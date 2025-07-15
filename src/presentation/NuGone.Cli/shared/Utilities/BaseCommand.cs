@@ -1,8 +1,15 @@
+#nullable disable
 using NuGone.Cli.Shared.Constants;
 using NuGone.Cli.Shared.Models;
 using Spectre.Console.Cli;
 
 namespace NuGone.Cli.Shared.Utilities;
+
+/// <summary>
+/// Marker interface for async commands.
+/// </summary>
+public interface IAsyncCommand<TSettings>
+    where TSettings : CommandSettings { }
 
 /// <summary>
 /// Base class for all NuGone CLI commands.
@@ -20,16 +27,33 @@ public abstract class BaseCommand<TSettings> : Command<TSettings>
         return GlobalExceptionHandler.ExecuteWithGlobalHandler(
             () =>
             {
-                var result = ExecuteCommand(context, settings);
-
-                return result.Match(
-                    onSuccess: exitCode => exitCode,
-                    onFailure: error =>
-                    {
-                        DisplayError(error);
-                        return error.ExitCode;
-                    }
-                );
+                // Check if this is an async command
+                if (this is IAsyncCommand<TSettings>)
+                {
+                    var asyncResult = ExecuteCommandAsync(context, settings)
+                        .GetAwaiter()
+                        .GetResult();
+                    return asyncResult.Match(
+                        onSuccess: exitCode => exitCode,
+                        onFailure: error =>
+                        {
+                            DisplayError(error);
+                            return error.ExitCode;
+                        }
+                    );
+                }
+                else
+                {
+                    var result = ExecuteCommand(context, settings);
+                    return result.Match(
+                        onSuccess: exitCode => exitCode,
+                        onFailure: error =>
+                        {
+                            DisplayError(error);
+                            return error.ExitCode;
+                        }
+                    );
+                }
             },
             IsVerboseMode(settings)
         );
@@ -38,12 +62,30 @@ public abstract class BaseCommand<TSettings> : Command<TSettings>
     /// <summary>
     /// Executes the specific command logic using Result pattern. Override this method in derived classes.
     /// </summary>
-    protected abstract Result<int> ExecuteCommand(CommandContext context, TSettings settings);
+    protected virtual Result<int> ExecuteCommand(CommandContext context, TSettings settings)
+    {
+        throw new NotImplementedException(
+            "Either ExecuteCommand or ExecuteCommandAsync must be implemented"
+        );
+    }
+
+    /// <summary>
+    /// Executes the specific command logic asynchronously using Result pattern. Override this method in async derived classes.
+    /// </summary>
+    protected virtual Task<Result<int>> ExecuteCommandAsync(
+        CommandContext context,
+        TSettings settings
+    )
+    {
+        throw new NotImplementedException(
+            "Either ExecuteCommand or ExecuteCommandAsync must be implemented"
+        );
+    }
 
     /// <summary>
     /// Validates the project path and returns the resolved path using Result pattern.
     /// </summary>
-    protected Result<string> ValidateAndResolveProjectPath(string? projectPath)
+    protected Result<string> ValidateAndResolveProjectPath(string projectPath)
     {
         if (string.IsNullOrEmpty(projectPath))
         {
@@ -108,7 +150,7 @@ public abstract class BaseCommand<TSettings> : Command<TSettings>
     /// <summary>
     /// Checks if verbose mode is enabled (if the settings support it).
     /// </summary>
-    protected static bool IsVerboseMode(TSettings? settings)
+    protected static bool IsVerboseMode(TSettings settings)
     {
         if (settings == null)
             return false;
