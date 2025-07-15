@@ -16,7 +16,6 @@ This document provides an overview of the technologies, frameworks, and tools us
 - **NuGet** (Package management for .NET)
 - **MediatR** (Command and query dispatching)
 - **Spectre.Console.Cli** (CLI interface framework)
-- **Directory.Packages.props** (Central package management support)
 
 ## 🧪 Testing
 
