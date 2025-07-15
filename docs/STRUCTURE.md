@@ -23,17 +23,25 @@ NuGone is organized using Clean Architecture to ensure separation of concerns, m
 nugone/
 ├── src/
 │   ├── core/
-│   │   ├── NuGone.Domain/         # Domain entities, value objects, interfaces
-│   │   └── NuGone.Application/    # Use cases, services, DTOs, ports
+│   │   ├── NuGone.Domain/
+│   │   │   ├── features/           # Domain-specific features (e.g., package analysis, project management)
+│   │   │   └── shared/             # Shared domain objects, helpers, value objects
+│   │   └── NuGone.Application/
+│   │       ├── features/           # Application layer features (use cases, services)
+│   │       └── shared/             # Shared application services, DTOs, helpers
 │   ├── infrastructure/
 │   │   └── ...                    # External system integrations (NuGet, file system, etc.)
 │   └── presentation/
-│       └── NuGone.Cli/            # CLI entry point, commands, argument parsing
+│       └── NuGone.Cli/
+│           ├── features/           # CLI commands and functional features
+│           └── shared/             # Shared CLI helpers, utilities, and common code
 ├── tests/                         # Unit and integration tests
 ├── docs/                          # Documentation (PRD.md, etc.)
 ├── README.md                      # Project overview
 └── ...                            # Solution files, configs, etc.
 ```
+
+Additionally, the `features` folders are used to modularize each functional feature. The `shared` folders contain code that is shared across layers or used by multiple features. In the CLI layer, this separation helps keep commands and common CLI helpers organized and maintainable.
 
 ---
 
