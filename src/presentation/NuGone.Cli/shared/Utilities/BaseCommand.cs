@@ -1,0 +1,120 @@
+using NuGone.Cli.Shared.Constants;
+using NuGone.Cli.Shared.Models;
+using Spectre.Console.Cli;
+
+namespace NuGone.Cli.Shared.Utilities;
+
+/// <summary>
+/// Base class for all NuGone CLI commands.
+/// Implements RFC-0001: CLI Architecture And Command Design with Result/Error pattern.
+/// Provides common functionality and error handling patterns.
+/// </summary>
+public abstract class BaseCommand<TSettings> : Command<TSettings>
+    where TSettings : CommandSettings
+{
+    /// <summary>
+    /// Executes the command with standardized error handling using Result pattern.
+    /// </summary>
+    public sealed override int Execute(CommandContext context, TSettings settings)
+    {
+        return GlobalExceptionHandler.ExecuteWithGlobalHandler(
+            () =>
+            {
+                var result = ExecuteCommand(context, settings);
+
+                return result.Match(
+                    onSuccess: exitCode => exitCode,
+                    onFailure: error =>
+                    {
+                        DisplayError(error);
+                        return error.ExitCode;
+                    }
+                );
+            },
+            IsVerboseMode(settings)
+        );
+    }
+
+    /// <summary>
+    /// Executes the specific command logic using Result pattern. Override this method in derived classes.
+    /// </summary>
+    protected abstract Result<int> ExecuteCommand(CommandContext context, TSettings settings);
+
+    /// <summary>
+    /// Validates the project path and returns the resolved path using Result pattern.
+    /// </summary>
+    protected Result<string> ValidateAndResolveProjectPath(string? projectPath)
+    {
+        if (string.IsNullOrEmpty(projectPath))
+        {
+            projectPath = Directory.GetCurrentDirectory();
+            ConsoleHelpers.WriteInfo(
+                $"No project specified, using current directory: {projectPath}"
+            );
+        }
+
+        if (!Directory.Exists(projectPath) && !File.Exists(projectPath))
+        {
+            return Error.InvalidArgument(
+                $"Project path does not exist: {projectPath}",
+                "projectPath"
+            );
+        }
+
+        try
+        {
+            var fullPath = Path.GetFullPath(projectPath);
+            return Result<string>.Success(fullPath);
+        }
+        catch (ArgumentException ex)
+        {
+            return Error.InvalidArgument($"Invalid project path: {ex.Message}", "projectPath");
+        }
+        catch (NotSupportedException ex)
+        {
+            return Error.InvalidArgument(
+                $"Unsupported project path format: {ex.Message}",
+                "projectPath"
+            );
+        }
+    }
+
+    /// <summary>
+    /// Validates command settings and returns any validation errors.
+    /// </summary>
+    protected virtual Result ValidateSettings(TSettings settings)
+    {
+        // Default implementation - no validation errors
+        return Result.Success();
+    }
+
+    /// <summary>
+    /// Displays error information to the user.
+    /// </summary>
+    private void DisplayError(Error error)
+    {
+        ConsoleHelpers.WriteError(error.Message);
+
+        if (IsVerboseMode(null) && error.Details.Any())
+        {
+            ConsoleHelpers.WriteVerbose("Error Details:");
+            foreach (var detail in error.Details)
+            {
+                ConsoleHelpers.WriteVerbose($"  {detail.Key}: {detail.Value}");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Checks if verbose mode is enabled (if the settings support it).
+    /// </summary>
+    protected static bool IsVerboseMode(TSettings? settings)
+    {
+        if (settings == null)
+            return false;
+
+        // Use reflection to check for a Verbose property
+        var verboseProperty = typeof(TSettings).GetProperty("Verbose");
+        return verboseProperty?.GetValue(settings) as bool? ?? false;
+    }
+}
