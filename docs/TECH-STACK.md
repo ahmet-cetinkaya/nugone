@@ -37,7 +37,6 @@ This document provides an overview of the technologies, frameworks, and tools us
 
 - SDK-style .NET projects (`*.csproj`)
 - Multi-project solutions (`*.sln`, `*.slnx`)
-- Central package management (`Directory.Packages.props`)
 
 ---
 

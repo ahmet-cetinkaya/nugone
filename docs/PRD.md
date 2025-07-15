@@ -39,7 +39,6 @@ To automatically detect and optionally remove unused NuGet package references in
 
 * SDK-style .NET projects (e.g. *.csproj*)
 * Multi-project solutions (*.sln*, *.slnx*)
-* Directory.Packages.props-based central package management
 
 ---
 

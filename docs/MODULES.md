@@ -7,7 +7,7 @@ This document defines the unified module structure for the NuGone project. All f
 ## NuGone Main Module
 
 - **Package Analysis:** Reads `<PackageReference>` entries in project files, distinguishes between direct and transitive dependencies, and detects unused NuGet packages in the codebase.
-- **Project Management:** Reads project and solution files (csproj, sln, slnx, Directory.Packages.props) and supports central package management.
+- **Project Management:** Reads project and solution files (csproj, sln, slnx) and supports central package management.
 - **Package Removal:** Safely removes unused packages from the project, manages backup and rollback mechanisms.
 - **Reporting:** Reports used and unused packages, generates summary and detailed outputs (JSON, text).
 - **Configuration:** Reads settings from `global.json` or legacy config files and applies exclude patterns.
