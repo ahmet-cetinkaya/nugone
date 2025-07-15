@@ -21,13 +21,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGone.FileSystem", "src\in
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGone.NuGet", "src\infrastructure\NuGone.NuGet\NuGone.NuGet.csproj", "{E02A18E2-21FD-417E-BFC7-5CEA91733950}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{8A9B5C6D-7E8F-4A5B-9C6D-7E8F4A5B9C6D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "presentation", "presentation", "{3C4D5E6F-7A8B-9C0D-1E2F-3A4B5C6D7E8F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NuGone.Cli.Tests", "tests\presentation\NuGone.Cli.Tests\NuGone.Cli.Tests.csproj", "{8B9C0D1E-2F3A-4B5C-6D7E-8F9A0B1C2D3E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{E308ED36-E31F-414A-B9C2-18A1D718062F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -50,6 +53,13 @@ Global
 		{E02A18E2-21FD-417E-BFC7-5CEA91733950}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E02A18E2-21FD-417E-BFC7-5CEA91733950}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E02A18E2-21FD-417E-BFC7-5CEA91733950}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8B9C0D1E-2F3A-4B5C-6D7E-8F9A0B1C2D3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8B9C0D1E-2F3A-4B5C-6D7E-8F9A0B1C2D3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8B9C0D1E-2F3A-4B5C-6D7E-8F9A0B1C2D3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8B9C0D1E-2F3A-4B5C-6D7E-8F9A0B1C2D3E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{4C28B967-E58F-4D43-8500-64B4CBFCD7AC} = {F8E4FC49-0B8E-45F8-9D3B-AFDA98BFA72A}
@@ -60,5 +70,7 @@ Global
 		{B6863AFE-8B53-4DA1-8B6C-6EF0A99AF753} = {F8E4FC49-0B8E-45F8-9D3B-AFDA98BFA72A}
 		{3F983122-0A76-4D91-9600-09AA0DEFEE00} = {B6863AFE-8B53-4DA1-8B6C-6EF0A99AF753}
 		{E02A18E2-21FD-417E-BFC7-5CEA91733950} = {B6863AFE-8B53-4DA1-8B6C-6EF0A99AF753}
+		{3C4D5E6F-7A8B-9C0D-1E2F-3A4B5C6D7E8F} = {8A9B5C6D-7E8F-4A5B-9C6D-7E8F4A5B9C6D}
+		{8B9C0D1E-2F3A-4B5C-6D7E-8F9A0B1C2D3E} = {3C4D5E6F-7A8B-9C0D-1E2F-3A4B5C6D7E8F}
 	EndGlobalSection
 EndGlobal

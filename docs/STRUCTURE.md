@@ -72,6 +72,14 @@ nugone/
 │               ├── Constants/          # CLI constants
 │               └── ...
 ├── tests/                         # Unit and integration tests
+│   ├── ...
+│   └── presentation/  # Example for a test
+│       └── NuGone.Cli.Tests/
+│           └── features/
+│               └── analyzeCommand/
+│                   └── Commands/
+│                       └── AnalyzeCommandTests.cs  # Example command test file
+│           └── ...
 ├── docs/                          # Documentation (PRD.md, etc.)
 ├── README.md                      # Project overview
 └── ...                            # Solution files, configs, etc.
