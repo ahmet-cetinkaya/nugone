@@ -1,5 +1,9 @@
 # RFC-0004: Package Removal And Safety Mechanisms
 
+## Related Module
+
+**Package Removal**
+
 ## Summary
 
 Define the workflow and safeguards for removing unused NuGet packages, including backup, confirmation, build validation, and rollback.

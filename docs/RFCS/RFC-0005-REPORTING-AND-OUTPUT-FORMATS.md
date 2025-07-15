@@ -1,5 +1,9 @@
 # RFC-0005: Reporting And Output Formats
 
+## Related Module
+
+**Reporting**
+
 ## Summary
 
 Define the structure, formats, and extensibility of NuGone's analysis reports.

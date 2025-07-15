@@ -24,16 +24,18 @@ nugone/
 ├── src/
 │   ├── core/
 │   │   ├── NuGone.Domain/
-│   │   │   ├── features/           # Domain-specific features (e.g., package analysis, project management)
+│   │   │   ├── features/           # Domain-specific features (e.g., packageAnalysis, projectManagement)
 │   │   │   └── shared/             # Shared domain objects, helpers, value objects
 │   │   └── NuGone.Application/
-│   │       ├── features/           # Application layer features (use cases, services)
+│   │       ├── features/           # Application layer features (e.g., packageAnalysis, packageRemoval)
 │   │       └── shared/             # Shared application services, DTOs, helpers
 │   ├── infrastructure/
-│   │   └── ...                    # External system integrations (NuGet, file system, etc.)
+│   │   ├── NuGone.NuGet/           # NuGet integration and data access
+│   │   ├── NuGone.FileSystem/      # File system integration and data access
+│   │   └── ...                     # Other external system integrations (NuGet, file system, etc.)
 │   └── presentation/
 │       └── NuGone.Cli/
-│           ├── features/           # CLI commands and functional features
+│           ├── features/           # CLI commands and functional features (e.g., analyzeCommand, removeCommand)
 │           └── shared/             # Shared CLI helpers, utilities, and common code
 ├── tests/                         # Unit and integration tests
 ├── docs/                          # Documentation (PRD.md, etc.)
@@ -49,12 +51,12 @@ Additionally, the `features` folders are used to modularize each functional feat
 
 ### Core
 - **NuGone.Domain**
-  - Entities (e.g., PackageReference, Project, Solution)
+  - Entities (e.g., packageReference, project, solution)
   - Value Objects
-  - Domain Interfaces (e.g., IPackageUsageAnalyzer)
+  - Domain Interfaces (e.g., iPackageUsageAnalyzer)
   - Pure business logic, no dependencies on other layers
 - **NuGone.Application**
-  - Use cases (e.g., AnalyzeUnusedPackages, RemoveUnusedPackages)
+  - Use cases (e.g., packageAnalysis, packageRemoval)
   - Application services
   - DTOs and input/output models
   - Interfaces for infrastructure (ports)

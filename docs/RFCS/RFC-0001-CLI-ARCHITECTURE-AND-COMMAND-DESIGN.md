@@ -1,4 +1,8 @@
-# RFC-0001: Cli Architecture And Command Design
+# RFC-0001: CLI Architecture And Command Design
+
+## Related Module
+
+**CLI**
 
 ## Summary
 

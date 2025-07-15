@@ -1,5 +1,9 @@
 # RFC-0002: Unused Package Detection Algorithm
 
+## Related Module
+
+**Package Analysis**
+
 ## Summary
 
 Define the algorithm and heuristics for detecting unused NuGet packages in .NET projects, balancing accuracy, performance, and maintainability.

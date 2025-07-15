@@ -1,5 +1,9 @@
 # RFC-0003: Configuration And Exclusion Mechanism
 
+## Related Module
+
+**Configuration**
+
 ## Summary
 
 Specify how NuGone loads configuration, applies exclusion patterns, and determines precedence for settings.
