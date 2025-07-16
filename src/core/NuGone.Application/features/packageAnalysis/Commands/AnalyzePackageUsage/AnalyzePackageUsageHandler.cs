@@ -442,7 +442,8 @@ public class AnalyzePackageUsageHandler(
             packageRef.IsUsed,
             packageRef.Condition,
             packageRef.UsageLocations,
-            packageRef.DetectedNamespaces
+            packageRef.DetectedNamespaces,
+            packageRef.HasGlobalUsing
         );
     }
 

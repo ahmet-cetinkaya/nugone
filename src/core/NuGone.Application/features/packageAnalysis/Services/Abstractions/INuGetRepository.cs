@@ -74,6 +74,18 @@ public interface INuGetRepository
     /// <param name="packageMetadata">Optional package metadata</param>
     /// <returns>True if the package is a development dependency</returns>
     bool IsDevelopmentDependency(string packageId, PackageMetadata? packageMetadata = null);
+
+    /// <summary>
+    /// Extracts global using declarations from a project file.
+    /// Global usings make package namespaces available throughout the project without explicit using statements.
+    /// </summary>
+    /// <param name="projectFilePath">Path to the project file</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Collection of global using declarations</returns>
+    Task<IEnumerable<GlobalUsing>> ExtractGlobalUsingsAsync(
+        string projectFilePath,
+        CancellationToken cancellationToken = default
+    );
 }
 
 /// <summary>

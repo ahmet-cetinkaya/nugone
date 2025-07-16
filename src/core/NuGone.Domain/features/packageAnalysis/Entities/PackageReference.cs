@@ -11,7 +11,8 @@ public class PackageReference
         string version,
         string projectPath,
         bool isDirect = true,
-        string? condition = null
+        string? condition = null,
+        bool hasGlobalUsing = false
     )
     {
         if (string.IsNullOrWhiteSpace(packageId))
@@ -31,6 +32,7 @@ public class PackageReference
         ProjectPath = projectPath;
         IsDirect = isDirect;
         Condition = condition;
+        HasGlobalUsing = hasGlobalUsing;
         IsUsed = false; // Default to unused until analysis proves otherwise
         UsageLocations = new List<string>();
         DetectedNamespaces = new List<string>();
@@ -62,6 +64,12 @@ public class PackageReference
     /// RFC-0002 specifies handling conditional references.
     /// </summary>
     public string? Condition { get; }
+
+    /// <summary>
+    /// Indicates whether this package has a corresponding global Using declaration.
+    /// Global usings make package namespaces available throughout the project without explicit using statements.
+    /// </summary>
+    public bool HasGlobalUsing { get; }
 
     /// <summary>
     /// Indicates whether the package is detected as being used in the codebase.

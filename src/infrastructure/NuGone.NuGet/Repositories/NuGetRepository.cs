@@ -40,6 +40,7 @@ public class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
     /// <summary>
     /// Extracts package references from a project file.
     /// RFC-0002: Package reference discovery from project files.
+    /// Enhanced to support global Using declarations.
     /// </summary>
     public async Task<IEnumerable<PackageReference>> ExtractPackageReferencesAsync(
         string projectFilePath,
@@ -57,7 +58,19 @@ public class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
             var document = XDocument.Parse(content);
 
             var packageReferences = new List<PackageReference>();
+            var globalUsings = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
+            // First, collect all global using declarations
+            foreach (var usingElement in document.Descendants("Using"))
+            {
+                var include = usingElement.Attribute("Include")?.Value;
+                if (!string.IsNullOrWhiteSpace(include))
+                {
+                    _ = globalUsings.Add(include);
+                }
+            }
+
+            // Then, extract package references and mark those with global usings
             foreach (var packageRefElement in document.Descendants("PackageReference"))
             {
                 var include = packageRefElement.Attribute("Include")?.Value;
@@ -76,20 +89,24 @@ public class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
                 }
 
                 var condition = packageRefElement.Attribute("Condition")?.Value;
+                var hasGlobalUsing = globalUsings.Contains(include);
+
                 var packageRef = new PackageReference(
                     include,
                     version,
                     projectFilePath,
                     true,
-                    condition
+                    condition,
+                    hasGlobalUsing
                 );
                 packageReferences.Add(packageRef);
             }
 
             _logger.LogDebug(
-                "Extracted {Count} package reference(s) from: {ProjectFilePath}",
+                "Extracted {Count} package reference(s) from: {ProjectFilePath}, {GlobalUsingCount} with global usings",
                 packageReferences.Count,
-                projectFilePath
+                projectFilePath,
+                packageReferences.Count(p => p.HasGlobalUsing)
             );
             return packageReferences;
         }
@@ -192,6 +209,56 @@ public class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
         return DevelopmentDependencyPatterns.Any(pattern =>
             packageId.Contains(pattern, StringComparison.OrdinalIgnoreCase)
         );
+    }
+
+    /// <summary>
+    /// Extracts global using declarations from a project file.
+    /// Global usings make package namespaces available throughout the project without explicit using statements.
+    /// </summary>
+    public async Task<IEnumerable<GlobalUsing>> ExtractGlobalUsingsAsync(
+        string projectFilePath,
+        CancellationToken cancellationToken = default
+    )
+    {
+        _logger.LogDebug("Extracting global usings from: {ProjectFilePath}", projectFilePath);
+
+        if (!File.Exists(projectFilePath))
+            throw new FileNotFoundException($"Project file not found: {projectFilePath}");
+
+        try
+        {
+            var content = await File.ReadAllTextAsync(projectFilePath, cancellationToken);
+            var document = XDocument.Parse(content);
+
+            var globalUsings = new List<GlobalUsing>();
+
+            foreach (var usingElement in document.Descendants("Using"))
+            {
+                var include = usingElement.Attribute("Include")?.Value;
+                if (string.IsNullOrWhiteSpace(include))
+                    continue;
+
+                var condition = usingElement.Attribute("Condition")?.Value;
+                var globalUsing = new GlobalUsing(include, projectFilePath, condition);
+                globalUsings.Add(globalUsing);
+            }
+
+            _logger.LogDebug(
+                "Extracted {Count} global using(s) from: {ProjectFilePath}",
+                globalUsings.Count,
+                projectFilePath
+            );
+            return globalUsings;
+        }
+        catch (Exception ex) when (!(ex is OperationCanceledException))
+        {
+            _logger.LogError(
+                ex,
+                "Error extracting global usings from: {ProjectFilePath}",
+                projectFilePath
+            );
+            throw;
+        }
     }
 
     private static string? GetPackageVersion(XElement packageRefElement)

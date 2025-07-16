@@ -198,7 +198,8 @@ public class PackageUsageDetail(
     bool isUsed,
     string? condition = null,
     IEnumerable<string>? usageLocations = null,
-    IEnumerable<string>? detectedNamespaces = null
+    IEnumerable<string>? detectedNamespaces = null,
+    bool hasGlobalUsing = false
 )
 {
     /// <summary>
@@ -239,6 +240,12 @@ public class PackageUsageDetail(
         detectedNamespaces?.ToList() ?? new List<string>();
 
     /// <summary>
+    /// Whether this package has a corresponding global using declaration.
+    /// Global usings make package namespaces available throughout the project without explicit using statements.
+    /// </summary>
+    public bool HasGlobalUsing { get; } = hasGlobalUsing;
+
+    /// <summary>
     /// Gets a display string for the package.
     /// </summary>
     /// <returns>Display string</returns>
@@ -249,7 +256,8 @@ public class PackageUsageDetail(
         var conditionText = !string.IsNullOrWhiteSpace(Condition)
             ? $" (Condition: {Condition})"
             : "";
+        var globalUsingText = HasGlobalUsing ? " [Global Using]" : "";
 
-        return $"{PackageId} {Version} ({dependencyType}, {usageStatus}){conditionText}";
+        return $"{PackageId} {Version} ({dependencyType}, {usageStatus}){conditionText}{globalUsingText}";
     }
 }

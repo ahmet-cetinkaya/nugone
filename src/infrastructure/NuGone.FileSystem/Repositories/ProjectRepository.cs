@@ -10,11 +10,16 @@ namespace NuGone.FileSystem.Repositories;
 /// File system implementation of the project repository.
 /// Handles project file discovery and parsing as specified in RFC-0002.
 /// </summary>
-public class ProjectRepository(IFileSystem fileSystem, ILogger<ProjectRepository> logger)
+public class ProjectRepository(
+    IFileSystem fileSystem, 
+    INuGetRepository nugetRepository,
+    ILogger<ProjectRepository> logger)
     : IProjectRepository
 {
     private readonly IFileSystem _fileSystem =
         fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+    private readonly INuGetRepository _nugetRepository =
+        nugetRepository ?? throw new ArgumentNullException(nameof(nugetRepository));
     private readonly ILogger<ProjectRepository> _logger =
         logger ?? throw new ArgumentNullException(nameof(logger));
 
@@ -73,6 +78,7 @@ public class ProjectRepository(IFileSystem fileSystem, ILogger<ProjectRepository
     /// <summary>
     /// Loads project information from a project file.
     /// RFC-0002: Project file parsing for metadata extraction.
+    /// Enhanced to support global Using declarations.
     /// </summary>
     public async Task<Project> LoadProjectAsync(
         string projectFilePath,
@@ -94,6 +100,13 @@ public class ProjectRepository(IFileSystem fileSystem, ILogger<ProjectRepository
 
             var project = new Project(projectFilePath, projectName, targetFramework);
 
+            // Load global using declarations
+            var globalUsings = await _nugetRepository.ExtractGlobalUsingsAsync(projectFilePath, cancellationToken);
+            foreach (var globalUsing in globalUsings)
+            {
+                project.AddGlobalUsing(globalUsing);
+            }
+
             // Add default exclude patterns
             project.AddExcludePattern("**/bin/**");
             project.AddExcludePattern("**/obj/**");
@@ -101,9 +114,10 @@ public class ProjectRepository(IFileSystem fileSystem, ILogger<ProjectRepository
             project.AddExcludePattern("**/.git/**");
 
             _logger.LogDebug(
-                "Loaded project: {ProjectName} ({TargetFramework})",
+                "Loaded project: {ProjectName} ({TargetFramework}) with {GlobalUsingCount} global usings",
                 projectName,
-                targetFramework
+                targetFramework,
+                project.GlobalUsings.Count
             );
             return project;
         }

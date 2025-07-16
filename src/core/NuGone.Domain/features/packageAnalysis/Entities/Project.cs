@@ -24,6 +24,7 @@ public class Project
         Name = name;
         TargetFramework = targetFramework;
         PackageReferences = new List<PackageReference>();
+        GlobalUsings = new List<GlobalUsing>();
         SourceFiles = new List<string>();
         ExcludePatterns = new List<string>();
     }
@@ -48,6 +49,12 @@ public class Project
     /// Collection of package references in this project.
     /// </summary>
     public IList<PackageReference> PackageReferences { get; }
+
+    /// <summary>
+    /// Collection of global using declarations in this project.
+    /// Global usings make package namespaces available throughout the project without explicit using statements.
+    /// </summary>
+    public IList<GlobalUsing> GlobalUsings { get; }
 
     /// <summary>
     /// Collection of source file paths in this project.
@@ -108,6 +115,45 @@ public class Project
     public IEnumerable<PackageReference> GetUsedPackages()
     {
         return PackageReferences.Where(p => p.IsUsed);
+    }
+
+    /// <summary>
+    /// Adds a global using declaration to the project.
+    /// </summary>
+    /// <param name="globalUsing">The global using declaration to add</param>
+    public void AddGlobalUsing(GlobalUsing globalUsing)
+    {
+        if (globalUsing == null)
+            throw new ArgumentNullException(nameof(globalUsing));
+
+        if (!GlobalUsings.Contains(globalUsing))
+            GlobalUsings.Add(globalUsing);
+    }
+
+    /// <summary>
+    /// Removes a global using declaration from the project.
+    /// </summary>
+    /// <param name="globalUsing">The global using declaration to remove</param>
+    /// <returns>True if the global using was removed, false if it wasn't found</returns>
+    public bool RemoveGlobalUsing(GlobalUsing globalUsing)
+    {
+        if (globalUsing == null)
+            throw new ArgumentNullException(nameof(globalUsing));
+
+        return GlobalUsings.Remove(globalUsing);
+    }
+
+    /// <summary>
+    /// Checks if a package has a corresponding global using declaration.
+    /// </summary>
+    /// <param name="packageId">The package identifier to check</param>
+    /// <returns>True if the package has a global using declaration</returns>
+    public bool HasGlobalUsingForPackage(string packageId)
+    {
+        if (string.IsNullOrWhiteSpace(packageId))
+            return false;
+
+        return GlobalUsings.Any(gu => gu.PackageId.Equals(packageId, StringComparison.OrdinalIgnoreCase));
     }
 
     /// <summary>
