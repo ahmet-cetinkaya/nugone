@@ -24,7 +24,18 @@ jobs:
         run: dotnet build NuGone.sln --no-restore --configuration Release
 
       - name: Pack NuGet package
-        run: dotnet pack NuGone.sln --no-build --configuration Release --output ./nupkg
+        run: dotnet pack src/presentation/NuGone.Cli/NuGone.Cli.csproj --no-build --configuration Release --output ./nupkg
+
+      - name: Publish CLI
+        run: |
+          dotnet publish src/presentation/NuGone.Cli/NuGone.Cli.csproj \
+            --configuration Release \
+            --output ./publish \
+            --no-build
+
+      - name: Archive published CLI as tar.gz
+        run: |
+          tar -czf ./nugone-cli.tar.gz -C ./publish .
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -32,6 +43,8 @@ jobs:
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           body: Automatically published release.
-          files: ./nupkg/*.nupkg
+          files: |
+            ./nupkg/*.nupkg
+            ./nugone-cli.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
