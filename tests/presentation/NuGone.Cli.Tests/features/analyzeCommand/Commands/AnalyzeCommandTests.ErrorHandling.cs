@@ -1,3 +1,5 @@
+using System.IO.Abstractions;
+using Moq;
 using NuGone.Cli.Features.AnalyzeCommand.Commands;
 using NuGone.Cli.Shared.Constants;
 using Shouldly;
@@ -17,7 +19,8 @@ public partial class AnalyzeCommandTests
     public void AnalyzeCommand_ShouldReturnErrorForInvalidProjectPath()
     {
         // Arrange
-        var command = new TestableAnalyzeCommand();
+        var mockFileSystem = new Mock<IFileSystem>();
+        var command = new TestableAnalyzeCommand(mockFileSystem.Object);
         var settings = new AnalyzeCommand.Settings
         {
             ProjectPath = "/invalid/path/that/does/not/exist",

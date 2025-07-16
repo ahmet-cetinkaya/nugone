@@ -1,3 +1,5 @@
+using System.IO.Abstractions;
+using Moq;
 using NuGone.Cli.Features.AnalyzeCommand.Commands;
 using NuGone.Cli.Shared.Models;
 using NuGone.Cli.Shared.Utilities;
@@ -19,7 +21,8 @@ public partial class AnalyzeCommandTests
     public void AnalyzeCommand_ShouldInheritFromBaseCommand()
     {
         // Arrange & Act
-        var command = new AnalyzeCommand();
+        var mockFileSystem = new Mock<IFileSystem>();
+        var command = new AnalyzeCommand(mockFileSystem.Object);
 
         // Assert
         command.ShouldBeAssignableTo<BaseCommand<AnalyzeCommand.Settings>>();
@@ -29,7 +32,8 @@ public partial class AnalyzeCommandTests
     public void AnalyzeCommand_ShouldImplementIAsyncCommand()
     {
         // Arrange & Act
-        var command = new AnalyzeCommand();
+        var mockFileSystem = new Mock<IFileSystem>();
+        var command = new AnalyzeCommand(mockFileSystem.Object);
 
         // Assert
         command.ShouldBeAssignableTo<IAsyncCommand<AnalyzeCommand.Settings>>();
@@ -39,7 +43,8 @@ public partial class AnalyzeCommandTests
     public void AnalyzeCommand_ShouldValidateProjectPath()
     {
         // Arrange
-        var command = new TestableAnalyzeCommand();
+        var mockFileSystem = new Mock<IFileSystem>();
+        var command = new TestableAnalyzeCommand(mockFileSystem.Object);
         var settings = new AnalyzeCommand.Settings { ProjectPath = "/non/existent/path" };
 
         // Act
@@ -55,7 +60,8 @@ public partial class AnalyzeCommandTests
     public void AnalyzeCommand_ShouldUseCurrentDirectoryWhenProjectPathIsNull()
     {
         // Arrange
-        var command = new TestableAnalyzeCommand();
+        var mockFileSystem = new Mock<IFileSystem>();
+        var command = new TestableAnalyzeCommand(mockFileSystem.Object);
         var settings = new AnalyzeCommand.Settings { ProjectPath = null };
 
         // Act
@@ -73,7 +79,8 @@ public partial class AnalyzeCommandTests
     public void AnalyzeCommand_ShouldAcceptJsonFormat(string format)
     {
         // Arrange
-        var command = new TestableAnalyzeCommand();
+        var mockFileSystem = new Mock<IFileSystem>();
+        var command = new TestableAnalyzeCommand(mockFileSystem.Object);
         var settings = new AnalyzeCommand.Settings { Format = format };
 
         // Act
@@ -92,7 +99,8 @@ public partial class AnalyzeCommandTests
     public void AnalyzeCommand_ShouldTreatNonJsonAsTextFormat(string? format)
     {
         // Arrange
-        var command = new TestableAnalyzeCommand();
+        var mockFileSystem = new Mock<IFileSystem>();
+        var command = new TestableAnalyzeCommand(mockFileSystem.Object);
         var settings = new AnalyzeCommand.Settings { Format = format ?? string.Empty };
 
         // Act
@@ -106,7 +114,8 @@ public partial class AnalyzeCommandTests
     public void AnalyzeCommand_ShouldDetectVerboseMode()
     {
         // Arrange
-        var command = new TestableAnalyzeCommand();
+        var mockFileSystem = new Mock<IFileSystem>();
+        var command = new TestableAnalyzeCommand(mockFileSystem.Object);
         var verboseSettings = new AnalyzeCommand.Settings { Verbose = true };
         var nonVerboseSettings = new AnalyzeCommand.Settings { Verbose = false };
 

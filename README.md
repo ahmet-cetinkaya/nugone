@@ -20,10 +20,29 @@ nugone analyze --project MySolution.sln
 
 For more usage instructions, see future documentation updates.
 
-### 📋 Requirements
+## 🚀 Usage
 
-- .NET Core 3.1, .NET 5, .NET 6, .NET 7, .NET 8, .NET 9+ (primary target)
-- Windows, macOS, or Linux
+To detect unused NuGet packages in your .NET projects, use the following command:
+
+```
+nugone analyze --project <SOLUTION_OR_PROJECT_PATH>
+```
+
+**Options:**
+- `--output json`   Show results in JSON format
+- `--verbose`       Show detailed analysis output
+
+**Example:**
+```
+nugone analyze --project MySolution.sln --output json
+```
+
+For a list of all commands and parameters, use:
+```
+nugone --help
+```
+
+Only the `analyze` command is currently available. No changes are made; analysis is read-only.
 
 ## 🤝 Contributing
 

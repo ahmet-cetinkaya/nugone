@@ -1,9 +1,22 @@
+using Microsoft.Extensions.DependencyInjection;
+using NuGone.Application.Shared.Extensions;
 using NuGone.Cli.Features.AnalyzeCommand.Commands;
-using NuGone.Cli.Features.ConfigCommand.Commands;
-using NuGone.Cli.Features.RemoveCommand.Commands;
+// using NuGone.Cli.Features.ConfigCommand.Commands;
+// using NuGone.Cli.Features.RemoveCommand.Commands;
+using NuGone.FileSystem.Extensions;
+using NuGone.NuGet.Extensions;
 using Spectre.Console.Cli;
 
-CommandApp app = new();
+// Set up dependency injection
+var services = new ServiceCollection();
+services.AddLogging();
+services.AddApplicationServices();
+services.AddFileSystemServices();
+services.AddNuGetServices();
+
+// Create the command app with dependency injection
+var registrar = new TypeRegistrar(services);
+CommandApp app = new(registrar);
 
 app.Configure(config =>
 {
@@ -15,20 +28,71 @@ app.Configure(config =>
     config
         .AddCommand<AnalyzeCommand>("analyze")
         .WithDescription("Analyze project(s) for unused NuGet packages")
-        .WithExample(new[] { "analyze", "--project", "MySolution.sln" })
-        .WithExample(new[] { "analyze", "--dry-run", "--format", "json" });
+        .WithExample(["analyze", "--project", "MySolution.sln"])
+        .WithExample(["analyze", "--dry-run", "--format", "json"]);
 
-    config
-        .AddCommand<RemoveCommand>("remove")
-        .WithDescription("Remove unused NuGet packages from project(s)")
-        .WithExample(new[] { "remove", "--project", "MySolution.sln" })
-        .WithExample(new[] { "remove", "--exclude", "System.Text.Json" });
+    // config
+    //     .AddCommand<RemoveCommand>("remove")
+    //     .WithDescription("Remove unused NuGet packages from project(s)")
+    //     .WithExample(["remove", "--project", "MySolution.sln"])
+    //     .WithExample(["remove", "--exclude", "System.Text.Json"]);
 
-    config
-        .AddCommand<ConfigCommand>("config")
-        .WithDescription("Manage NuGone configuration settings")
-        .WithExample(new[] { "config", "list" })
-        .WithExample(new[] { "config", "set", "excludeNamespaces", "System.Text.Json" });
+    // config
+    //     .AddCommand<ConfigCommand>("config")
+    //     .WithDescription("Manage NuGone configuration settings")
+    //     .WithExample(["config", "list"])
+    //     .WithExample(["config", "set", "excludeNamespaces", "System.Text.Json"]);
 });
 
 return app.Run(args);
+
+// Type registrar for Spectre.Console.Cli dependency injection
+public sealed class TypeRegistrar(IServiceCollection builder) : ITypeRegistrar
+{
+    private readonly IServiceCollection _builder = builder;
+
+    public ITypeResolver Build()
+    {
+        return new TypeResolver(_builder.BuildServiceProvider());
+    }
+
+    public void Register(Type service, Type implementation)
+    {
+        _builder.AddSingleton(service, implementation);
+    }
+
+    public void RegisterInstance(Type service, object implementation)
+    {
+        _builder.AddSingleton(service, implementation);
+    }
+
+    public void RegisterLazy(Type service, Func<object> factory)
+    {
+        _builder.AddSingleton(service, _ => factory());
+    }
+}
+
+// Type resolver for Spectre.Console.Cli dependency injection
+public sealed class TypeResolver(IServiceProvider provider) : ITypeResolver, IDisposable
+{
+    private readonly IServiceProvider _provider =
+        provider ?? throw new ArgumentNullException(nameof(provider));
+
+    public object? Resolve(Type? type)
+    {
+        if (type == null)
+        {
+            return null;
+        }
+
+        return _provider.GetService(type);
+    }
+
+    public void Dispose()
+    {
+        if (_provider is IDisposable disposable)
+        {
+            disposable.Dispose();
+        }
+    }
+}

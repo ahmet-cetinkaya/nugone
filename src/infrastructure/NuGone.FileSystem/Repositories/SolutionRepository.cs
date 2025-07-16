@@ -1,6 +1,7 @@
 using System.IO.Abstractions;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Xml;
 using System.Xml.Linq;
 using Microsoft.Extensions.Logging;
 using NuGone.Application.Features.PackageAnalysis.Services.Abstractions;
@@ -285,45 +286,63 @@ public class SolutionRepository : ISolutionRepository
         CancellationToken cancellationToken
     )
     {
-        // .slnx files are JSON-based (when available in future .NET versions)
         var content = await _fileSystem.File.ReadAllTextAsync(solutionFilePath, cancellationToken);
+        var solutionDirectory = _fileSystem.Path.GetDirectoryName(solutionFilePath) ?? string.Empty;
 
         try
         {
-            using var document = JsonDocument.Parse(content);
-            var root = document.RootElement;
+            var document = XDocument.Parse(content);
+            var ns = document.Root?.GetDefaultNamespace() ?? XNamespace.None;
 
-            if (root.TryGetProperty("projects", out var projectsElement))
+            foreach (var projectElement in document.Descendants(ns + "Project"))
             {
-                var solutionDirectory =
-                    _fileSystem.Path.GetDirectoryName(solutionFilePath) ?? string.Empty;
-
-                foreach (var projectElement in projectsElement.EnumerateArray())
+                var pathElement = projectElement.Element(ns + "Path");
+                if (pathElement == null)
                 {
-                    if (projectElement.TryGetProperty("path", out var pathElement))
-                    {
-                        var relativePath = pathElement.GetString();
-                        if (!string.IsNullOrWhiteSpace(relativePath))
-                        {
-                            var fullPath = ResolveProjectPath(solutionDirectory, relativePath);
-                            var projectName = _fileSystem.Path.GetFileNameWithoutExtension(
-                                fullPath
-                            );
+                    _logger.LogWarning(
+                        "Project entry missing Path element in: {SolutionFilePath}",
+                        solutionFilePath
+                    );
+                    continue;
+                }
 
-                            if (_fileSystem.File.Exists(fullPath))
-                            {
-                                var project = new Project(fullPath, projectName, "net9.0"); // Default framework
-                                solution.AddProject(project);
-                            }
-                        }
-                    }
+                var relativePath = pathElement.Value;
+                if (string.IsNullOrWhiteSpace(relativePath))
+                {
+                    _logger.LogWarning(
+                        "Empty project path in: {SolutionFilePath}",
+                        solutionFilePath
+                    );
+                    continue;
+                }
+
+                var fullPath = ResolveProjectPath(solutionDirectory, relativePath);
+                var projectName = _fileSystem.Path.GetFileNameWithoutExtension(fullPath);
+
+                if (_fileSystem.File.Exists(fullPath))
+                {
+                    var project = new Project(fullPath, projectName, "net9.0");
+                    solution.AddProject(project);
+                    _logger.LogDebug(
+                        "Added project: {ProjectName} from {RelativePath}",
+                        projectName,
+                        relativePath
+                    );
+                }
+                else
+                {
+                    _logger.LogWarning("Project file not found: {ProjectPath}", fullPath);
                 }
             }
         }
-        catch (JsonException ex)
+        catch (XmlException ex)
         {
-            _logger.LogError(ex, "Error parsing .slnx file: {SolutionFilePath}", solutionFilePath);
-            throw;
+            _logger.LogError(
+                ex,
+                "Invalid XML format in .slnx file: {SolutionFilePath}",
+                solutionFilePath
+            );
+            throw new InvalidDataException($"Invalid .slnx file format: {solutionFilePath}", ex);
         }
     }
 }

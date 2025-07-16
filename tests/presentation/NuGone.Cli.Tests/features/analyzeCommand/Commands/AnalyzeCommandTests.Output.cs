@@ -1,3 +1,5 @@
+using System.IO.Abstractions;
+using Moq;
 using NuGone.Cli.Features.AnalyzeCommand.Commands;
 using Shouldly;
 using Xunit;
@@ -16,7 +18,8 @@ public partial class AnalyzeCommandTests
     public void AnalyzeCommand_ShouldShowSuccessMessageForTextFormat()
     {
         // Arrange
-        var command = new TestableAnalyzeCommand();
+        var mockFileSystem = new Mock<IFileSystem>();
+        var command = new TestableAnalyzeCommand(mockFileSystem.Object);
         var settings = new AnalyzeCommand.Settings { Format = "text", Verbose = false };
 
         // Act
@@ -30,7 +33,8 @@ public partial class AnalyzeCommandTests
     public void AnalyzeCommand_ShouldNotShowSuccessMessageForJsonFormatWithoutVerbose()
     {
         // Arrange
-        var command = new TestableAnalyzeCommand();
+        var mockFileSystem = new Mock<IFileSystem>();
+        var command = new TestableAnalyzeCommand(mockFileSystem.Object);
         var settings = new AnalyzeCommand.Settings { Format = "json", Verbose = false };
 
         // Act
@@ -44,7 +48,8 @@ public partial class AnalyzeCommandTests
     public void AnalyzeCommand_ShouldShowSuccessMessageForJsonFormatWithVerbose()
     {
         // Arrange
-        var command = new TestableAnalyzeCommand();
+        var mockFileSystem = new Mock<IFileSystem>();
+        var command = new TestableAnalyzeCommand(mockFileSystem.Object);
         var settings = new AnalyzeCommand.Settings { Format = "json", Verbose = true };
 
         // Act
@@ -58,7 +63,8 @@ public partial class AnalyzeCommandTests
     public void AnalyzeCommand_ShouldShowProgressMessageForTextFormat()
     {
         // Arrange
-        var command = new TestableAnalyzeCommand();
+        var mockFileSystem = new Mock<IFileSystem>();
+        var command = new TestableAnalyzeCommand(mockFileSystem.Object);
         var settings = new AnalyzeCommand.Settings { Format = "text", Verbose = false };
 
         // Act
@@ -72,7 +78,8 @@ public partial class AnalyzeCommandTests
     public void AnalyzeCommand_ShouldNotShowProgressMessageForJsonFormatWithoutVerbose()
     {
         // Arrange
-        var command = new TestableAnalyzeCommand();
+        var mockFileSystem = new Mock<IFileSystem>();
+        var command = new TestableAnalyzeCommand(mockFileSystem.Object);
         var settings = new AnalyzeCommand.Settings { Format = "json", Verbose = false };
 
         // Act
@@ -86,7 +93,8 @@ public partial class AnalyzeCommandTests
     public void AnalyzeCommand_ShouldShowProgressMessageForJsonFormatWithVerbose()
     {
         // Arrange
-        var command = new TestableAnalyzeCommand();
+        var mockFileSystem = new Mock<IFileSystem>();
+        var command = new TestableAnalyzeCommand(mockFileSystem.Object);
         var settings = new AnalyzeCommand.Settings { Format = "json", Verbose = true };
 
         // Act

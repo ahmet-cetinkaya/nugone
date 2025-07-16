@@ -1,4 +1,5 @@
 using System.IO.Abstractions.TestingHelpers;
+using Moq;
 using NuGone.Cli.Features.AnalyzeCommand.Commands;
 using NuGone.Cli.Shared.Constants;
 using NuGone.Cli.Shared.Models;
@@ -16,19 +17,24 @@ namespace NuGone.Cli.Tests.Commands;
 /// </summary>
 public partial class AnalyzeCommandTests
 {
-    private readonly MockFileSystem _fileSystem;
+    private readonly System.IO.Abstractions.IFileSystem _fileSystem;
+    private readonly AnalyzeCommand _command;
     private readonly string _testProjectPath;
     private readonly string _testSolutionPath;
 
     public AnalyzeCommandTests()
     {
         _fileSystem = new MockFileSystem();
+        _command = new AnalyzeCommand(_fileSystem);
         _testProjectPath = Path.Combine("test", "project", "Test.csproj");
         _testSolutionPath = Path.Combine("test", "solution", "Test.sln");
 
         // Setup test files
-        _fileSystem.AddFile(_testProjectPath, new MockFileData("<Project></Project>"));
-        _fileSystem.AddFile(
+        ((MockFileSystem)_fileSystem).AddFile(
+            _testProjectPath,
+            new MockFileData("<Project></Project>")
+        );
+        ((MockFileSystem)_fileSystem).AddFile(
             _testSolutionPath,
             new MockFileData("Microsoft Visual Studio Solution File")
         );
@@ -41,6 +47,9 @@ public partial class AnalyzeCommandTests
     /// </summary>
     private class TestableAnalyzeCommand : AnalyzeCommand
     {
+        public TestableAnalyzeCommand(System.IO.Abstractions.IFileSystem fileSystem)
+            : base(fileSystem) { }
+
         public Result<string> TestValidateAndResolveProjectPath(string? projectPath)
         {
             return ValidateAndResolveProjectPath(projectPath);

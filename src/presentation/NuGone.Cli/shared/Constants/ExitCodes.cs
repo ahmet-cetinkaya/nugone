@@ -11,6 +11,7 @@ public static class ExitCodes
     public const int FileNotFound = 2;
     public const int DirectoryNotFound = 3;
     public const int AccessDenied = 4;
-    public const int OperationFailed = 5;
+    public const int InvalidFileFormat = 5;
+    public const int OperationFailed = 6;
     public const int UnexpectedError = 99;
 }

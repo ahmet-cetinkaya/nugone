@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.IO.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NuGone.Application.Features.PackageAnalysis.Commands.AnalyzePackageUsage;
@@ -20,6 +21,13 @@ public class AnalyzeCommand
     : BaseCommand<AnalyzeCommand.Settings>,
         IAsyncCommand<AnalyzeCommand.Settings>
 {
+    private readonly IFileSystem _fileSystem;
+
+    public AnalyzeCommand(IFileSystem fileSystem)
+    {
+        _fileSystem = fileSystem;
+    }
+
     public class Settings : CommandSettings
     {
         [Description("Path to project or solution")]
@@ -63,6 +71,22 @@ public class AnalyzeCommand
         var projectPathResult = ValidateAndResolveProjectPath(settings.ProjectPath);
         if (projectPathResult.IsFailure)
             return projectPathResult.Error;
+
+        // Validate file extension for direct file paths
+        if (_fileSystem.File.Exists(projectPathResult.Value))
+        {
+            var extension = Path.GetExtension(projectPathResult.Value);
+            if (
+                !extension.Equals(".sln", StringComparison.OrdinalIgnoreCase)
+                && !extension.Equals(".slnx", StringComparison.OrdinalIgnoreCase)
+            )
+            {
+                return Error.InvalidFileFormat(
+                    "Only .sln and .slnx files are supported for analysis",
+                    extension
+                );
+            }
+        }
 
         var projectPath = projectPathResult.Value;
 

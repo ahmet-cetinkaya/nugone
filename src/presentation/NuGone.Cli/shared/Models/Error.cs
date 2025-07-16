@@ -39,6 +39,17 @@ public record Error
         };
     }
 
+    public static Error InvalidFileFormat(string message, string extension)
+    {
+        return new Error
+        {
+            Code = "INVALID_FILE_FORMAT",
+            Message = $"{message}: {extension}",
+            ExitCode = ExitCodes.InvalidFileFormat,
+            Details = new Dictionary<string, object> { ["Extension"] = extension },
+        };
+    }
+
     public static Error DirectoryNotFound(string directoryPath)
     {
         return new Error
