@@ -137,6 +137,31 @@ public partial class PackageUsageAnalyzer(
                 cancellationToken
             );
 
+            // If package has global using, also scan for implicit usage
+            if (packageRef.HasGlobalUsing)
+            {
+                var globalUsageResults = await ScanSourceFilesForGlobalUsageAsync(
+                    sourceFiles,
+                    allNamespaces,
+                    project,
+                    errorLoggedFiles,
+                    cancellationToken
+                );
+
+                // Merge global usage results with regular usage results
+                foreach (var (namespaceName, usageLocations) in globalUsageResults)
+                {
+                    if (!usageResults.ContainsKey(namespaceName))
+                        usageResults[namespaceName] = new List<string>();
+
+                    foreach (var location in usageLocations)
+                    {
+                        if (!usageResults[namespaceName].Contains(location))
+                            usageResults[namespaceName].Add(location);
+                    }
+                }
+            }
+
             _logger.LogDebug(
                 "Package {PackageId} usage scan found {UsageCount} namespace matches",
                 packageRef.PackageId,
@@ -304,6 +329,64 @@ public partial class PackageUsageAnalyzer(
     }
 
     /// <summary>
+    /// Scans source files for implicit usage of package namespaces through global usings.
+    /// When a package has global usings, its namespaces are implicitly available without explicit using statements.
+    /// </summary>
+    public async Task<Dictionary<string, List<string>>> ScanSourceFilesForGlobalUsageAsync(
+        IEnumerable<string> sourceFiles,
+        IEnumerable<string> packageNamespaces,
+        Project project,
+        HashSet<string> errorLoggedFiles,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var usageResults = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+        var namespacePatterns = packageNamespaces.Select(ns => new NamespacePattern(ns)).ToList();
+
+        foreach (var sourceFile in sourceFiles)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // Use project's proper file exclusion logic
+            if (project.ShouldExcludeFile(sourceFile))
+                continue;
+
+            try
+            {
+                var content = await _projectRepository.ReadSourceFileAsync(
+                    sourceFile,
+                    cancellationToken
+                );
+                var foundNamespaces = ScanFileForGlobalNamespaceUsage(content, namespacePatterns);
+
+                foreach (var foundNamespace in foundNamespaces)
+                {
+                    if (!usageResults.ContainsKey(foundNamespace))
+                        usageResults[foundNamespace] = new List<string>();
+
+                    if (!usageResults[foundNamespace].Contains(sourceFile))
+                        usageResults[foundNamespace].Add(sourceFile);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Avoid duplicate error logging for the same file across all package analyses
+                if (!errorLoggedFiles.Contains(sourceFile))
+                {
+                    _logger.LogWarning(
+                        ex,
+                        "Error scanning file for global namespace usage: {SourceFile}",
+                        sourceFile
+                    );
+                    _ = errorLoggedFiles.Add(sourceFile);
+                }
+            }
+        }
+
+        return usageResults;
+    }
+
+    /// <summary>
     /// Validates that all required inputs are present and accessible.
     /// RFC-0002: Input validation for paths and configuration.
     /// </summary>
@@ -444,6 +527,103 @@ public partial class PackageUsageAnalyzer(
         }
 
         return foundNamespaces;
+    }
+
+    private static HashSet<string> ScanFileForGlobalNamespaceUsage(
+        string content,
+        IList<NamespacePattern> namespacePatterns
+    )
+    {
+        var foundNamespaces = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        // When a namespace is globally available, we need to look for usage patterns
+        // that would indicate the namespace is being used without explicit using statements.
+        
+        // Scan for direct namespace usage (e.g., System.Console.WriteLine, Xunit.Assert.True)
+        var usageMatches = NamespaceUsageRegex.Matches(content);
+        foreach (Match match in usageMatches)
+        {
+            var fullQualifiedName = match.Groups[1].Value;
+
+            // Check all possible namespace prefixes of the qualified name
+            var parts = fullQualifiedName.Split('.');
+            for (int i = 1; i <= parts.Length; i++)
+            {
+                var namespaceName = string.Join(".", parts.Take(i));
+                foreach (var pattern in namespacePatterns)
+                {
+                    if (pattern.Matches(namespaceName))
+                    {
+                        _ = foundNamespaces.Add(namespaceName);
+                    }
+                }
+            }
+        }
+
+        // For global usings, we also need to scan for unqualified usage patterns
+        // that would only work if the namespace is globally available
+        foreach (var pattern in namespacePatterns)
+        {
+            var namespaceName = pattern.Pattern;
+            
+            // Look for common patterns that indicate namespace usage without qualification
+            // For Xunit namespace, look for [Fact], [Theory], Assert.*, etc.
+            if (namespaceName.Equals("Xunit", StringComparison.OrdinalIgnoreCase))
+            {
+                // Look for Xunit attributes and classes
+                if (content.Contains("[Fact]") || content.Contains("[Theory]") || 
+                    content.Contains("Assert.") || content.Contains("[InlineData"))
+                {
+                    _ = foundNamespaces.Add(namespaceName);
+                }
+            }
+            
+            // For other namespaces, look for unqualified class/method usage patterns
+            // This is a more general approach that looks for identifiers that could be from the namespace
+            var unqualifiedPattern = new Regex(
+                @"\b([A-Z][a-zA-Z0-9_]*)\s*[\.\(]",
+                RegexOptions.Compiled
+            );
+            
+            var unqualifiedMatches = unqualifiedPattern.Matches(content);
+            foreach (Match match in unqualifiedMatches)
+            {
+                var identifier = match.Groups[1].Value;
+                
+                // This is a heuristic - if we find an identifier that could belong to the namespace
+                // and there's no explicit using statement for it, it might be from a global using
+                // We'll be conservative and only mark it as used if it's a common pattern
+                if (IsLikelyFromNamespace(identifier, namespaceName))
+                {
+                    _ = foundNamespaces.Add(namespaceName);
+                }
+            }
+        }
+
+        return foundNamespaces;
+    }
+
+    private static bool IsLikelyFromNamespace(string identifier, string namespaceName)
+    {
+        // This is a heuristic method to determine if an identifier is likely from a specific namespace
+        // For now, we'll implement some common patterns
+        
+        if (namespaceName.Equals("Xunit", StringComparison.OrdinalIgnoreCase))
+        {
+            return identifier.Equals("Assert", StringComparison.OrdinalIgnoreCase) ||
+                   identifier.Equals("Fact", StringComparison.OrdinalIgnoreCase) ||
+                   identifier.Equals("Theory", StringComparison.OrdinalIgnoreCase);
+        }
+        
+        if (namespaceName.Equals("Moq", StringComparison.OrdinalIgnoreCase))
+        {
+            return identifier.Equals("Mock", StringComparison.OrdinalIgnoreCase) ||
+                   identifier.Equals("It", StringComparison.OrdinalIgnoreCase);
+        }
+        
+        // For other namespaces, we'll be conservative and not assume usage
+        // This could be enhanced in the future with more sophisticated analysis
+        return false;
     }
 
     private static bool ShouldExcludeFile(string filePath, IEnumerable<string> excludePatterns)
