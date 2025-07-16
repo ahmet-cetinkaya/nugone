@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 using NuGone.Application.Features.PackageAnalysis.Services.Abstractions;
@@ -18,12 +19,12 @@ public class PackageUsageAnalyzer : IPackageUsageAnalyzer
 
     // Regex patterns for detecting namespace usage
     private static readonly Regex UsingStatementRegex = new(
-        @"^\s*using\s+([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)*)\s*;",
+        @"^\s*using\s+(?:global\s+)?([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_0-9][a-zA-Z0-9_]*)*)\s*;",
         RegexOptions.Compiled | RegexOptions.Multiline
     );
 
     private static readonly Regex NamespaceUsageRegex = new(
-        @"\b([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_][a-zA-Z0-9_]*)*)\.",
+        @"(?:new\s+)?([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_0-9][a-zA-Z0-9_]*)*)\s*[\.\(]",
         RegexOptions.Compiled
     );
 
@@ -83,22 +84,52 @@ public class PackageUsageAnalyzer : IPackageUsageAnalyzer
             cancellationToken
         );
 
-        // Step 2: For each package, get its namespaces and scan for usage
+        // Step 2: Parse target frameworks for multi-target support (RFC-0002)
+        var targetFrameworks = project.TargetFramework.Split(
+            ';',
+            StringSplitOptions.RemoveEmptyEntries
+        );
+
+        // RFC-0004: Track error-logged files at project level to avoid duplicate logging
+        var errorLoggedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        // Step 3: For each package, get its namespaces and scan for usage
         foreach (var packageRef in project.PackageReferences)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
+            _logger.LogDebug(
+                "Analyzing package: {PackageId} in project: {ProjectName}",
+                packageRef.PackageId,
+                project.Name
+            );
+
             // Reset usage status before analysis
             packageRef.ResetUsageStatus();
 
-            // Get namespaces provided by this package
-            var namespaces = await GetPackageNamespacesAsync(
+            // Get namespaces for all target frameworks (RFC-0002: multi-target support)
+            var allNamespaces = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var targetFramework in targetFrameworks)
+            {
+                var namespaces = await GetPackageNamespacesAsync(
+                    packageRef.PackageId,
+                    packageRef.Version,
+                    targetFramework.Trim()
+                );
+                foreach (var ns in namespaces)
+                {
+                    allNamespaces.Add(ns);
+                }
+            }
+
+            _logger.LogDebug(
+                "Package {PackageId} has {NamespaceCount} namespaces: {Namespaces}",
                 packageRef.PackageId,
-                packageRef.Version,
-                project.TargetFramework
+                allNamespaces.Count,
+                string.Join(", ", allNamespaces)
             );
 
-            if (!namespaces.Any())
+            if (!allNamespaces.Any())
             {
                 _logger.LogWarning(
                     "No namespaces found for package: {PackageId}",
@@ -110,9 +141,16 @@ public class PackageUsageAnalyzer : IPackageUsageAnalyzer
             // Scan source files for usage of these namespaces
             var usageResults = await ScanSourceFilesForUsageAsync(
                 sourceFiles,
-                namespaces,
-                project.ExcludePatterns,
+                allNamespaces,
+                project,
+                errorLoggedFiles,
                 cancellationToken
+            );
+
+            _logger.LogDebug(
+                "Package {PackageId} usage scan found {UsageCount} namespace matches",
+                packageRef.PackageId,
+                usageResults.Sum(kvp => kvp.Value.Count)
             );
 
             // Mark package as used if any namespace usage was found
@@ -123,6 +161,13 @@ public class PackageUsageAnalyzer : IPackageUsageAnalyzer
                     packageRef.MarkAsUsed(location, namespaceName);
                 }
             }
+
+            _logger.LogDebug(
+                "Package {PackageId} analysis result: IsUsed={IsUsed}, UsageLocations={LocationCount}",
+                packageRef.PackageId,
+                packageRef.IsUsed,
+                packageRef.UsageLocations.Count
+            );
         }
 
         var usedCount = project.PackageReferences.Count(p => p.IsUsed);
@@ -182,6 +227,80 @@ public class PackageUsageAnalyzer : IPackageUsageAnalyzer
                     "Error scanning file for namespace usage: {SourceFile}",
                     sourceFile
                 );
+            }
+        }
+
+        return usageResults;
+    }
+
+    /// <summary>
+    /// Scans source files for usage of specific package namespaces with project-aware exclusion.
+    /// RFC-0002: Usage scanning with proper file exclusion patterns.
+    /// </summary>
+    public async Task<Dictionary<string, List<string>>> ScanSourceFilesForUsageAsync(
+        IEnumerable<string> sourceFiles,
+        IEnumerable<string> packageNamespaces,
+        Project project,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var errorLoggedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        return await ScanSourceFilesForUsageAsync(sourceFiles, packageNamespaces, project, errorLoggedFiles, cancellationToken);
+    }
+
+    /// <summary>
+    /// Scans source files for usage of specific package namespaces with project-aware exclusion and shared error tracking.
+    /// RFC-0002: Usage scanning with proper file exclusion patterns.
+    /// RFC-0004: Shared error tracking to prevent duplicate logging across package analyses.
+    /// </summary>
+    public async Task<Dictionary<string, List<string>>> ScanSourceFilesForUsageAsync(
+        IEnumerable<string> sourceFiles,
+        IEnumerable<string> packageNamespaces,
+        Project project,
+        HashSet<string> errorLoggedFiles,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var usageResults = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+        var namespacePatterns = packageNamespaces.Select(ns => new NamespacePattern(ns)).ToList();
+
+        foreach (var sourceFile in sourceFiles)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // Use project's proper file exclusion logic (RFC-0002: auto-generated files + patterns)
+            if (project.ShouldExcludeFile(sourceFile))
+                continue;
+
+            try
+            {
+                var content = await _projectRepository.ReadSourceFileAsync(
+                    sourceFile,
+                    cancellationToken
+                );
+                var foundNamespaces = ScanFileForNamespaceUsage(content, namespacePatterns);
+
+                foreach (var foundNamespace in foundNamespaces)
+                {
+                    if (!usageResults.ContainsKey(foundNamespace))
+                        usageResults[foundNamespace] = new List<string>();
+
+                    if (!usageResults[foundNamespace].Contains(sourceFile))
+                        usageResults[foundNamespace].Add(sourceFile);
+                }
+            }
+            catch (Exception ex)
+            {
+                // RFC-0004: Avoid duplicate error logging for the same file across all package analyses
+                if (!errorLoggedFiles.Contains(sourceFile))
+                {
+                    _logger.LogWarning(
+                        ex,
+                        "Error scanning file for namespace usage: {SourceFile}",
+                        sourceFile
+                    );
+                    errorLoggedFiles.Add(sourceFile);
+                }
             }
         }
 
@@ -261,12 +380,24 @@ public class PackageUsageAnalyzer : IPackageUsageAnalyzer
         var usageMatches = NamespaceUsageRegex.Matches(content);
         foreach (Match match in usageMatches)
         {
-            var namespaceName = match.Groups[1].Value;
-            foreach (var pattern in namespacePatterns)
+            var fullQualifiedName = match.Groups[1].Value;
+            
+            // Check all possible namespace prefixes of the qualified name
+            // For "Complex.Package.Utilities.Helper", check:
+            // - "Complex"
+            // - "Complex.Package" 
+            // - "Complex.Package.Utilities"
+            // - "Complex.Package.Utilities.Helper"
+            var parts = fullQualifiedName.Split('.');
+            for (int i = 1; i <= parts.Length; i++)
             {
-                if (pattern.Matches(namespaceName))
+                var namespaceName = string.Join(".", parts.Take(i));
+                foreach (var pattern in namespacePatterns)
                 {
-                    foundNamespaces.Add(namespaceName);
+                    if (pattern.Matches(namespaceName))
+                    {
+                        foundNamespaces.Add(namespaceName);
+                    }
                 }
             }
         }

@@ -46,6 +46,41 @@ public interface IPackageUsageAnalyzer
     );
 
     /// <summary>
+    /// Scans source files for usage of specific package namespaces with project-aware exclusion.
+    /// RFC-0002: Usage scanning with proper file exclusion patterns.
+    /// </summary>
+    /// <param name="sourceFiles">Collection of source file paths to scan</param>
+    /// <param name="packageNamespaces">Namespaces to look for in the source files</param>
+    /// <param name="project">Project containing exclusion patterns and auto-generated file detection</param>
+    /// <param name="cancellationToken">Cancellation token for long-running operations</param>
+    /// <returns>Dictionary mapping found namespaces to their usage locations</returns>
+    Task<Dictionary<string, List<string>>> ScanSourceFilesForUsageAsync(
+        IEnumerable<string> sourceFiles,
+        IEnumerable<string> packageNamespaces,
+        Project project,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
+    /// Scans source files for usage of specific package namespaces with project-aware exclusion and shared error tracking.
+    /// RFC-0002: Usage scanning with proper file exclusion patterns.
+    /// RFC-0004: Shared error tracking to prevent duplicate logging across package analyses.
+    /// </summary>
+    /// <param name="sourceFiles">Collection of source file paths to scan</param>
+    /// <param name="packageNamespaces">Namespaces to look for in the source files</param>
+    /// <param name="project">Project containing exclusion patterns and auto-generated file detection</param>
+    /// <param name="errorLoggedFiles">Shared set to track files that have already had errors logged</param>
+    /// <param name="cancellationToken">Cancellation token for long-running operations</param>
+    /// <returns>Dictionary mapping found namespaces to their usage locations</returns>
+    Task<Dictionary<string, List<string>>> ScanSourceFilesForUsageAsync(
+        IEnumerable<string> sourceFiles,
+        IEnumerable<string> packageNamespaces,
+        Project project,
+        HashSet<string> errorLoggedFiles,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
     /// Validates that all required inputs are present and accessible.
     /// RFC-0002: Input validation for paths and configuration.
     /// </summary>
