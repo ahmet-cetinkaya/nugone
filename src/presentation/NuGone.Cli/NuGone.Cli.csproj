@@ -7,7 +7,7 @@
     <OutputType>Exe</OutputType>
     <PackageDescription>Automatically detect unused NuGet package references in your .NET projects.</PackageDescription>
     <PackageIcon>assets/icon.png</PackageIcon>
-    <PackageIconUrl>https://raw.githubusercontent.com/ahmet-cetinkaya/nugone/main/docs/icon.png</PackageIconUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/ahmet-cetinkaya/nugone/main/docs/icon/icon.png</PackageIconUrl>
     <PackageId>NuGone</PackageId>
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/ahmet-cetinkaya/nugone</PackageProjectUrl>
@@ -25,7 +25,7 @@
   </PropertyGroup>
   <!-- Package Files -->
   <ItemGroup>
-    <None Include="../../../docs/icon.png" Pack="true" PackagePath="assets" />
+    <None Include="../../../docs/icon/icon.png" Pack="true" PackagePath="assets" />
     <None Include="../../../LICENSE" Pack="true" PackagePath="" />
     <None Include="../../../README.md" Pack="true" PackagePath="" />
   </ItemGroup>
