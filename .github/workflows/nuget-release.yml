@@ -3,6 +3,11 @@ name: NuGet Publish
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Release tag to fetch assets from (e.g. v1.1.0)"
+        required: true
 
 jobs:
   publish-nuget:
@@ -16,11 +21,32 @@ jobs:
         with:
           dotnet-version: "9.0.x"
 
-      - name: Build and publish NuGet package
+      - name: Set release tag variable
+        id: set_tag
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            echo "tag=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ github.event.inputs.release_tag }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download release assets
+        run: |
+          mkdir -p ./nupkg
+          if ! gh release download ${{ steps.set_tag.outputs.tag }} --repo ${{ github.repository }} --pattern '*.nupkg' --dir ./nupkg; then
+            echo "No nupkg assets found for tag ${{ steps.set_tag.outputs.tag }}. Failing workflow."
+            exit 1
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish NuGet package
+        run: |
+          nupkg_file=$(ls ./nupkg/*.nupkg | head -n1)
+          if [ -z "$nupkg_file" ]; then
+            echo "No nupkg file found. Failing workflow."
+            exit 1
+          fi
+          dotnet nuget push "$nupkg_file" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
         env:
           NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
-        run: |
-          dotnet restore
-          dotnet build --configuration Release
-          dotnet pack --configuration Release --no-build
-          dotnet nuget push **/*.nupkg --api-key $NUGET_API_KEY --source https://api.nuget.org/v3/index.json --skip-duplicate

@@ -5,12 +5,15 @@ on:
     workflows: [".NET Test"]
     types:
       - completed
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: "Release tag (e.g. v1.1.0)"
+        required: true
 
 jobs:
   release:
-    if: >-
-      github.event.workflow_run.conclusion == 'success' &&
-      startsWith(github.event.workflow_run.head_branch, 'v')
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && startsWith(github.event.workflow_run.ref, 'refs/tags/v'))
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -41,12 +44,24 @@ jobs:
         run: |
           tar -czf ./nugone-cli.tar.gz -C ./publish .
 
+      - name: Get tag name
+        id: get_tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "::set-output name=tag::${{ github.event.inputs.tag_name }}"
+          else
+            echo "::set-output name=tag::$(echo ${{ github.event.workflow_run.ref }} | sed 's|refs/tags/||')"
+          fi
+
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event.workflow_run.head_branch }}
-          name: Release ${{ github.event.workflow_run.head_branch }}
-          body: Automatically published release.
+          tag_name: ${{ steps.get_tag.outputs.tag }}
+          name: Release ${{ steps.get_tag.outputs.tag }}
+          body: |
+            Automatically published release.
+
+            For detailed changes, see the [CHANGELOG.md for this release](https://github.com/ahmet-cetinkaya/nugone/blob/${{ steps.get_tag.outputs.tag }}/CHANGELOG.md).
           files: |
             ./nupkg/*.nupkg
             ./nugone-cli.tar.gz
