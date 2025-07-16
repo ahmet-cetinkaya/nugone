@@ -10,7 +10,7 @@ namespace NuGone.Application.Features.PackageAnalysis.Services;
 /// Core implementation of the package usage analyzer.
 /// Implements the unused package detection algorithm as specified in RFC-0002.
 /// </summary>
-public class PackageUsageAnalyzer(
+public partial class PackageUsageAnalyzer(
     IProjectRepository projectRepository,
     INuGetRepository nugetRepository,
     ILogger<PackageUsageAnalyzer> logger
@@ -24,21 +24,12 @@ public class PackageUsageAnalyzer(
         logger ?? throw new ArgumentNullException(nameof(logger));
 
     // Regex patterns for detecting namespace usage
-    private static readonly Regex UsingStatementRegex = new(
-        @"^\s*using\s+(?:global\s+)?([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_0-9][a-zA-Z0-9_]*)*)\s*;",
-        RegexOptions.Compiled | RegexOptions.Multiline
-    );
+    private static readonly Regex UsingStatementRegex = MyRegex();
 
     // Regex for detecting namespace aliases (e.g., using PackageSerilog = Serilog;)
-    private static readonly Regex UsingAliasRegex = new(
-        @"^\s*using\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_0-9][a-zA-Z0-9_]*)*)\s*;",
-        RegexOptions.Compiled | RegexOptions.Multiline
-    );
+    private static readonly Regex UsingAliasRegex = MyRegex1();
 
-    private static readonly Regex NamespaceUsageRegex = new(
-        @"(?:new\s+)?([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_0-9][a-zA-Z0-9_]*)*)\s*[\.\(]",
-        RegexOptions.Compiled
-    );
+    private static readonly Regex NamespaceUsageRegex = MyRegex2();
 
     /// <summary>
     /// Analyzes package usage across all projects in a solution.
@@ -117,7 +108,7 @@ public class PackageUsageAnalyzer(
                 );
                 foreach (var ns in namespaces)
                 {
-                    allNamespaces.Add(ns);
+                    _ = allNamespaces.Add(ns);
                 }
             }
 
@@ -128,7 +119,7 @@ public class PackageUsageAnalyzer(
                 string.Join(", ", allNamespaces)
             );
 
-            if (!allNamespaces.Any())
+            if (allNamespaces.Count == 0)
             {
                 _logger.LogWarning(
                     "No namespaces found for package: {PackageId}",
@@ -304,7 +295,7 @@ public class PackageUsageAnalyzer(
                         "Error scanning file for namespace usage: {SourceFile}",
                         sourceFile
                     );
-                    errorLoggedFiles.Add(sourceFile);
+                    _ = errorLoggedFiles.Add(sourceFile);
                 }
             }
         }
@@ -340,7 +331,7 @@ public class PackageUsageAnalyzer(
                 errors.Add($"Project directory does not exist: {project.DirectoryPath}");
         }
 
-        return errors.Any() ? ValidationResult.Failure(errors) : ValidationResult.Success();
+        return errors.Count != 0 ? ValidationResult.Failure(errors) : ValidationResult.Success();
     }
 
     /// <summary>
@@ -376,7 +367,7 @@ public class PackageUsageAnalyzer(
             {
                 if (pattern.Matches(namespaceName))
                 {
-                    foundNamespaces.Add(namespaceName);
+                    _ = foundNamespaces.Add(namespaceName);
                 }
             }
         }
@@ -384,19 +375,19 @@ public class PackageUsageAnalyzer(
         // Scan for namespace aliases (e.g., using PackageSerilog = Serilog;)
         var aliasMatches = UsingAliasRegex.Matches(content);
         var namespaceAliases = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        
+
         foreach (Match match in aliasMatches)
         {
             var aliasName = match.Groups[1].Value;
             var actualNamespace = match.Groups[2].Value;
             namespaceAliases[aliasName] = actualNamespace;
-            
+
             // Check if the actual namespace matches any of our patterns
             foreach (var pattern in namespacePatterns)
             {
                 if (pattern.Matches(actualNamespace))
                 {
-                    foundNamespaces.Add(actualNamespace);
+                    _ = foundNamespaces.Add(actualNamespace);
                 }
             }
         }
@@ -414,7 +405,7 @@ public class PackageUsageAnalyzer(
                 // Replace the alias with the actual namespace
                 var remainingParts = fullQualifiedName.Substring(firstPart.Length);
                 var resolvedName = actualNamespace + remainingParts;
-                
+
                 // Check the resolved namespace
                 var resolvedParts = resolvedName.Split('.');
                 for (int i = 1; i <= resolvedParts.Length; i++)
@@ -424,7 +415,7 @@ public class PackageUsageAnalyzer(
                     {
                         if (pattern.Matches(namespaceName))
                         {
-                            foundNamespaces.Add(namespaceName);
+                            _ = foundNamespaces.Add(namespaceName);
                         }
                     }
                 }
@@ -445,7 +436,7 @@ public class PackageUsageAnalyzer(
                     {
                         if (pattern.Matches(namespaceName))
                         {
-                            foundNamespaces.Add(namespaceName);
+                            _ = foundNamespaces.Add(namespaceName);
                         }
                     }
                 }
@@ -465,4 +456,22 @@ public class PackageUsageAnalyzer(
 
         return false;
     }
+
+    [GeneratedRegex(
+        @"^\s*using\s+(?:global\s+)?([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_0-9][a-zA-Z0-9_]*)*)\s*;",
+        RegexOptions.Multiline | RegexOptions.Compiled
+    )]
+    private static partial Regex MyRegex();
+
+    [GeneratedRegex(
+        @"^\s*using\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_0-9][a-zA-Z0-9_]*)*)\s*;",
+        RegexOptions.Multiline | RegexOptions.Compiled
+    )]
+    private static partial Regex MyRegex1();
+
+    [GeneratedRegex(
+        @"(?:new\s+)?([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_0-9][a-zA-Z0-9_]*)*)\s*[\.\(]",
+        RegexOptions.Compiled
+    )]
+    private static partial Regex MyRegex2();
 }

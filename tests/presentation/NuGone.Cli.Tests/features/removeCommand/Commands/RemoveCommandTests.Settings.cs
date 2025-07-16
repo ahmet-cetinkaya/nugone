@@ -45,7 +45,7 @@ public partial class RemoveCommandTests
         var settings = new RemoveCommand.Settings { ExcludePackages = ["Package1", "Package2"] };
 
         // Assert
-        settings.ExcludePackages.ShouldNotBeNull();
+        _ = settings.ExcludePackages.ShouldNotBeNull();
         settings.ExcludePackages.Length.ShouldBe(2);
         settings.ExcludePackages.ShouldContain("Package1");
         settings.ExcludePackages.ShouldContain("Package2");

@@ -23,7 +23,7 @@ public partial class AnalyzeCommandTests
         var command = new AnalyzeCommand(mockFileSystem.Object);
 
         // Assert
-        command.ShouldBeAssignableTo<BaseCommand<AnalyzeCommand.Settings>>();
+        _ = command.ShouldBeAssignableTo<BaseCommand<AnalyzeCommand.Settings>>();
     }
 
     [Fact]
@@ -34,7 +34,7 @@ public partial class AnalyzeCommandTests
         var command = new AnalyzeCommand(mockFileSystem.Object);
 
         // Assert
-        command.ShouldBeAssignableTo<IAsyncCommand<AnalyzeCommand.Settings>>();
+        _ = command.ShouldBeAssignableTo<IAsyncCommand<AnalyzeCommand.Settings>>();
     }
 
     [Fact]

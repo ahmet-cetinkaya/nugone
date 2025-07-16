@@ -18,11 +18,11 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddFileSystemServices(this IServiceCollection services)
     {
         // Register file system abstraction
-        services.AddSingleton<IFileSystem, System.IO.Abstractions.FileSystem>();
+        _ = services.AddSingleton<IFileSystem, System.IO.Abstractions.FileSystem>();
 
         // Register repositories
-        services.AddScoped<IProjectRepository, ProjectRepository>();
-        services.AddScoped<ISolutionRepository, SolutionRepository>();
+        _ = services.AddScoped<IProjectRepository, ProjectRepository>();
+        _ = services.AddScoped<ISolutionRepository, SolutionRepository>();
 
         return services;
     }

@@ -242,7 +242,7 @@ public partial class PackageUsageAnalyzerTests
         SetupMockPathExists(solution.FilePath, project.FilePath, project.DirectoryPath);
 
         // Act & Assert
-        await Should.ThrowAsync<OperationCanceledException>(() =>
+        _ = await Should.ThrowAsync<OperationCanceledException>(() =>
             _analyzer.AnalyzePackageUsageAsync(solution, cts.Token)
         );
     }

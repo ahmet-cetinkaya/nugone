@@ -83,7 +83,7 @@ public partial class PackageUsageAnalyzerTests
     /// </summary>
     private void SetupMockSourceFiles(Project project, params string[] sourceFiles)
     {
-        _mockProjectRepository
+        _ = _mockProjectRepository
             .Setup(r => r.GetProjectSourceFilesAsync(project, It.IsAny<CancellationToken>()))
             .ReturnsAsync(sourceFiles);
     }
@@ -93,7 +93,7 @@ public partial class PackageUsageAnalyzerTests
     /// </summary>
     private void SetupMockFileContent(string filePath, string content)
     {
-        _mockProjectRepository
+        _ = _mockProjectRepository
             .Setup(r => r.ReadSourceFileAsync(filePath, It.IsAny<CancellationToken>()))
             .ReturnsAsync(content);
     }
@@ -108,7 +108,7 @@ public partial class PackageUsageAnalyzerTests
         params string[] namespaces
     )
     {
-        _mockNuGetRepository
+        _ = _mockNuGetRepository
             .Setup(r =>
                 r.GetPackageNamespacesAsync(
                     packageId,
@@ -127,7 +127,7 @@ public partial class PackageUsageAnalyzerTests
     {
         foreach (var path in paths)
         {
-            _mockProjectRepository.Setup(r => r.ExistsAsync(path)).ReturnsAsync(true);
+            _ = _mockProjectRepository.Setup(r => r.ExistsAsync(path)).ReturnsAsync(true);
         }
     }
 }

@@ -18,10 +18,10 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         // Register command handlers
-        services.AddScoped<AnalyzePackageUsageHandler>();
+        _ = services.AddScoped<AnalyzePackageUsageHandler>();
 
         // Register services
-        services.AddScoped<IPackageUsageAnalyzer, PackageUsageAnalyzer>();
+        _ = services.AddScoped<IPackageUsageAnalyzer, PackageUsageAnalyzer>();
 
         // Add MediatR if needed for CQRS pattern
         // services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ServiceCollectionExtensions).Assembly));

@@ -174,10 +174,10 @@ public class AnalyzeCommand(IFileSystem fileSystem)
 
             // Set up dependency injection
             var services = new ServiceCollection();
-            services.AddLogging();
-            services.AddApplicationServices();
-            services.AddFileSystemServices();
-            services.AddNuGetServices();
+            _ = services.AddLogging();
+            _ = services.AddApplicationServices();
+            _ = services.AddFileSystemServices();
+            _ = services.AddNuGetServices();
 
             using var serviceProvider = services.BuildServiceProvider();
             var handler = serviceProvider.GetRequiredService<AnalyzePackageUsageHandler>();
@@ -359,31 +359,31 @@ public class AnalyzeCommand(IFileSystem fileSystem)
     private string SerializeToText(AnalyzePackageUsageResult result)
     {
         var sb = new System.Text.StringBuilder();
-        sb.AppendLine($"Package Analysis Results");
-        sb.AppendLine($"=======================");
-        sb.AppendLine($"Analyzed Path: {result.AnalyzedPath}");
-        sb.AppendLine($"Analysis Time: {result.AnalysisTime}");
-        sb.AppendLine($"Summary: {result.GetSummary()}");
-        sb.AppendLine();
+        _ = sb.AppendLine($"Package Analysis Results");
+        _ = sb.AppendLine($"=======================");
+        _ = sb.AppendLine($"Analyzed Path: {result.AnalyzedPath}");
+        _ = sb.AppendLine($"Analysis Time: {result.AnalysisTime}");
+        _ = sb.AppendLine($"Summary: {result.GetSummary()}");
+        _ = sb.AppendLine();
 
         foreach (var project in result.ProjectResults)
         {
-            sb.AppendLine($"Project: {project.ProjectName} ({project.TargetFramework})");
-            sb.AppendLine($"Path: {project.ProjectPath}");
+            _ = sb.AppendLine($"Project: {project.ProjectName} ({project.TargetFramework})");
+            _ = sb.AppendLine($"Path: {project.ProjectPath}");
 
             if (project.UnusedPackages > 0)
             {
-                sb.AppendLine($"Unused Packages ({project.UnusedPackages}):");
+                _ = sb.AppendLine($"Unused Packages ({project.UnusedPackages}):");
                 foreach (var package in project.UnusedPackageDetails)
                 {
-                    sb.AppendLine($"  - {package.GetDisplayString()}");
+                    _ = sb.AppendLine($"  - {package.GetDisplayString()}");
                 }
             }
             else
             {
-                sb.AppendLine("No unused packages found.");
+                _ = sb.AppendLine("No unused packages found.");
             }
-            sb.AppendLine();
+            _ = sb.AppendLine();
         }
 
         return sb.ToString();

@@ -6,11 +6,7 @@ namespace NuGone.Domain.Features.PackageAnalysis.Entities;
 /// </summary>
 public class GlobalUsing
 {
-    public GlobalUsing(
-        string packageId,
-        string projectPath,
-        string? condition = null
-    )
+    public GlobalUsing(string packageId, string projectPath, string? condition = null)
     {
         if (string.IsNullOrWhiteSpace(packageId))
             throw new ArgumentException("Package ID cannot be null or empty", nameof(packageId));
@@ -57,9 +53,6 @@ public class GlobalUsing
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(
-            PackageId.ToLowerInvariant(),
-            ProjectPath.ToLowerInvariant()
-        );
+        return HashCode.Combine(PackageId.ToLowerInvariant(), ProjectPath.ToLowerInvariant());
     }
 }

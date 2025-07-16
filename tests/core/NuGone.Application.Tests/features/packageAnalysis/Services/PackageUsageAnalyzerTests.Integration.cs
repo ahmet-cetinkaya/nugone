@@ -123,7 +123,7 @@ public partial class PackageUsageAnalyzerTests
 
         // Conditional package - REQUIRES SPECIAL HANDLING (conditional removal)
         conditionalPackage.IsUsed.ShouldBeFalse();
-        conditionalPackage.Condition.ShouldNotBeNull();
+        _ = conditionalPackage.Condition.ShouldNotBeNull();
 
         // Transitive package - NOT DIRECTLY REMOVABLE (managed by package manager)
         transitivePackage.IsUsed.ShouldBeFalse();
@@ -263,7 +263,7 @@ public partial class PackageUsageAnalyzerTests
         );
 
         // Setup error condition for second file
-        _mockProjectRepository
+        _ = _mockProjectRepository
             .Setup(r => r.ReadSourceFileAsync("/test/ErrorFile.cs", It.IsAny<CancellationToken>()))
             .ThrowsAsync(new IOException("File access denied"));
 

@@ -96,10 +96,10 @@ public class NuGetRepositoryGlobalUsingsTests : IDisposable
 
         // Assert
         globalUsings.Should().HaveCount(2);
-        
+
         var xunitUsing = globalUsings.First(gu => gu.PackageId == "Xunit");
         xunitUsing.Condition.Should().BeNull();
-        
+
         var moqUsing = globalUsings.First(gu => gu.PackageId == "Moq");
         moqUsing.Condition.Should().Be("'$(Configuration)' == 'Debug'");
     }
@@ -162,13 +162,13 @@ public class NuGetRepositoryGlobalUsingsTests : IDisposable
 
         // Assert
         packageReferences.Should().HaveCount(3);
-        
+
         var xunitPackage = packageReferences.First(pr => pr.PackageId == "Xunit");
         xunitPackage.HasGlobalUsing.Should().BeTrue();
-        
+
         var moqPackage = packageReferences.First(pr => pr.PackageId == "Moq");
         moqPackage.HasGlobalUsing.Should().BeTrue();
-        
+
         var shouldlyPackage = packageReferences.First(pr => pr.PackageId == "Shouldly");
         shouldlyPackage.HasGlobalUsing.Should().BeFalse();
     }
@@ -180,8 +180,10 @@ public class NuGetRepositoryGlobalUsingsTests : IDisposable
         var nonExistentPath = Path.Combine(_tempDirectory, "NonExistent.csproj");
 
         // Act & Assert
-        await _repository.Invoking(r => r.ExtractGlobalUsingsAsync(nonExistentPath))
-            .Should().ThrowAsync<FileNotFoundException>()
+        await _repository
+            .Invoking(r => r.ExtractGlobalUsingsAsync(nonExistentPath))
+            .Should()
+            .ThrowAsync<FileNotFoundException>()
             .WithMessage($"Project file not found: {nonExistentPath}");
     }
 
@@ -194,8 +196,10 @@ public class NuGetRepositoryGlobalUsingsTests : IDisposable
         await File.WriteAllTextAsync(projectFilePath, invalidXmlContent);
 
         // Act & Assert
-        await _repository.Invoking(r => r.ExtractGlobalUsingsAsync(projectFilePath))
-            .Should().ThrowAsync<Exception>();
+        await _repository
+            .Invoking(r => r.ExtractGlobalUsingsAsync(projectFilePath))
+            .Should()
+            .ThrowAsync<Exception>();
     }
 
     [Fact]

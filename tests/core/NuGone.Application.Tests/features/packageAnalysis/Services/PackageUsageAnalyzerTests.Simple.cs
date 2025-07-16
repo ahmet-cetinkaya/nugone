@@ -200,7 +200,7 @@ public class PackageUsageAnalyzerSimpleTests
         // Assert
         Assert.Contains(usedPackage, usedPackages);
         Assert.DoesNotContain(unusedPackage, usedPackages);
-        Assert.Single(usedPackages);
+        _ = Assert.Single(usedPackages);
     }
 
     [Fact]
@@ -234,7 +234,7 @@ public class PackageUsageAnalyzerSimpleTests
         // Assert
         Assert.Contains(unusedPackage, unusedPackages);
         Assert.DoesNotContain(usedPackage, unusedPackages);
-        Assert.Single(unusedPackages);
+        _ = Assert.Single(unusedPackages);
     }
 
     [Fact]

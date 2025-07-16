@@ -59,7 +59,7 @@ public class NamespacePattern : IEquatable<NamespacePattern>
             return @namespace.EndsWith(suffix, StringComparison.OrdinalIgnoreCase);
         }
 
-        if (Pattern.Contains("*"))
+        if (Pattern.Contains('*'))
         {
             // More complex wildcard matching - convert to regex-like behavior
             var parts = Pattern.Split('*', StringSplitOptions.RemoveEmptyEntries);

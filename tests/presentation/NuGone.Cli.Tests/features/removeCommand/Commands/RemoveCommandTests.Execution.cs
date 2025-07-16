@@ -20,7 +20,7 @@ public partial class RemoveCommandTests
         var command = new RemoveCommand();
 
         // Assert
-        command.ShouldBeAssignableTo<BaseCommand<RemoveCommand.Settings>>();
+        _ = command.ShouldBeAssignableTo<BaseCommand<RemoveCommand.Settings>>();
     }
 
     [Fact]

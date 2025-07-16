@@ -11,10 +11,10 @@ namespace NuGone.FileSystem.Repositories;
 /// Handles project file discovery and parsing as specified in RFC-0002.
 /// </summary>
 public class ProjectRepository(
-    IFileSystem fileSystem, 
+    IFileSystem fileSystem,
     INuGetRepository nugetRepository,
-    ILogger<ProjectRepository> logger)
-    : IProjectRepository
+    ILogger<ProjectRepository> logger
+) : IProjectRepository
 {
     private readonly IFileSystem _fileSystem =
         fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
@@ -101,7 +101,10 @@ public class ProjectRepository(
             var project = new Project(projectFilePath, projectName, targetFramework);
 
             // Load global using declarations
-            var globalUsings = await _nugetRepository.ExtractGlobalUsingsAsync(projectFilePath, cancellationToken);
+            var globalUsings = await _nugetRepository.ExtractGlobalUsingsAsync(
+                projectFilePath,
+                cancellationToken
+            );
             foreach (var globalUsing in globalUsings)
             {
                 project.AddGlobalUsing(globalUsing);

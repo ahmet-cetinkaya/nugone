@@ -34,7 +34,9 @@ public class GlobalUsingTests
 
         // Act & Assert
         var action = () => new GlobalUsing(packageId!, projectPath);
-        action.Should().Throw<ArgumentException>()
+        action
+            .Should()
+            .Throw<ArgumentException>()
             .WithMessage("Package ID cannot be null or empty*");
     }
 
@@ -47,7 +49,9 @@ public class GlobalUsingTests
 
         // Act & Assert
         var action = () => new GlobalUsing(packageId, projectPath);
-        action.Should().Throw<ArgumentException>()
+        action
+            .Should()
+            .Throw<ArgumentException>()
             .WithMessage("Package ID cannot be null or empty*");
     }
 
@@ -60,7 +64,9 @@ public class GlobalUsingTests
 
         // Act & Assert
         var action = () => new GlobalUsing(packageId, projectPath!);
-        action.Should().Throw<ArgumentException>()
+        action
+            .Should()
+            .Throw<ArgumentException>()
             .WithMessage("Project path cannot be null or empty*");
     }
 
@@ -73,7 +79,9 @@ public class GlobalUsingTests
 
         // Act & Assert
         var action = () => new GlobalUsing(packageId, projectPath);
-        action.Should().Throw<ArgumentException>()
+        action
+            .Should()
+            .Throw<ArgumentException>()
             .WithMessage("Project path cannot be null or empty*");
     }
 

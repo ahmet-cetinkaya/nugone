@@ -299,25 +299,21 @@ public class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
         switch (packageId.ToLowerInvariant())
         {
             case "newtonsoft.json":
-                namespaces.AddRange(new[] { "Newtonsoft.Json", "Newtonsoft.Json.Linq" });
+                namespaces.AddRange(["Newtonsoft.Json", "Newtonsoft.Json.Linq"]);
                 break;
             case "system.text.json":
-                namespaces.AddRange(new[] { "System.Text.Json", "System.Text.Json.Serialization" });
+                namespaces.AddRange(["System.Text.Json", "System.Text.Json.Serialization"]);
                 break;
             case "microsoft.extensions.logging":
                 namespaces.AddRange(
-                    new[]
-                    {
-                        "Microsoft.Extensions.Logging",
-                        "Microsoft.Extensions.DependencyInjection",
-                    }
+                    ["Microsoft.Extensions.Logging", "Microsoft.Extensions.DependencyInjection"]
                 );
                 break;
             case "spectre.console":
-                namespaces.AddRange(new[] { "Spectre.Console", "Spectre.Console.Cli" });
+                namespaces.AddRange(["Spectre.Console", "Spectre.Console.Cli"]);
                 break;
             case "xunit":
-                namespaces.AddRange(new[] { "Xunit", "Xunit.Abstractions" });
+                namespaces.AddRange(["Xunit", "Xunit.Abstractions"]);
                 break;
             case "moq":
                 namespaces.Add("Moq");

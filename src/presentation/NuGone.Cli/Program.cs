@@ -21,11 +21,11 @@ CommandApp app = new(registrar);
 app.Configure(config =>
 {
     // Configure application metadata
-    config.SetApplicationName("nugone");
-    config.SetApplicationVersion("1.0.0");
+    _ = config.SetApplicationName("nugone");
+    _ = config.SetApplicationVersion("1.0.0");
 
     // Add commands following RFC-0001 structure
-    config
+    _ = config
         .AddCommand<AnalyzeCommand>("analyze")
         .WithDescription("Analyze project(s) for unused NuGet packages")
         .WithExample(["analyze", "--project", "MySolution.sln"])
@@ -58,17 +58,17 @@ public sealed class TypeRegistrar(IServiceCollection builder) : ITypeRegistrar
 
     public void Register(Type service, Type implementation)
     {
-        _builder.AddSingleton(service, implementation);
+        _ = _builder.AddSingleton(service, implementation);
     }
 
     public void RegisterInstance(Type service, object implementation)
     {
-        _builder.AddSingleton(service, implementation);
+        _ = _builder.AddSingleton(service, implementation);
     }
 
     public void RegisterLazy(Type service, Func<object> factory)
     {
-        _builder.AddSingleton(service, _ => factory());
+        _ = _builder.AddSingleton(service, _ => factory());
     }
 }
 

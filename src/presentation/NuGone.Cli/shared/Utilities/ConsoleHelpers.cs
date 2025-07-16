@@ -48,13 +48,13 @@ public static class ConsoleHelpers
 
         foreach (var (header, _) in columns)
         {
-            table.AddColumn(header);
+            _ = table.AddColumn(header);
         }
 
         foreach (var item in items)
         {
             var values = columns.Select(col => EscapeMarkup(col.Selector(item))).ToArray();
-            table.AddRow(values);
+            _ = table.AddRow(values);
         }
 
         AnsiConsole.Write(table);

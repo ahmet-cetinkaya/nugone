@@ -22,7 +22,7 @@ public partial class ConfigCommandTests
         var command = new ConfigCommand();
 
         // Assert
-        command.ShouldBeAssignableTo<BaseCommand<ConfigCommand.Settings>>();
+        _ = command.ShouldBeAssignableTo<BaseCommand<ConfigCommand.Settings>>();
     }
 
     [Fact]

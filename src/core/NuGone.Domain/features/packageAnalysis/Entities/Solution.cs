@@ -65,8 +65,7 @@ public class Solution
     /// <param name="project">The project to add</param>
     public void AddProject(Project project)
     {
-        if (project == null)
-            throw new ArgumentNullException(nameof(project));
+        ArgumentNullException.ThrowIfNull(project);
 
         if (!Projects.Contains(project))
             Projects.Add(project);
@@ -79,8 +78,7 @@ public class Solution
     /// <returns>True if the project was removed, false if it wasn't found</returns>
     public bool RemoveProject(Project project)
     {
-        if (project == null)
-            throw new ArgumentNullException(nameof(project));
+        ArgumentNullException.ThrowIfNull(project);
 
         return Projects.Remove(project);
     }

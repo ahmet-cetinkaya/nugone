@@ -79,8 +79,7 @@ public class Project
     /// <param name="packageReference">The package reference to add</param>
     public void AddPackageReference(PackageReference packageReference)
     {
-        if (packageReference == null)
-            throw new ArgumentNullException(nameof(packageReference));
+        ArgumentNullException.ThrowIfNull(packageReference);
 
         if (!PackageReferences.Contains(packageReference))
             PackageReferences.Add(packageReference);
@@ -93,8 +92,7 @@ public class Project
     /// <returns>True if the package was removed, false if it wasn't found</returns>
     public bool RemovePackageReference(PackageReference packageReference)
     {
-        if (packageReference == null)
-            throw new ArgumentNullException(nameof(packageReference));
+        ArgumentNullException.ThrowIfNull(packageReference);
 
         return PackageReferences.Remove(packageReference);
     }
@@ -123,8 +121,7 @@ public class Project
     /// <param name="globalUsing">The global using declaration to add</param>
     public void AddGlobalUsing(GlobalUsing globalUsing)
     {
-        if (globalUsing == null)
-            throw new ArgumentNullException(nameof(globalUsing));
+        ArgumentNullException.ThrowIfNull(globalUsing);
 
         if (!GlobalUsings.Contains(globalUsing))
             GlobalUsings.Add(globalUsing);
@@ -137,8 +134,7 @@ public class Project
     /// <returns>True if the global using was removed, false if it wasn't found</returns>
     public bool RemoveGlobalUsing(GlobalUsing globalUsing)
     {
-        if (globalUsing == null)
-            throw new ArgumentNullException(nameof(globalUsing));
+        ArgumentNullException.ThrowIfNull(globalUsing);
 
         return GlobalUsings.Remove(globalUsing);
     }
@@ -153,7 +149,9 @@ public class Project
         if (string.IsNullOrWhiteSpace(packageId))
             return false;
 
-        return GlobalUsings.Any(gu => gu.PackageId.Equals(packageId, StringComparison.OrdinalIgnoreCase));
+        return GlobalUsings.Any(gu =>
+            gu.PackageId.Equals(packageId, StringComparison.OrdinalIgnoreCase)
+        );
     }
 
     /// <summary>

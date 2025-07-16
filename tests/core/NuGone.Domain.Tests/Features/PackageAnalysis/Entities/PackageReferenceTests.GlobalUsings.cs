@@ -18,7 +18,12 @@ public class PackageReferenceGlobalUsingsTests
         var hasGlobalUsing = true;
 
         // Act
-        var packageRef = new PackageReference(packageId, version, projectPath, hasGlobalUsing: hasGlobalUsing);
+        var packageRef = new PackageReference(
+            packageId,
+            version,
+            projectPath,
+            hasGlobalUsing: hasGlobalUsing
+        );
 
         // Assert
         packageRef.PackageId.Should().Be(packageId);
@@ -56,7 +61,14 @@ public class PackageReferenceGlobalUsingsTests
         var hasGlobalUsing = true;
 
         // Act
-        var packageRef = new PackageReference(packageId, version, projectPath, isDirect, condition, hasGlobalUsing);
+        var packageRef = new PackageReference(
+            packageId,
+            version,
+            projectPath,
+            isDirect,
+            condition,
+            hasGlobalUsing
+        );
 
         // Assert
         packageRef.PackageId.Should().Be(packageId);
@@ -71,7 +83,12 @@ public class PackageReferenceGlobalUsingsTests
     public void ToString_WithGlobalUsing_ShouldNotIncludeGlobalUsingInformation()
     {
         // Arrange
-        var packageRef = new PackageReference("Xunit", "2.4.2", "/path/to/project.csproj", hasGlobalUsing: true);
+        var packageRef = new PackageReference(
+            "Xunit",
+            "2.4.2",
+            "/path/to/project.csproj",
+            hasGlobalUsing: true
+        );
 
         // Act
         var result = packageRef.ToString();
@@ -89,9 +106,19 @@ public class PackageReferenceGlobalUsingsTests
         var packageId = "Xunit";
         var version = "2.4.2";
         var projectPath = "/path/to/project.csproj";
-        
-        var packageRef1 = new PackageReference(packageId, version, projectPath, hasGlobalUsing: true);
-        var packageRef2 = new PackageReference(packageId, version, projectPath, hasGlobalUsing: false);
+
+        var packageRef1 = new PackageReference(
+            packageId,
+            version,
+            projectPath,
+            hasGlobalUsing: true
+        );
+        var packageRef2 = new PackageReference(
+            packageId,
+            version,
+            projectPath,
+            hasGlobalUsing: false
+        );
 
         // Act & Assert
         // Equality should be based on PackageId, Version, and ProjectPath only
@@ -105,7 +132,12 @@ public class PackageReferenceGlobalUsingsTests
     public void HasGlobalUsing_ShouldReturnCorrectValue(bool hasGlobalUsing)
     {
         // Arrange
-        var packageRef = new PackageReference("Xunit", "2.4.2", "/path/to/project.csproj", hasGlobalUsing: hasGlobalUsing);
+        var packageRef = new PackageReference(
+            "Xunit",
+            "2.4.2",
+            "/path/to/project.csproj",
+            hasGlobalUsing: hasGlobalUsing
+        );
 
         // Act & Assert
         packageRef.HasGlobalUsing.Should().Be(hasGlobalUsing);

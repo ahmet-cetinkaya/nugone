@@ -12,7 +12,7 @@ namespace NuGone.FileSystem.Repositories;
 /// File system implementation of the solution repository.
 /// Handles solution file discovery and parsing as specified in RFC-0002.
 /// </summary>
-public class SolutionRepository(IFileSystem fileSystem, ILogger<SolutionRepository> logger)
+public partial class SolutionRepository(IFileSystem fileSystem, ILogger<SolutionRepository> logger)
     : ISolutionRepository
 {
     private readonly IFileSystem _fileSystem =
@@ -21,10 +21,7 @@ public class SolutionRepository(IFileSystem fileSystem, ILogger<SolutionReposito
         logger ?? throw new ArgumentNullException(nameof(logger));
 
     private static readonly string[] SolutionFileExtensions = [".sln", ".slnx"];
-    private static readonly Regex ProjectLineRegex = new(
-        @"Project\(""{[^}]+}""\)\s*=\s*""([^""]+)"",\s*""([^""]+)""",
-        RegexOptions.Compiled
-    );
+    private static readonly Regex ProjectLineRegex = MyRegex();
 
     /// <summary>
     /// Discovers solution files in a given directory.
@@ -341,4 +338,10 @@ public class SolutionRepository(IFileSystem fileSystem, ILogger<SolutionReposito
             throw new InvalidDataException($"Invalid .slnx file format: {solutionFilePath}", ex);
         }
     }
+
+    [GeneratedRegex(
+        @"Project\(""{[^}]+}""\)\s*=\s*""([^""]+)"",\s*""([^""]+)""",
+        RegexOptions.Compiled
+    )]
+    private static partial Regex MyRegex();
 }

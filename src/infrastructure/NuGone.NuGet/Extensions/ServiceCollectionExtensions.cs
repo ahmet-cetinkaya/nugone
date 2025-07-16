@@ -17,7 +17,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddNuGetServices(this IServiceCollection services)
     {
         // Register repositories
-        services.AddScoped<INuGetRepository, NuGetRepository>();
+        _ = services.AddScoped<INuGetRepository, NuGetRepository>();
 
         return services;
     }

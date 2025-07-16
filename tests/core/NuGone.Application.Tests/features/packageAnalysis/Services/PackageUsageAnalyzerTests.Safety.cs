@@ -51,7 +51,7 @@ public partial class PackageUsageAnalyzerTests
         var project = CreateTestProject("TestProject", "net9.0");
         var solution = CreateTestSolution("NonExistentSolution", project);
 
-        _mockProjectRepository.Setup(r => r.ExistsAsync(solution.FilePath)).ReturnsAsync(false);
+        _ = _mockProjectRepository.Setup(r => r.ExistsAsync(solution.FilePath)).ReturnsAsync(false);
         SetupMockPathExists(project.FilePath, project.DirectoryPath);
 
         // Act
@@ -70,7 +70,7 @@ public partial class PackageUsageAnalyzerTests
         var solution = CreateTestSolution("TestSolution", project);
 
         SetupMockPathExists(solution.FilePath, project.DirectoryPath);
-        _mockProjectRepository.Setup(r => r.ExistsAsync(project.FilePath)).ReturnsAsync(false);
+        _ = _mockProjectRepository.Setup(r => r.ExistsAsync(project.FilePath)).ReturnsAsync(false);
 
         // Act
         var result = await _analyzer.ValidateInputsAsync(solution);
@@ -88,7 +88,9 @@ public partial class PackageUsageAnalyzerTests
         var solution = CreateTestSolution("TestSolution", project);
 
         SetupMockPathExists(solution.FilePath, project.FilePath);
-        _mockProjectRepository.Setup(r => r.ExistsAsync(project.DirectoryPath)).ReturnsAsync(false);
+        _ = _mockProjectRepository
+            .Setup(r => r.ExistsAsync(project.DirectoryPath))
+            .ReturnsAsync(false);
 
         // Act
         var result = await _analyzer.ValidateInputsAsync(solution);
@@ -107,7 +109,9 @@ public partial class PackageUsageAnalyzerTests
         var solution = CreateTestSolution("TestSolution", project1, project2);
 
         // Setup all paths as non-existent
-        _mockProjectRepository.Setup(r => r.ExistsAsync(It.IsAny<string>())).ReturnsAsync(false);
+        _ = _mockProjectRepository
+            .Setup(r => r.ExistsAsync(It.IsAny<string>()))
+            .ReturnsAsync(false);
 
         // Act
         var result = await _analyzer.ValidateInputsAsync(solution);
@@ -185,7 +189,7 @@ public partial class PackageUsageAnalyzerTests
         var packageNamespaces = new[] { "Test.Namespace" };
         var excludePatterns = new string[0];
 
-        _mockProjectRepository
+        _ = _mockProjectRepository
             .Setup(r => r.ReadSourceFileAsync("/test/ErrorFile.cs", It.IsAny<CancellationToken>()))
             .ThrowsAsync(new IOException("File access error"));
         SetupMockFileContent(
@@ -255,7 +259,7 @@ public partial class PackageUsageAnalyzerTests
         var version = "1.0.0";
         var targetFramework = "net9.0";
 
-        _mockNuGetRepository
+        _ = _mockNuGetRepository
             .Setup(r =>
                 r.GetPackageNamespacesAsync(
                     invalidPackageId!,
@@ -264,7 +268,7 @@ public partial class PackageUsageAnalyzerTests
                     It.IsAny<CancellationToken>()
                 )
             )
-            .ReturnsAsync(new string[0]);
+            .ReturnsAsync([]);
 
         // Act
         var result = await _analyzer.GetPackageNamespacesAsync(
