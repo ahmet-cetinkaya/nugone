@@ -135,14 +135,14 @@ To automatically detect and optionally remove unused NuGet package references in
 nugone analyze [options]
 ```
 
-| Flag                | Description                                 |
-|---------------------|---------------------------------------------|
-| --dry-run           | Only list packages, don’t remove             |
-| --format <type>     | Output format: `json` or `text`              |
-| --exclude <name>    | Exclude packages from analysis               |
-| --output <file>     | Write report to file                         |
-| --project <path>    | Path to project or solution                  |
-| --help              | Show help                                    |
+| Flag             | Description                      |
+| ---------------- | -------------------------------- |
+| --dry-run        | Only list packages, don’t remove |
+| --format <type>  | Output format: `json` or `text`  |
+| --exclude <name> | Exclude packages from analysis   |
+| --output <file>  | Write report to file             |
+| --project <path> | Path to project or solution      |
+| --help           | Show help                        |
 
 ### Remove
 
@@ -150,14 +150,14 @@ nugone analyze [options]
 nugone remove [options]
 ```
 
-| Flag                | Description                                 |
-|---------------------|---------------------------------------------|
-| --package <name>    | Remove a single unused package              |
-| --all-unused        | Remove all unused packages                  |
-| --no-build          | Skip build after removal                    |
-| --yes, -y           | Skip confirmation prompt                    |
-| --backup            | Backup project file before removal          |
-| --help              | Show help                                   |
+| Flag             | Description                        |
+| ---------------- | ---------------------------------- |
+| --package <name> | Remove a single unused package     |
+| --all-unused     | Remove all unused packages         |
+| --no-build       | Skip build after removal           |
+| --yes, -y        | Skip confirmation prompt           |
+| --backup         | Backup project file before removal |
+| --help           | Show help                          |
 
 ### Config (Planned)
 
@@ -165,11 +165,11 @@ nugone remove [options]
 nugone config [options]
 ```
 
-| Flag                | Description                                 |
-|---------------------|---------------------------------------------|
-| --set <key> <value> | Set a configuration value                   |
-| --get <key>         | Get a configuration value                   |
-| --help              | Show help                                   |
+| Flag                | Description               |
+| ------------------- | ------------------------- |
+| --set <key> <value> | Set a configuration value |
+| --get <key>         | Get a configuration value |
+| --help              | Show help                 |
 
 ---
 
@@ -238,13 +238,16 @@ nugone config [options]
 - Package detection
 - Code scanning (namespace + class names)
 - CLI reporting
-- Dry-run support
-- Single-package removal
 
 ### V2
 
-- Source generator support
+- Dry-run support
+- Single-package removal
 - Config file support
+
+### V3
+
+- Source generator support
 - Transitive dependency analysis
 - Reflection-based analysis
 
