@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.Logging;
 using NuGone.Application.Features.PackageAnalysis.Services.Abstractions;
@@ -11,11 +10,18 @@ namespace NuGone.Application.Features.PackageAnalysis.Services;
 /// Core implementation of the package usage analyzer.
 /// Implements the unused package detection algorithm as specified in RFC-0002.
 /// </summary>
-public class PackageUsageAnalyzer : IPackageUsageAnalyzer
+public class PackageUsageAnalyzer(
+    IProjectRepository projectRepository,
+    INuGetRepository nugetRepository,
+    ILogger<PackageUsageAnalyzer> logger
+) : IPackageUsageAnalyzer
 {
-    private readonly IProjectRepository _projectRepository;
-    private readonly INuGetRepository _nugetRepository;
-    private readonly ILogger<PackageUsageAnalyzer> _logger;
+    private readonly IProjectRepository _projectRepository =
+        projectRepository ?? throw new ArgumentNullException(nameof(projectRepository));
+    private readonly INuGetRepository _nugetRepository =
+        nugetRepository ?? throw new ArgumentNullException(nameof(nugetRepository));
+    private readonly ILogger<PackageUsageAnalyzer> _logger =
+        logger ?? throw new ArgumentNullException(nameof(logger));
 
     // Regex patterns for detecting namespace usage
     private static readonly Regex UsingStatementRegex = new(
@@ -27,19 +33,6 @@ public class PackageUsageAnalyzer : IPackageUsageAnalyzer
         @"(?:new\s+)?([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_0-9][a-zA-Z0-9_]*)*)\s*[\.\(]",
         RegexOptions.Compiled
     );
-
-    public PackageUsageAnalyzer(
-        IProjectRepository projectRepository,
-        INuGetRepository nugetRepository,
-        ILogger<PackageUsageAnalyzer> logger
-    )
-    {
-        _projectRepository =
-            projectRepository ?? throw new ArgumentNullException(nameof(projectRepository));
-        _nugetRepository =
-            nugetRepository ?? throw new ArgumentNullException(nameof(nugetRepository));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
 
     /// <summary>
     /// Analyzes package usage across all projects in a solution.
@@ -245,7 +238,13 @@ public class PackageUsageAnalyzer : IPackageUsageAnalyzer
     )
     {
         var errorLoggedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        return await ScanSourceFilesForUsageAsync(sourceFiles, packageNamespaces, project, errorLoggedFiles, cancellationToken);
+        return await ScanSourceFilesForUsageAsync(
+            sourceFiles,
+            packageNamespaces,
+            project,
+            errorLoggedFiles,
+            cancellationToken
+        );
     }
 
     /// <summary>
@@ -381,11 +380,11 @@ public class PackageUsageAnalyzer : IPackageUsageAnalyzer
         foreach (Match match in usageMatches)
         {
             var fullQualifiedName = match.Groups[1].Value;
-            
+
             // Check all possible namespace prefixes of the qualified name
             // For "Complex.Package.Utilities.Helper", check:
             // - "Complex"
-            // - "Complex.Package" 
+            // - "Complex.Package"
             // - "Complex.Package.Utilities"
             // - "Complex.Package.Utilities.Helper"
             var parts = fullQualifiedName.Split('.');

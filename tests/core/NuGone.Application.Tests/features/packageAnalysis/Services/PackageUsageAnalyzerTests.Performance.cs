@@ -1,9 +1,5 @@
 using System.Diagnostics;
-using Microsoft.Extensions.Logging;
-using Moq;
-using NuGone.Application.Features.PackageAnalysis.Services.Abstractions;
 using NuGone.Domain.Features.PackageAnalysis.Entities;
-using NuGone.Domain.Features.PackageAnalysis.ValueObjects;
 using Shouldly;
 using Xunit;
 

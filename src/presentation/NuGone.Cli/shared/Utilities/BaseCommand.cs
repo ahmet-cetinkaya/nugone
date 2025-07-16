@@ -1,5 +1,4 @@
 #nullable disable
-using NuGone.Cli.Shared.Constants;
 using NuGone.Cli.Shared.Models;
 using Spectre.Console.Cli;
 

@@ -79,45 +79,36 @@ public interface INuGetRepository
 /// <summary>
 /// Represents metadata for a NuGet package.
 /// </summary>
-public class PackageMetadata
+public class PackageMetadata(
+    string id,
+    string version,
+    string? description = null,
+    IEnumerable<string>? tags = null,
+    bool isDevelopmentDependency = false
+)
 {
-    public PackageMetadata(
-        string id,
-        string version,
-        string? description = null,
-        IEnumerable<string>? tags = null,
-        bool isDevelopmentDependency = false
-    )
-    {
-        Id = id ?? throw new ArgumentNullException(nameof(id));
-        Version = version ?? throw new ArgumentNullException(nameof(version));
-        Description = description;
-        Tags = tags?.ToList() ?? new List<string>();
-        IsDevelopmentDependency = isDevelopmentDependency;
-    }
-
     /// <summary>
     /// The package identifier.
     /// </summary>
-    public string Id { get; }
+    public string Id { get; } = id ?? throw new ArgumentNullException(nameof(id));
 
     /// <summary>
     /// The package version.
     /// </summary>
-    public string Version { get; }
+    public string Version { get; } = version ?? throw new ArgumentNullException(nameof(version));
 
     /// <summary>
     /// The package description.
     /// </summary>
-    public string? Description { get; }
+    public string? Description { get; } = description;
 
     /// <summary>
     /// Tags associated with the package.
     /// </summary>
-    public IList<string> Tags { get; }
+    public IList<string> Tags { get; } = tags?.ToList() ?? new List<string>();
 
     /// <summary>
     /// Indicates whether this is a development dependency.
     /// </summary>
-    public bool IsDevelopmentDependency { get; }
+    public bool IsDevelopmentDependency { get; } = isDevelopmentDependency;
 }

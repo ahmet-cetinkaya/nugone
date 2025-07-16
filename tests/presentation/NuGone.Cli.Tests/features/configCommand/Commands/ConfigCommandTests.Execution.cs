@@ -1,6 +1,5 @@
 using NuGone.Cli.Features.ConfigCommand.Commands;
 using NuGone.Cli.Shared.Constants;
-using NuGone.Cli.Shared.Models;
 using NuGone.Cli.Shared.Utilities;
 using Shouldly;
 using Spectre.Console.Cli;

@@ -1,7 +1,6 @@
 using System.ComponentModel;
 using System.IO.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using NuGone.Application.Features.PackageAnalysis.Commands.AnalyzePackageUsage;
 using NuGone.Application.Shared.Extensions;
 using NuGone.Cli.Shared.Constants;
@@ -17,16 +16,11 @@ namespace NuGone.Cli.Features.AnalyzeCommand.Commands;
 /// CLI command for analyzing unused packages.
 /// Implements RFC-0001: CLI Architecture And Command Design.
 /// </summary>
-public class AnalyzeCommand
+public class AnalyzeCommand(IFileSystem fileSystem)
     : BaseCommand<AnalyzeCommand.Settings>,
         IAsyncCommand<AnalyzeCommand.Settings>
 {
-    private readonly IFileSystem _fileSystem;
-
-    public AnalyzeCommand(IFileSystem fileSystem)
-    {
-        _fileSystem = fileSystem;
-    }
+    private readonly IFileSystem _fileSystem = fileSystem;
 
     public class Settings : CommandSettings
     {

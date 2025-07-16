@@ -36,10 +36,7 @@ public partial class RemoveCommandTests
     {
         // Arrange
         var command = new TestableRemoveCommand();
-        var settings = new RemoveCommand.Settings
-        {
-            ExcludePackages = new[] { "critical-package" },
-        };
+        var settings = new RemoveCommand.Settings { ExcludePackages = ["critical-package"] };
 
         // Act
         var result = command.TestPerformRemoval(Directory.GetCurrentDirectory(), settings);
@@ -71,7 +68,7 @@ public partial class RemoveCommandTests
     {
         // Arrange
         var command = new TestableRemoveCommand();
-        var settings = new RemoveCommand.Settings { ExcludePackages = new[] { "valid-package" } };
+        var settings = new RemoveCommand.Settings { ExcludePackages = ["valid-package"] };
 
         // Act
         var result = command.TestPerformRemoval(Directory.GetCurrentDirectory(), settings);

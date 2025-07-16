@@ -42,10 +42,7 @@ public partial class RemoveCommandTests
     public void Settings_ShouldAcceptExcludePackages()
     {
         // Arrange & Act
-        var settings = new RemoveCommand.Settings
-        {
-            ExcludePackages = new[] { "Package1", "Package2" },
-        };
+        var settings = new RemoveCommand.Settings { ExcludePackages = ["Package1", "Package2"] };
 
         // Assert
         settings.ExcludePackages.ShouldNotBeNull();

@@ -4,39 +4,29 @@ namespace NuGone.Application.Features.PackageAnalysis.Commands.AnalyzePackageUsa
 /// Command for analyzing package usage in a solution or project.
 /// RFC-0002: Input parameters for unused package detection.
 /// </summary>
-public class AnalyzePackageUsageCommand
+public class AnalyzePackageUsageCommand(string path)
 {
-    public AnalyzePackageUsageCommand(string path)
-    {
-        Path = path ?? throw new ArgumentNullException(nameof(path));
-        ExcludePatterns = new List<string>();
-        IncludeTransitiveDependencies = false;
-        Verbose = false;
-        DryRun = true;
-        TimeoutSeconds = 300;
-    }
-
     /// <summary>
     /// Path to the solution file, project file, or directory to analyze.
     /// </summary>
-    public string Path { get; }
+    public string Path { get; } = path ?? throw new ArgumentNullException(nameof(path));
 
     /// <summary>
     /// Patterns for files/folders to exclude from analysis.
     /// RFC-0002: User-defined exclusion patterns.
     /// </summary>
-    public IList<string> ExcludePatterns { get; }
+    public IList<string> ExcludePatterns { get; } = new List<string>();
 
     /// <summary>
     /// Whether to include transitive dependencies in the analysis.
     /// RFC-0002: Transitive dependency analysis option.
     /// </summary>
-    public bool IncludeTransitiveDependencies { get; set; }
+    public bool IncludeTransitiveDependencies { get; set; } = false;
 
     /// <summary>
     /// Whether to enable verbose output with detailed information.
     /// </summary>
-    public bool Verbose { get; set; }
+    public bool Verbose { get; set; } = false;
 
     /// <summary>
     /// Optional target framework to filter analysis.
@@ -47,13 +37,13 @@ public class AnalyzePackageUsageCommand
     /// <summary>
     /// Whether to perform a dry run without making any changes.
     /// </summary>
-    public bool DryRun { get; set; }
+    public bool DryRun { get; set; } = true;
 
     /// <summary>
     /// Timeout for the analysis operation in seconds.
     /// Default is 300 seconds (5 minutes).
     /// </summary>
-    public int TimeoutSeconds { get; set; }
+    public int TimeoutSeconds { get; set; } = 300;
 
     /// <summary>
     /// Adds an exclusion pattern.

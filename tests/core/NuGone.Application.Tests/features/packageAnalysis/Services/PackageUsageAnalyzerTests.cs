@@ -3,9 +3,6 @@ using Moq;
 using NuGone.Application.Features.PackageAnalysis.Services;
 using NuGone.Application.Features.PackageAnalysis.Services.Abstractions;
 using NuGone.Domain.Features.PackageAnalysis.Entities;
-using NuGone.Domain.Features.PackageAnalysis.ValueObjects;
-using Shouldly;
-using Xunit;
 
 namespace NuGone.Application.Tests.Features.PackageAnalysis.Services;
 

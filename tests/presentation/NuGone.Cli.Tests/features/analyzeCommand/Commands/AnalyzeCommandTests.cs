@@ -1,13 +1,8 @@
 using System.IO.Abstractions.TestingHelpers;
-using Moq;
 using NuGone.Cli.Features.AnalyzeCommand.Commands;
 using NuGone.Cli.Shared.Constants;
 using NuGone.Cli.Shared.Models;
-using NuGone.Cli.Shared.Utilities;
-using Shouldly;
 using Spectre.Console.Cli;
-using Spectre.Console.Testing;
-using Xunit;
 
 namespace NuGone.Cli.Tests.Commands;
 
@@ -45,11 +40,9 @@ public partial class AnalyzeCommandTests
     /// <summary>
     /// Testable version of AnalyzeCommand that exposes protected methods for testing.
     /// </summary>
-    private class TestableAnalyzeCommand : AnalyzeCommand
+    private class TestableAnalyzeCommand(System.IO.Abstractions.IFileSystem fileSystem)
+        : AnalyzeCommand(fileSystem)
     {
-        public TestableAnalyzeCommand(System.IO.Abstractions.IFileSystem fileSystem)
-            : base(fileSystem) { }
-
         public Result<string> TestValidateAndResolveProjectPath(string? projectPath)
         {
             return ValidateAndResolveProjectPath(projectPath);

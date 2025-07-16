@@ -53,10 +53,7 @@ public partial class AnalyzeCommandTests
     public void Settings_ShouldAcceptExcludePackages()
     {
         // Arrange & Act
-        var settings = new AnalyzeCommand.Settings
-        {
-            ExcludePackages = new[] { "Package1", "Package2" },
-        };
+        var settings = new AnalyzeCommand.Settings { ExcludePackages = ["Package1", "Package2"] };
 
         // Assert
         settings.ExcludePackages.ShouldNotBeNull();

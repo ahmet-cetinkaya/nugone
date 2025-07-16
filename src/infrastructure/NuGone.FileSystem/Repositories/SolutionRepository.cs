@@ -1,5 +1,4 @@
 using System.IO.Abstractions;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
@@ -13,22 +12,19 @@ namespace NuGone.FileSystem.Repositories;
 /// File system implementation of the solution repository.
 /// Handles solution file discovery and parsing as specified in RFC-0002.
 /// </summary>
-public class SolutionRepository : ISolutionRepository
+public class SolutionRepository(IFileSystem fileSystem, ILogger<SolutionRepository> logger)
+    : ISolutionRepository
 {
-    private readonly IFileSystem _fileSystem;
-    private readonly ILogger<SolutionRepository> _logger;
+    private readonly IFileSystem _fileSystem =
+        fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+    private readonly ILogger<SolutionRepository> _logger =
+        logger ?? throw new ArgumentNullException(nameof(logger));
 
-    private static readonly string[] SolutionFileExtensions = { ".sln", ".slnx" };
+    private static readonly string[] SolutionFileExtensions = [".sln", ".slnx"];
     private static readonly Regex ProjectLineRegex = new(
         @"Project\(""{[^}]+}""\)\s*=\s*""([^""]+)"",\s*""([^""]+)""",
         RegexOptions.Compiled
     );
-
-    public SolutionRepository(IFileSystem fileSystem, ILogger<SolutionRepository> logger)
-    {
-        _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
 
     /// <summary>
     /// Discovers solution files in a given directory.

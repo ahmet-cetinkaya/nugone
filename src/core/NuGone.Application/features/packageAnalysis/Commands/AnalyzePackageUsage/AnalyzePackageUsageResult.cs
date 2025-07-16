@@ -191,61 +191,52 @@ public class ProjectAnalysisResult
 /// <summary>
 /// Detailed information about a package's usage.
 /// </summary>
-public class PackageUsageDetail
+public class PackageUsageDetail(
+    string packageId,
+    string version,
+    bool isDirect,
+    bool isUsed,
+    string? condition = null,
+    IEnumerable<string>? usageLocations = null,
+    IEnumerable<string>? detectedNamespaces = null
+)
 {
-    public PackageUsageDetail(
-        string packageId,
-        string version,
-        bool isDirect,
-        bool isUsed,
-        string? condition = null,
-        IEnumerable<string>? usageLocations = null,
-        IEnumerable<string>? detectedNamespaces = null
-    )
-    {
-        PackageId = packageId ?? throw new ArgumentNullException(nameof(packageId));
-        Version = version ?? throw new ArgumentNullException(nameof(version));
-        IsDirect = isDirect;
-        IsUsed = isUsed;
-        Condition = condition;
-        UsageLocations = usageLocations?.ToList() ?? new List<string>();
-        DetectedNamespaces = detectedNamespaces?.ToList() ?? new List<string>();
-    }
-
     /// <summary>
     /// The package identifier.
     /// </summary>
-    public string PackageId { get; }
+    public string PackageId { get; } =
+        packageId ?? throw new ArgumentNullException(nameof(packageId));
 
     /// <summary>
     /// The package version.
     /// </summary>
-    public string Version { get; }
+    public string Version { get; } = version ?? throw new ArgumentNullException(nameof(version));
 
     /// <summary>
     /// Whether this is a direct dependency.
     /// </summary>
-    public bool IsDirect { get; }
+    public bool IsDirect { get; } = isDirect;
 
     /// <summary>
     /// Whether the package is used in the codebase.
     /// </summary>
-    public bool IsUsed { get; }
+    public bool IsUsed { get; } = isUsed;
 
     /// <summary>
     /// Optional condition from the PackageReference.
     /// </summary>
-    public string? Condition { get; }
+    public string? Condition { get; } = condition;
 
     /// <summary>
     /// File paths where usage was detected.
     /// </summary>
-    public IList<string> UsageLocations { get; }
+    public IList<string> UsageLocations { get; } = usageLocations?.ToList() ?? new List<string>();
 
     /// <summary>
     /// Namespaces from this package that were detected.
     /// </summary>
-    public IList<string> DetectedNamespaces { get; }
+    public IList<string> DetectedNamespaces { get; } =
+        detectedNamespaces?.ToList() ?? new List<string>();
 
     /// <summary>
     /// Gets a display string for the package.

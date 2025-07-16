@@ -106,23 +106,17 @@ public interface IPackageUsageAnalyzer
 /// <summary>
 /// Represents the result of input validation.
 /// </summary>
-public class ValidationResult
+public class ValidationResult(bool isValid, IEnumerable<string>? errors = null)
 {
-    public ValidationResult(bool isValid, IEnumerable<string>? errors = null)
-    {
-        IsValid = isValid;
-        Errors = errors?.ToList() ?? new List<string>();
-    }
-
     /// <summary>
     /// Indicates whether the validation passed.
     /// </summary>
-    public bool IsValid { get; }
+    public bool IsValid { get; } = isValid;
 
     /// <summary>
     /// Collection of validation error messages.
     /// </summary>
-    public IList<string> Errors { get; }
+    public IList<string> Errors { get; } = errors?.ToList() ?? new List<string>();
 
     /// <summary>
     /// Creates a successful validation result.

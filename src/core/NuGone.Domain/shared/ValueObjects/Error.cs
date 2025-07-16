@@ -4,23 +4,17 @@ namespace NuGone.Domain.Shared.ValueObjects;
 /// Represents an error that occurred during an operation.
 /// Used with the Result pattern for error handling without exceptions.
 /// </summary>
-public class Error : IEquatable<Error>
+public class Error(string code, string message) : IEquatable<Error>
 {
-    public Error(string code, string message)
-    {
-        Code = code ?? throw new ArgumentNullException(nameof(code));
-        Message = message ?? throw new ArgumentNullException(nameof(message));
-    }
-
     /// <summary>
     /// The error code that identifies the type of error.
     /// </summary>
-    public string Code { get; }
+    public string Code { get; } = code ?? throw new ArgumentNullException(nameof(code));
 
     /// <summary>
     /// The human-readable error message.
     /// </summary>
-    public string Message { get; }
+    public string Message { get; } = message ?? throw new ArgumentNullException(nameof(message));
 
     /// <summary>
     /// Creates an error with the specified code and message.

@@ -173,7 +173,7 @@ public class Project
         if (pattern.Contains("**"))
         {
             // Handle recursive directory patterns like **/Generated/**
-            var parts = pattern.Split(new[] { "**" }, StringSplitOptions.RemoveEmptyEntries);
+            var parts = pattern.Split(["**"], StringSplitOptions.RemoveEmptyEntries);
             if (parts.Length == 2)
             {
                 var prefix = parts[0].TrimEnd('/');

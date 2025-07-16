@@ -1,8 +1,6 @@
 using NuGone.Cli.Features.RemoveCommand.Commands;
-using NuGone.Cli.Shared.Models;
 using NuGone.Cli.Shared.Utilities;
 using Shouldly;
-using Spectre.Console.Cli;
 using Xunit;
 
 namespace NuGone.Cli.Tests.Commands;

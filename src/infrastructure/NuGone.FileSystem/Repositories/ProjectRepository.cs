@@ -10,19 +10,16 @@ namespace NuGone.FileSystem.Repositories;
 /// File system implementation of the project repository.
 /// Handles project file discovery and parsing as specified in RFC-0002.
 /// </summary>
-public class ProjectRepository : IProjectRepository
+public class ProjectRepository(IFileSystem fileSystem, ILogger<ProjectRepository> logger)
+    : IProjectRepository
 {
-    private readonly IFileSystem _fileSystem;
-    private readonly ILogger<ProjectRepository> _logger;
+    private readonly IFileSystem _fileSystem =
+        fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+    private readonly ILogger<ProjectRepository> _logger =
+        logger ?? throw new ArgumentNullException(nameof(logger));
 
-    private static readonly string[] ProjectFileExtensions = { ".csproj", ".vbproj", ".fsproj" };
-    private static readonly string[] SourceFileExtensions = { ".cs", ".vb", ".fs" };
-
-    public ProjectRepository(IFileSystem fileSystem, ILogger<ProjectRepository> logger)
-    {
-        _fileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
+    private static readonly string[] ProjectFileExtensions = [".csproj", ".vbproj", ".fsproj"];
+    private static readonly string[] SourceFileExtensions = [".cs", ".vb", ".fs"];
 
     /// <summary>
     /// Discovers all project files in a given directory and its subdirectories.

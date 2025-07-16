@@ -10,32 +10,24 @@ namespace NuGone.Application.Features.PackageAnalysis.Commands.AnalyzePackageUsa
 /// Command handler for analyzing package usage in a solution or project.
 /// Implements the core algorithm specified in RFC-0002.
 /// </summary>
-public class AnalyzePackageUsageHandler
+public class AnalyzePackageUsageHandler(
+    ISolutionRepository solutionRepository,
+    IProjectRepository projectRepository,
+    INuGetRepository nugetRepository,
+    IPackageUsageAnalyzer packageUsageAnalyzer,
+    ILogger<AnalyzePackageUsageHandler> logger
+)
 {
-    private readonly ISolutionRepository _solutionRepository;
-    private readonly IProjectRepository _projectRepository;
-    private readonly INuGetRepository _nugetRepository;
-    private readonly IPackageUsageAnalyzer _packageUsageAnalyzer;
-    private readonly ILogger<AnalyzePackageUsageHandler> _logger;
-
-    public AnalyzePackageUsageHandler(
-        ISolutionRepository solutionRepository,
-        IProjectRepository projectRepository,
-        INuGetRepository nugetRepository,
-        IPackageUsageAnalyzer packageUsageAnalyzer,
-        ILogger<AnalyzePackageUsageHandler> logger
-    )
-    {
-        _solutionRepository =
-            solutionRepository ?? throw new ArgumentNullException(nameof(solutionRepository));
-        _projectRepository =
-            projectRepository ?? throw new ArgumentNullException(nameof(projectRepository));
-        _nugetRepository =
-            nugetRepository ?? throw new ArgumentNullException(nameof(nugetRepository));
-        _packageUsageAnalyzer =
-            packageUsageAnalyzer ?? throw new ArgumentNullException(nameof(packageUsageAnalyzer));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
+    private readonly ISolutionRepository _solutionRepository =
+        solutionRepository ?? throw new ArgumentNullException(nameof(solutionRepository));
+    private readonly IProjectRepository _projectRepository =
+        projectRepository ?? throw new ArgumentNullException(nameof(projectRepository));
+    private readonly INuGetRepository _nugetRepository =
+        nugetRepository ?? throw new ArgumentNullException(nameof(nugetRepository));
+    private readonly IPackageUsageAnalyzer _packageUsageAnalyzer =
+        packageUsageAnalyzer ?? throw new ArgumentNullException(nameof(packageUsageAnalyzer));
+    private readonly ILogger<AnalyzePackageUsageHandler> _logger =
+        logger ?? throw new ArgumentNullException(nameof(logger));
 
     /// <summary>
     /// Handles the package usage analysis command.

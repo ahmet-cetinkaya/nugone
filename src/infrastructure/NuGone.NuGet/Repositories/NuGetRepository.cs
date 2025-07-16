@@ -9,9 +9,10 @@ namespace NuGone.NuGet.Repositories;
 /// NuGet implementation of the NuGet repository.
 /// Handles package reference extraction and metadata operations as specified in RFC-0002.
 /// </summary>
-public class NuGetRepository : INuGetRepository
+public class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
 {
-    private readonly ILogger<NuGetRepository> _logger;
+    private readonly ILogger<NuGetRepository> _logger =
+        logger ?? throw new ArgumentNullException(nameof(logger));
 
     // Common development dependency package patterns
     private static readonly HashSet<string> DevelopmentDependencyPatterns = new(
@@ -35,11 +36,6 @@ public class NuGetRepository : INuGetRepository
         "StyleCop",
         "SonarAnalyzer",
     };
-
-    public NuGetRepository(ILogger<NuGetRepository> logger)
-    {
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
 
     /// <summary>
     /// Extracts package references from a project file.
