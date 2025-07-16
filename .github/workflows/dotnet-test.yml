@@ -2,36 +2,68 @@ name: .NET Test
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
+    paths:
+      - "**/*.cs"
+      - "**/*.csproj"
+      - "**/*.sln"
+      - "**/*.slnc"
+      - "**/*.props"
+      - "**/*.targets"
+      - "**/*.json"
+      - "**/*.runsettings"
+      - "**/*.testsettings"
+      - "**/*.config"
+      - "**/*.xml"
+      - "**/*.editorconfig"
+      - "**/*.ruleset"
+      - "**/*.yml"
+      - "**/*.yaml"
   pull_request:
-    branches: [ main ]
+    branches: [main]
+    paths:
+      - "**/*.cs"
+      - "**/*.csproj"
+      - "**/*.sln"
+      - "**/*.slnc"
+      - "**/*.props"
+      - "**/*.targets"
+      - "**/*.json"
+      - "**/*.runsettings"
+      - "**/*.testsettings"
+      - "**/*.config"
+      - "**/*.xml"
+      - "**/*.editorconfig"
+      - "**/*.ruleset"
+      - "**/*.yml"
+      - "**/*.yaml"
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '9.0.x'
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
 
-    - name: Restore dependencies
-      run: dotnet restore NuGone.sln
+      - name: Restore dependencies
+        run: dotnet restore NuGone.sln
 
-    - name: Build
-      run: dotnet build NuGone.sln --no-restore --configuration Release
+      - name: Build
+        run: dotnet build NuGone.sln --no-restore --configuration Release
 
-    - name: Test
-      run: dotnet test NuGone.sln --no-build --configuration Release --logger "trx;LogFileName=test-results.trx"
-      env:
-        DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      - name: Test
+        run: dotnet test NuGone.sln --no-build --configuration Release --logger "trx;LogFileName=test-results.trx"
+        env:
+          DOTNET_CLI_TELEMETRY_OPTOUT: 1
 
-    - name: Upload Test Results
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: test-results
-        path: '**/TestResults/*.trx'
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: "**/TestResults/*.trx"
