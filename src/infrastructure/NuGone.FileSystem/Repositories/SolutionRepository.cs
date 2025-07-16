@@ -288,21 +288,21 @@ public class SolutionRepository(IFileSystem fileSystem, ILogger<SolutionReposito
         try
         {
             var document = XDocument.Parse(content);
-            var ns = document.Root?.GetDefaultNamespace() ?? XNamespace.None;
 
-            foreach (var projectElement in document.Descendants(ns + "Project"))
+            // SLNX files use Project elements with Path attributes directly, not nested Path elements
+            foreach (var projectElement in document.Descendants("Project"))
             {
-                var pathElement = projectElement.Element(ns + "Path");
-                if (pathElement == null)
+                var pathAttribute = projectElement.Attribute("Path");
+                if (pathAttribute == null)
                 {
                     _logger.LogWarning(
-                        "Project entry missing Path element in: {SolutionFilePath}",
+                        "Project entry missing Path attribute in: {SolutionFilePath}",
                         solutionFilePath
                     );
                     continue;
                 }
 
-                var relativePath = pathElement.Value;
+                var relativePath = pathAttribute.Value;
                 if (string.IsNullOrWhiteSpace(relativePath))
                 {
                     _logger.LogWarning(

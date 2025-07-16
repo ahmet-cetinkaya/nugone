@@ -29,6 +29,12 @@ public class PackageUsageAnalyzer(
         RegexOptions.Compiled | RegexOptions.Multiline
     );
 
+    // Regex for detecting namespace aliases (e.g., using PackageSerilog = Serilog;)
+    private static readonly Regex UsingAliasRegex = new(
+        @"^\s*using\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_0-9][a-zA-Z0-9_]*)*)\s*;",
+        RegexOptions.Compiled | RegexOptions.Multiline
+    );
+
     private static readonly Regex NamespaceUsageRegex = new(
         @"(?:new\s+)?([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_0-9][a-zA-Z0-9_]*)*)\s*[\.\(]",
         RegexOptions.Compiled
@@ -375,27 +381,72 @@ public class PackageUsageAnalyzer(
             }
         }
 
+        // Scan for namespace aliases (e.g., using PackageSerilog = Serilog;)
+        var aliasMatches = UsingAliasRegex.Matches(content);
+        var namespaceAliases = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        
+        foreach (Match match in aliasMatches)
+        {
+            var aliasName = match.Groups[1].Value;
+            var actualNamespace = match.Groups[2].Value;
+            namespaceAliases[aliasName] = actualNamespace;
+            
+            // Check if the actual namespace matches any of our patterns
+            foreach (var pattern in namespacePatterns)
+            {
+                if (pattern.Matches(actualNamespace))
+                {
+                    foundNamespaces.Add(actualNamespace);
+                }
+            }
+        }
+
         // Scan for direct namespace usage (e.g., System.Console.WriteLine)
         var usageMatches = NamespaceUsageRegex.Matches(content);
         foreach (Match match in usageMatches)
         {
             var fullQualifiedName = match.Groups[1].Value;
 
-            // Check all possible namespace prefixes of the qualified name
-            // For "Complex.Package.Utilities.Helper", check:
-            // - "Complex"
-            // - "Complex.Package"
-            // - "Complex.Package.Utilities"
-            // - "Complex.Package.Utilities.Helper"
-            var parts = fullQualifiedName.Split('.');
-            for (int i = 1; i <= parts.Length; i++)
+            // Check if this is an alias usage (e.g., PackageSerilog.ILogger)
+            var firstPart = fullQualifiedName.Split('.')[0];
+            if (namespaceAliases.TryGetValue(firstPart, out var actualNamespace))
             {
-                var namespaceName = string.Join(".", parts.Take(i));
-                foreach (var pattern in namespacePatterns)
+                // Replace the alias with the actual namespace
+                var remainingParts = fullQualifiedName.Substring(firstPart.Length);
+                var resolvedName = actualNamespace + remainingParts;
+                
+                // Check the resolved namespace
+                var resolvedParts = resolvedName.Split('.');
+                for (int i = 1; i <= resolvedParts.Length; i++)
                 {
-                    if (pattern.Matches(namespaceName))
+                    var namespaceName = string.Join(".", resolvedParts.Take(i));
+                    foreach (var pattern in namespacePatterns)
                     {
-                        foundNamespaces.Add(namespaceName);
+                        if (pattern.Matches(namespaceName))
+                        {
+                            foundNamespaces.Add(namespaceName);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // Check all possible namespace prefixes of the qualified name
+                // For "Complex.Package.Utilities.Helper", check:
+                // - "Complex"
+                // - "Complex.Package"
+                // - "Complex.Package.Utilities"
+                // - "Complex.Package.Utilities.Helper"
+                var parts = fullQualifiedName.Split('.');
+                for (int i = 1; i <= parts.Length; i++)
+                {
+                    var namespaceName = string.Join(".", parts.Take(i));
+                    foreach (var pattern in namespacePatterns)
+                    {
+                        if (pattern.Matches(namespaceName))
+                        {
+                            foundNamespaces.Add(namespaceName);
+                        }
                     }
                 }
             }
