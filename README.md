@@ -4,7 +4,7 @@ Automatically detect and remove unused NuGet package references in your .NET pro
 
 ## ⚡ Getting Started
 
-[![NuGet Version](https://img.shields.io/nuget/v/NuGone.svg?color=004880&logo=nuget&label=NuGet&style=flat-square)](https://www.nuget.org/packages/NuGone/)
+[![NuGet Version](https://img.shields.io/nuget/v/NuGone.svg?color=004880&logo=nuget&label=NuGet&style=flat-square)](https://www.nuget.org/packages/NuGone/) [![NuGet Downloads](https://img.shields.io/nuget/dt/NuGone.svg?color=004880&logo=nuget&label=Downloads&style=flat-square)](https://www.nuget.org/packages/NuGone/)
 
 You can install NuGone as a .NET global tool:
 
