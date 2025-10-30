@@ -53,7 +53,8 @@ public class AnalyzeCommand(IFileSystem fileSystem)
 
     protected override async Task<Result<int>> ExecuteCommandAsync(
         CommandContext context,
-        Settings settings
+        Settings settings,
+        CancellationToken cancellationToken = default
     )
     {
         // Validate settings first
@@ -106,7 +107,7 @@ public class AnalyzeCommand(IFileSystem fileSystem)
         }
 
         // Perform the actual package analysis using the CQRS handler
-        var analysisResult = await PerformAnalysisAsync(projectPath, settings);
+        var analysisResult = await PerformAnalysisAsync(projectPath, settings, cancellationToken);
         if (analysisResult.IsFailure)
             return analysisResult.Error;
 
@@ -161,7 +162,8 @@ public class AnalyzeCommand(IFileSystem fileSystem)
 
     private async Task<Result<AnalyzePackageUsageResult>> PerformAnalysisAsync(
         string projectPath,
-        Settings settings
+        Settings settings,
+        CancellationToken cancellationToken = default
     )
     {
         try
@@ -194,7 +196,7 @@ public class AnalyzeCommand(IFileSystem fileSystem)
             }
 
             // Execute the analysis
-            var result = await handler.HandleAsync(command);
+            var result = await handler.HandleAsync(command, cancellationToken);
             if (result.IsFailure)
             {
                 return Result<AnalyzePackageUsageResult>.Failure(
