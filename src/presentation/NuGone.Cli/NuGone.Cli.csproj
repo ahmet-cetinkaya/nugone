@@ -28,7 +28,7 @@
     <None Include="../../../docs/icon/icon.png" Pack="true" PackagePath="assets" />
     <None Include="../../../LICENSE" Pack="true" PackagePath="" />
     <None Include="../../../README.md" Pack="true" PackagePath="" />
-      </ItemGroup>
+  </ItemGroup>
   <!-- Packages -->
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="4.14.0">
