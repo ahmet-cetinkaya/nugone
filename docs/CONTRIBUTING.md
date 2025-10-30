@@ -43,7 +43,7 @@ dotnet test
 ### 6. Run the CLI Tool (Optional)
 
 ```bash
-dotnet run --project src/NuGone.Cli --help
+dotnet run --project src/presentation/NuGone.Cli --help
 ```
 
 ## 🛠️ Making Changes
