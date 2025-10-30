@@ -57,3 +57,5 @@ nunit-*.xml
 .augment/
 .copilot/
 .openai/
+.claude/
+CLAUDE.md
