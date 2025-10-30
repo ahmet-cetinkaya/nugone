@@ -538,7 +538,7 @@ public partial class PackageUsageAnalyzer(
 
         // When a namespace is globally available, we need to look for usage patterns
         // that would indicate the namespace is being used without explicit using statements.
-        
+
         // Scan for direct namespace usage (e.g., System.Console.WriteLine, Xunit.Assert.True)
         var usageMatches = NamespaceUsageRegex.Matches(content);
         foreach (Match match in usageMatches)
@@ -565,31 +565,35 @@ public partial class PackageUsageAnalyzer(
         foreach (var pattern in namespacePatterns)
         {
             var namespaceName = pattern.Pattern;
-            
+
             // Look for common patterns that indicate namespace usage without qualification
             // For Xunit namespace, look for [Fact], [Theory], Assert.*, etc.
             if (namespaceName.Equals("Xunit", StringComparison.OrdinalIgnoreCase))
             {
                 // Look for Xunit attributes and classes
-                if (content.Contains("[Fact]") || content.Contains("[Theory]") || 
-                    content.Contains("Assert.") || content.Contains("[InlineData"))
+                if (
+                    content.Contains("[Fact]")
+                    || content.Contains("[Theory]")
+                    || content.Contains("Assert.")
+                    || content.Contains("[InlineData")
+                )
                 {
                     _ = foundNamespaces.Add(namespaceName);
                 }
             }
-            
+
             // For other namespaces, look for unqualified class/method usage patterns
             // This is a more general approach that looks for identifiers that could be from the namespace
             var unqualifiedPattern = new Regex(
                 @"\b([A-Z][a-zA-Z0-9_]*)\s*[\.\(]",
                 RegexOptions.Compiled
             );
-            
+
             var unqualifiedMatches = unqualifiedPattern.Matches(content);
             foreach (Match match in unqualifiedMatches)
             {
                 var identifier = match.Groups[1].Value;
-                
+
                 // This is a heuristic - if we find an identifier that could belong to the namespace
                 // and there's no explicit using statement for it, it might be from a global using
                 // We'll be conservative and only mark it as used if it's a common pattern
@@ -607,20 +611,20 @@ public partial class PackageUsageAnalyzer(
     {
         // This is a heuristic method to determine if an identifier is likely from a specific namespace
         // For now, we'll implement some common patterns
-        
+
         if (namespaceName.Equals("Xunit", StringComparison.OrdinalIgnoreCase))
         {
-            return identifier.Equals("Assert", StringComparison.OrdinalIgnoreCase) ||
-                   identifier.Equals("Fact", StringComparison.OrdinalIgnoreCase) ||
-                   identifier.Equals("Theory", StringComparison.OrdinalIgnoreCase);
+            return identifier.Equals("Assert", StringComparison.OrdinalIgnoreCase)
+                || identifier.Equals("Fact", StringComparison.OrdinalIgnoreCase)
+                || identifier.Equals("Theory", StringComparison.OrdinalIgnoreCase);
         }
-        
+
         if (namespaceName.Equals("Moq", StringComparison.OrdinalIgnoreCase))
         {
-            return identifier.Equals("Mock", StringComparison.OrdinalIgnoreCase) ||
-                   identifier.Equals("It", StringComparison.OrdinalIgnoreCase);
+            return identifier.Equals("Mock", StringComparison.OrdinalIgnoreCase)
+                || identifier.Equals("It", StringComparison.OrdinalIgnoreCase);
         }
-        
+
         // For other namespaces, we'll be conservative and not assume usage
         // This could be enhanced in the future with more sophisticated analysis
         return false;
