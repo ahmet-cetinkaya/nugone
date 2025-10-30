@@ -28,6 +28,7 @@
     <None Include="../../../docs/icon/icon.png" Pack="true" PackagePath="assets" />
     <None Include="../../../LICENSE" Pack="true" PackagePath="" />
     <None Include="../../../README.md" Pack="true" PackagePath="" />
+    <None Include="DotnetToolSettings.xml" Pack="true" PackagePath="" />
   </ItemGroup>
   <!-- Packages -->
   <ItemGroup>
