@@ -8,27 +8,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+
 - (No new features added yet)
 
 ### Changed
+
 - (No changes yet)
 
 ### Removed
+
 - (Nothing removed yet)
 
 ## [1.1.0] - 2025-07-16
 
 ### Added
+
 - Global using detection in analyzer.
 - Support for global using declarations in package analysis.
 
 ### Changed
+
 - Update version to 1.1.0.
 
 ### Fixed
+
 - Fix Roslynator issues.
 
 ### CI/CD
+
 - Update .NET Test workflow for consistency.
 - Setup .NET 9.0 SDK in NuGet release workflow.
 - Update GitHub Actions workflow for release process.

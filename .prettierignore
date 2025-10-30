@@ -1,0 +1,33 @@
+# Ignore generated files and directories
+bin/
+obj/
+dist/
+build/
+out/
+
+# Ignore package files
+*.nupkg
+*.snupkg
+packages/
+
+# Ignore lock files
+package-lock.json
+yarn.lock
+
+# Ignore test results
+TestResults/
+coverage/
+
+# Ignore specific log files
+*.log
+
+# Ignore Git files
+.git/
+.gitignore
+
+# Ignore IDE files
+.vs/
+.vscode/
+
+# Ignore NuGet files
+NuGet.Config

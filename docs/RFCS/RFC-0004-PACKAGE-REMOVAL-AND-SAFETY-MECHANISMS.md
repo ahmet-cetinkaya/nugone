@@ -15,6 +15,7 @@ Safe and reliable package removal is critical to prevent accidental project brea
 ## Detailed Design
 
 ### Removal Workflow
+
 - Remove a single unused package: `nugone remove --package <PackageName>`
 - Remove all unused packages: `nugone remove --all-unused`
 - Prompt for confirmation unless `--yes` is specified.
@@ -23,26 +24,33 @@ Safe and reliable package removal is critical to prevent accidental project brea
 - If build fails, roll back changes and report errors.
 
 ### Backup And Rollback
+
 - Backups are timestamped and stored alongside the project file.
 - Rollback restores the backup if removal or build fails.
 
 ### Error Handling
+
 - All errors are reported with clear messages and exit codes.
 - Failures do not leave the project in a broken state.
 
 ### Input Validation
+
 - Validate package names and project paths before removal.
 - Sanitize all user input.
 
 ## Alternatives Considered
+
 - No backup/rollback (rejected for safety).
 - Always rebuild (rejected for flexibility).
 
 ## Drawbacks
+
 - Backup and rollback add minor overhead.
 
 ## Adoption
+
 - All removal logic must implement these safety mechanisms.
 
 ## References
+
 - [PRD.md](../PRD.md)
