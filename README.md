@@ -1,6 +1,6 @@
-![NuGone Icon](docs/icon/banner.png) 
-# NuGone [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?&logo=buy-me-a-coffee&logoColor=black)](https://ahmetcetinkaya.me/donate) [![GitHub license](https://img.shields.io/github/license/ahmet-cetinkaya/nugone)](LICENSE) [![GitHub stars](https://img.shields.io/github/stars/ahmet-cetinkaya/nugone?style=social)](https://github.com/ahmet-cetinkaya/nugone/stargazers) [![GitHub forks](https://img.shields.io/github/forks/ahmet-cetinkaya/nugone?style=social)](https://github.com/ahmet-cetinkaya/nugone/network/members)
+![NuGone Banner](https://github.com/user-attachments/assets/aaecaa36-43b4-4c3e-b026-843097435340)
 
+# NuGone [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?&logo=buy-me-a-coffee&logoColor=black)](https://ahmetcetinkaya.me/donate) [![GitHub license](https://img.shields.io/github/license/ahmet-cetinkaya/nugone)](LICENSE) [![GitHub stars](https://img.shields.io/github/stars/ahmet-cetinkaya/nugone?style=social)](https://github.com/ahmet-cetinkaya/nugone/stargazers) [![GitHub forks](https://img.shields.io/github/forks/ahmet-cetinkaya/nugone?style=social)](https://github.com/ahmet-cetinkaya/nugone/network/members)
 
 Automatically detect and remove unused NuGet package references in your .NET projects. Keep your codebase lean, fast, and secure.
 
