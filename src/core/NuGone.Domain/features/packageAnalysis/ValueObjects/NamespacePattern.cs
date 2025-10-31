@@ -47,13 +47,13 @@ public class NamespacePattern : IEquatable<NamespacePattern>
         }
 
         // Handle wildcard patterns
-        if (Pattern.EndsWith("*"))
+        if (Pattern.EndsWith('*'))
         {
             var prefix = Pattern[..^1]; // Remove the trailing *
             return @namespace.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
         }
 
-        if (Pattern.StartsWith("*"))
+        if (Pattern.StartsWith('*'))
         {
             var suffix = Pattern[1..]; // Remove the leading *
             return @namespace.EndsWith(suffix, StringComparison.OrdinalIgnoreCase);

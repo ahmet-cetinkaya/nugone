@@ -18,7 +18,7 @@ public partial class ConfigCommandTests
     /// </summary>
     private class TestableConfigCommand : ConfigCommand
     {
-        public Result TestValidateConfigSettings(Settings settings)
+        public static Result TestValidateConfigSettings(Settings settings)
         {
             // Since ValidateConfigSettings is private, we'll test the validation logic directly
             if (!string.IsNullOrEmpty(settings.Action))

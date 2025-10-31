@@ -23,7 +23,7 @@ public partial class AnalyzeCommandTests
         var settings = new AnalyzeCommand.Settings { Format = "text", Verbose = false };
 
         // Act
-        var shouldShowMessage = command.TestShouldShowSuccessMessage(settings);
+        var shouldShowMessage = TestableAnalyzeCommand.TestShouldShowSuccessMessage(settings);
 
         // Assert
         shouldShowMessage.ShouldBeTrue();
@@ -38,7 +38,7 @@ public partial class AnalyzeCommandTests
         var settings = new AnalyzeCommand.Settings { Format = "json", Verbose = false };
 
         // Act
-        var shouldShowMessage = command.TestShouldShowSuccessMessage(settings);
+        var shouldShowMessage = TestableAnalyzeCommand.TestShouldShowSuccessMessage(settings);
 
         // Assert
         shouldShowMessage.ShouldBeFalse();
@@ -53,7 +53,7 @@ public partial class AnalyzeCommandTests
         var settings = new AnalyzeCommand.Settings { Format = "json", Verbose = true };
 
         // Act
-        var shouldShowMessage = command.TestShouldShowSuccessMessage(settings);
+        var shouldShowMessage = TestableAnalyzeCommand.TestShouldShowSuccessMessage(settings);
 
         // Assert
         shouldShowMessage.ShouldBeTrue();
@@ -68,7 +68,7 @@ public partial class AnalyzeCommandTests
         var settings = new AnalyzeCommand.Settings { Format = "text", Verbose = false };
 
         // Act
-        var shouldShowProgress = command.TestShouldShowProgressMessage(settings);
+        var shouldShowProgress = TestableAnalyzeCommand.TestShouldShowProgressMessage(settings);
 
         // Assert
         shouldShowProgress.ShouldBeTrue();
@@ -83,7 +83,7 @@ public partial class AnalyzeCommandTests
         var settings = new AnalyzeCommand.Settings { Format = "json", Verbose = false };
 
         // Act
-        var shouldShowProgress = command.TestShouldShowProgressMessage(settings);
+        var shouldShowProgress = TestableAnalyzeCommand.TestShouldShowProgressMessage(settings);
 
         // Assert
         shouldShowProgress.ShouldBeFalse();
@@ -98,7 +98,7 @@ public partial class AnalyzeCommandTests
         var settings = new AnalyzeCommand.Settings { Format = "json", Verbose = true };
 
         // Act
-        var shouldShowProgress = command.TestShouldShowProgressMessage(settings);
+        var shouldShowProgress = TestableAnalyzeCommand.TestShouldShowProgressMessage(settings);
 
         // Assert
         shouldShowProgress.ShouldBeTrue();

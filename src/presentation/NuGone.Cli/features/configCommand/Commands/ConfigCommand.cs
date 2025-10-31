@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using NuGone.Application.Features.PackageAnalysis.Services.Abstractions;
 using NuGone.Cli.Shared.Constants;
 using NuGone.Cli.Shared.Models;
 using NuGone.Cli.Shared.Utilities;
@@ -30,16 +31,14 @@ public class ConfigCommand : BaseCommand<ConfigCommand.Settings>
         [Description("Global configuration (affects all projects)")]
         [CommandOption("--global")]
         public bool Global { get; init; }
-
-        // TODO: Add validation logic when ValidationResult is properly imported
     }
 
     protected override Result<int> ExecuteCommand(CommandContext context, Settings settings)
     {
         // Validate settings first
         var settingsValidation = ValidateConfigSettings(settings);
-        if (settingsValidation.IsFailure)
-            return settingsValidation.Error;
+        if (!settingsValidation.IsValid)
+            return Error.ValidationFailed(string.Join(", ", settingsValidation.Errors));
 
         ConsoleHelpers.WriteWarning("Configuration management is planned for a future release");
         ConsoleHelpers.WriteInfo("This command will allow you to:");
@@ -50,16 +49,17 @@ public class ConfigCommand : BaseCommand<ConfigCommand.Settings>
         return ExitCodes.Success;
     }
 
-    private Result ValidateConfigSettings(Settings settings)
+    private static ValidationResult ValidateConfigSettings(Settings settings)
     {
+        var errors = new List<string>();
+
         if (!string.IsNullOrEmpty(settings.Action))
         {
             var validActions = new[] { "get", "set", "list", "reset" };
             if (!validActions.Contains(settings.Action.ToLowerInvariant()))
             {
-                return Error.ValidationFailed(
-                    $"Action must be one of: {string.Join(", ", validActions)}",
-                    new Dictionary<string, object> { ["ProvidedAction"] = settings.Action }
+                errors.Add(
+                    $"Action must be one of: {string.Join(", ", validActions)}. Provided: {settings.Action}"
                 );
             }
 
@@ -68,10 +68,10 @@ public class ConfigCommand : BaseCommand<ConfigCommand.Settings>
                 && (string.IsNullOrEmpty(settings.Key) || string.IsNullOrEmpty(settings.Value))
             )
             {
-                return Error.ValidationFailed("Both key and value are required for 'set' action");
+                errors.Add("Both key and value are required for 'set' action");
             }
         }
 
-        return Result.Success();
+        return errors.Count > 0 ? ValidationResult.Failure(errors) : ValidationResult.Success();
     }
 }

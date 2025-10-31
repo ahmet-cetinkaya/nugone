@@ -21,7 +21,7 @@ public partial class ConfigCommandTests
         var settings = new ConfigCommand.Settings { Action = "invalid-action" };
 
         // Act
-        var result = command.TestValidateConfigSettings(settings);
+        var result = TestableConfigCommand.TestValidateConfigSettings(settings);
 
         // Assert
         result.IsFailure.ShouldBeTrue();

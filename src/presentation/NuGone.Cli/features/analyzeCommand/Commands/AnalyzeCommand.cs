@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.IO.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using NuGone.Application.Features.PackageAnalysis.Commands.AnalyzePackageUsage;
+using NuGone.Application.Features.PackageAnalysis.Services.Abstractions;
 using NuGone.Application.Shared.Extensions;
 using NuGone.Cli.Shared.Constants;
 using NuGone.Cli.Shared.Models;
@@ -20,6 +21,14 @@ public class AnalyzeCommand(IFileSystem fileSystem)
     : BaseCommand<AnalyzeCommand.Settings>,
         IAsyncCommand<AnalyzeCommand.Settings>
 {
+    private static readonly string[] ValidFormats = ["text", "json"];
+
+    private static readonly System.Text.Json.JsonSerializerOptions JsonOptions = new()
+    {
+        WriteIndented = true,
+        PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
+    };
+
     private readonly IFileSystem _fileSystem = fileSystem;
 
     public class Settings : CommandSettings
@@ -47,8 +56,6 @@ public class AnalyzeCommand(IFileSystem fileSystem)
         [Description("Enable verbose output")]
         [CommandOption("--verbose|-v")]
         public bool Verbose { get; init; }
-
-        // TODO: Add validation logic when ValidationResult is properly imported
     }
 
     protected override async Task<Result<int>> ExecuteCommandAsync(
@@ -59,8 +66,8 @@ public class AnalyzeCommand(IFileSystem fileSystem)
     {
         // Validate settings first
         var settingsValidation = ValidateAnalyzeSettings(settings);
-        if (settingsValidation.IsFailure)
-            return settingsValidation.Error;
+        if (!settingsValidation.IsValid)
+            return Error.ValidationFailed(string.Join(", ", settingsValidation.Errors));
 
         // Validate and resolve project path using base class method
         var projectPathResult = ValidateAndResolveProjectPath(settings.ProjectPath);
@@ -92,7 +99,7 @@ public class AnalyzeCommand(IFileSystem fileSystem)
             {
                 ConsoleHelpers.WriteVerbose($"Analyzing project: {projectPath}");
                 ConsoleHelpers.WriteVerbose($"Output format: {settings.Format ?? "text"}");
-                if (settings.ExcludePackages?.Any() == true)
+                if (settings.ExcludePackages?.Length > 0)
                 {
                     ConsoleHelpers.WriteVerbose(
                         $"Excluded packages: {string.Join(", ", settings.ExcludePackages)}"
@@ -123,18 +130,17 @@ public class AnalyzeCommand(IFileSystem fileSystem)
         return ExitCodes.Success;
     }
 
-    private Result ValidateAnalyzeSettings(Settings settings)
+    private static ValidationResult ValidateAnalyzeSettings(Settings settings)
     {
+        var errors = new List<string>();
+
         // Validate format option
         if (
             !string.IsNullOrEmpty(settings.Format)
-            && !new[] { "text", "json" }.Contains(settings.Format.ToLowerInvariant())
+            && !ValidFormats.Contains(settings.Format.ToLowerInvariant())
         )
         {
-            return Error.ValidationFailed(
-                "Format must be either 'text' or 'json'",
-                new Dictionary<string, object> { ["ProvidedFormat"] = settings.Format }
-            );
+            errors.Add($"Format must be either 'text' or 'json'. Provided: {settings.Format}");
         }
 
         // Validate output file path if provided
@@ -145,22 +151,19 @@ public class AnalyzeCommand(IFileSystem fileSystem)
                 var directory = Path.GetDirectoryName(settings.OutputFile);
                 if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
                 {
-                    return Error.DirectoryNotFound(directory);
+                    errors.Add($"Output directory not found: {directory}");
                 }
             }
             catch (ArgumentException ex)
             {
-                return Error.InvalidArgument(
-                    $"Invalid output file path: {ex.Message}",
-                    "outputFile"
-                );
+                errors.Add($"Invalid output file path: {ex.Message}");
             }
         }
 
-        return Result.Success();
+        return errors.Count > 0 ? ValidationResult.Failure(errors) : ValidationResult.Success();
     }
 
-    private async Task<Result<AnalyzePackageUsageResult>> PerformAnalysisAsync(
+    private static async Task<Result<AnalyzePackageUsageResult>> PerformAnalysisAsync(
         string projectPath,
         Settings settings,
         CancellationToken cancellationToken = default
@@ -190,7 +193,7 @@ public class AnalyzeCommand(IFileSystem fileSystem)
             command.DryRun = true; // Always dry run for analyze command
 
             // Add exclude patterns
-            if (settings.ExcludePackages?.Any() == true)
+            if (settings.ExcludePackages?.Length > 0)
             {
                 command.AddExcludePatterns(settings.ExcludePackages);
             }
@@ -214,7 +217,7 @@ public class AnalyzeCommand(IFileSystem fileSystem)
         }
     }
 
-    private void DisplayResults(AnalyzePackageUsageResult result, Settings settings)
+    private static void DisplayResults(AnalyzePackageUsageResult result, Settings settings)
     {
         // Display results based on format
         if (settings.Format?.ToLowerInvariant() == "json")
@@ -252,7 +255,7 @@ public class AnalyzeCommand(IFileSystem fileSystem)
         }
     }
 
-    private void DisplayTextResults(AnalyzePackageUsageResult result, Settings settings)
+    private static void DisplayTextResults(AnalyzePackageUsageResult result, Settings settings)
     {
         if (result.HasUnusedPackages())
         {
@@ -273,7 +276,7 @@ public class AnalyzeCommand(IFileSystem fileSystem)
         }
     }
 
-    private void SaveResultsToFile(AnalyzePackageUsageResult result, Settings settings)
+    private static void SaveResultsToFile(AnalyzePackageUsageResult result, Settings settings)
     {
         try
         {
@@ -297,7 +300,7 @@ public class AnalyzeCommand(IFileSystem fileSystem)
         }
     }
 
-    private string SerializeToJson(AnalyzePackageUsageResult result)
+    private static string SerializeToJson(AnalyzePackageUsageResult result)
     {
         var json = new
         {
@@ -348,17 +351,10 @@ public class AnalyzeCommand(IFileSystem fileSystem)
             }),
         };
 
-        return System.Text.Json.JsonSerializer.Serialize(
-            json,
-            new System.Text.Json.JsonSerializerOptions
-            {
-                WriteIndented = true,
-                PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
-            }
-        );
+        return System.Text.Json.JsonSerializer.Serialize(json, JsonOptions);
     }
 
-    private string SerializeToText(AnalyzePackageUsageResult result)
+    private static string SerializeToText(AnalyzePackageUsageResult result)
     {
         var sb = new System.Text.StringBuilder();
         _ = sb.AppendLine($"Package Analysis Results");

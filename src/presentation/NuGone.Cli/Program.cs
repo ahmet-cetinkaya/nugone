@@ -3,6 +3,7 @@ using NuGone.Application.Shared.Extensions;
 using NuGone.Cli.Features.AnalyzeCommand.Commands;
 // using NuGone.Cli.Features.ConfigCommand.Commands;
 // using NuGone.Cli.Features.RemoveCommand.Commands;
+using NuGone.Cli.Infrastructure;
 using NuGone.FileSystem.Extensions;
 using NuGone.NuGet.Extensions;
 using Spectre.Console.Cli;
@@ -45,54 +46,3 @@ app.Configure(config =>
 });
 
 return app.Run(args);
-
-// Type registrar for Spectre.Console.Cli dependency injection
-public sealed class TypeRegistrar(IServiceCollection builder) : ITypeRegistrar
-{
-    private readonly IServiceCollection _builder = builder;
-
-    public ITypeResolver Build()
-    {
-        return new TypeResolver(_builder.BuildServiceProvider());
-    }
-
-    public void Register(Type service, Type implementation)
-    {
-        _ = _builder.AddSingleton(service, implementation);
-    }
-
-    public void RegisterInstance(Type service, object implementation)
-    {
-        _ = _builder.AddSingleton(service, implementation);
-    }
-
-    public void RegisterLazy(Type service, Func<object> factory)
-    {
-        _ = _builder.AddSingleton(service, _ => factory());
-    }
-}
-
-// Type resolver for Spectre.Console.Cli dependency injection
-public sealed class TypeResolver(IServiceProvider provider) : ITypeResolver, IDisposable
-{
-    private readonly IServiceProvider _provider =
-        provider ?? throw new ArgumentNullException(nameof(provider));
-
-    public object? Resolve(Type? type)
-    {
-        if (type == null)
-        {
-            return null;
-        }
-
-        return _provider.GetService(type);
-    }
-
-    public void Dispose()
-    {
-        if (_provider is IDisposable disposable)
-        {
-            disposable.Dispose();
-        }
-    }
-}

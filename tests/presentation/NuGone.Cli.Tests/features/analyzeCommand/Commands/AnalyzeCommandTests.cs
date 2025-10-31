@@ -48,22 +48,22 @@ public partial class AnalyzeCommandTests
             return ValidateAndResolveProjectPath(projectPath);
         }
 
-        public bool TestIsVerboseMode(Settings settings)
+        public static bool TestIsVerboseMode(Settings settings)
         {
             return IsVerboseMode(settings);
         }
 
-        public bool TestIsJsonFormat(Settings settings)
+        public static bool TestIsJsonFormat(Settings settings)
         {
             return settings.Format?.ToLowerInvariant() == "json";
         }
 
-        public bool TestShouldShowSuccessMessage(Settings settings)
+        public static bool TestShouldShowSuccessMessage(Settings settings)
         {
             return settings.Format?.ToLowerInvariant() != "json" || settings.Verbose;
         }
 
-        public bool TestShouldShowProgressMessage(Settings settings)
+        public static bool TestShouldShowProgressMessage(Settings settings)
         {
             return settings.Format?.ToLowerInvariant() != "json" || settings.Verbose;
         }

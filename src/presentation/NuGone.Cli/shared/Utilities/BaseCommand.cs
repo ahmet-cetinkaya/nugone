@@ -21,7 +21,11 @@ public abstract class BaseCommand<TSettings> : Command<TSettings>
     /// <summary>
     /// Executes the command with standardized error handling using Result pattern.
     /// </summary>
-    public sealed override int Execute(CommandContext context, TSettings settings, CancellationToken cancellationToken)
+    public sealed override int Execute(
+        CommandContext context,
+        TSettings settings,
+        CancellationToken cancellationToken
+    )
     {
         return GlobalExceptionHandler.ExecuteWithGlobalHandler(
             () =>
@@ -133,11 +137,11 @@ public abstract class BaseCommand<TSettings> : Command<TSettings>
     /// <summary>
     /// Displays error information to the user.
     /// </summary>
-    private void DisplayError(Error error)
+    private static void DisplayError(Error error)
     {
         ConsoleHelpers.WriteError(error.Message);
 
-        if (IsVerboseMode(null) && error.Details.Any())
+        if (IsVerboseMode(null) && error.Details.Count > 0)
         {
             ConsoleHelpers.WriteVerbose("Error Details:");
             foreach (var detail in error.Details)

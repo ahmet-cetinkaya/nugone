@@ -12,6 +12,8 @@ namespace NuGone.Cli.Tests.Commands;
 /// </summary>
 public partial class RemoveCommandTests
 {
+    private static readonly string[] ValidFormats = ["text", "json"];
+
     private readonly MockFileSystem _fileSystem;
     private readonly string _testProjectPath;
     private readonly string _testSolutionPath;
@@ -42,13 +44,13 @@ public partial class RemoveCommandTests
             return ValidateAndResolveProjectPath(projectPath);
         }
 
-        public Result TestValidateRemoveSettings(Settings settings)
+        public static Result TestValidateRemoveSettings(Settings settings)
         {
             // Since ValidateRemoveSettings is private, we'll test the validation logic directly
             // Validate format option
             if (
                 !string.IsNullOrEmpty(settings.Format)
-                && !new[] { "text", "json" }.Contains(settings.Format.ToLowerInvariant())
+                && !ValidFormats.Contains(settings.Format.ToLowerInvariant())
             )
             {
                 return Error.ValidationFailed(
@@ -66,7 +68,7 @@ public partial class RemoveCommandTests
             return Result.Success();
         }
 
-        public Result TestPerformRemoval(string projectPath, Settings settings)
+        public static Result TestPerformRemoval(string projectPath, Settings settings)
         {
             // Since PerformRemoval is private, we'll simulate the logic for testing
             if (settings.ExcludePackages?.Contains("critical-package") == true)
@@ -82,12 +84,12 @@ public partial class RemoveCommandTests
             return Result.Success();
         }
 
-        public bool TestNeedsConfirmation(Settings settings)
+        public static bool TestNeedsConfirmation(Settings settings)
         {
             return !settings.DryRun && !settings.SkipConfirmation;
         }
 
-        public bool TestIsVerboseMode(Settings settings)
+        public static bool TestIsVerboseMode(Settings settings)
         {
             return IsVerboseMode(settings);
         }

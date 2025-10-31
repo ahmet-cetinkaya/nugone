@@ -26,7 +26,7 @@ public partial class ConfigCommandTests
         var settings = new ConfigCommand.Settings { Action = action };
 
         // Act
-        var result = command.TestValidateConfigSettings(settings);
+        var result = TestableConfigCommand.TestValidateConfigSettings(settings);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -47,7 +47,7 @@ public partial class ConfigCommandTests
         };
 
         // Act
-        var result = command.TestValidateConfigSettings(settings);
+        var result = TestableConfigCommand.TestValidateConfigSettings(settings);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -65,7 +65,7 @@ public partial class ConfigCommandTests
         var settings = new ConfigCommand.Settings { Action = action };
 
         // Act
-        var result = command.TestValidateConfigSettings(settings);
+        var result = TestableConfigCommand.TestValidateConfigSettings(settings);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -83,7 +83,7 @@ public partial class ConfigCommandTests
         var settings = new ConfigCommand.Settings { Action = null };
 
         // Act
-        var result = command.TestValidateConfigSettings(settings);
+        var result = TestableConfigCommand.TestValidateConfigSettings(settings);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -97,7 +97,7 @@ public partial class ConfigCommandTests
         var settings = new ConfigCommand.Settings { Action = string.Empty };
 
         // Act
-        var result = command.TestValidateConfigSettings(settings);
+        var result = TestableConfigCommand.TestValidateConfigSettings(settings);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -116,7 +116,7 @@ public partial class ConfigCommandTests
         };
 
         // Act
-        var result = command.TestValidateConfigSettings(settings);
+        var result = TestableConfigCommand.TestValidateConfigSettings(settings);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -135,7 +135,7 @@ public partial class ConfigCommandTests
         };
 
         // Act
-        var result = command.TestValidateConfigSettings(settings);
+        var result = TestableConfigCommand.TestValidateConfigSettings(settings);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -156,7 +156,7 @@ public partial class ConfigCommandTests
         };
 
         // Act
-        var result = command.TestValidateConfigSettings(settings);
+        var result = TestableConfigCommand.TestValidateConfigSettings(settings);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -177,7 +177,7 @@ public partial class ConfigCommandTests
         };
 
         // Act
-        var result = command.TestValidateConfigSettings(settings);
+        var result = TestableConfigCommand.TestValidateConfigSettings(settings);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -198,7 +198,7 @@ public partial class ConfigCommandTests
         };
 
         // Act
-        var result = command.TestValidateConfigSettings(settings);
+        var result = TestableConfigCommand.TestValidateConfigSettings(settings);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -219,7 +219,7 @@ public partial class ConfigCommandTests
         };
 
         // Act
-        var result = command.TestValidateConfigSettings(settings);
+        var result = TestableConfigCommand.TestValidateConfigSettings(settings);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -243,7 +243,7 @@ public partial class ConfigCommandTests
         };
 
         // Act
-        var result = command.TestValidateConfigSettings(settings);
+        var result = TestableConfigCommand.TestValidateConfigSettings(settings);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

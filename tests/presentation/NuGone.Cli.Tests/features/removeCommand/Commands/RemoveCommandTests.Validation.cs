@@ -25,7 +25,7 @@ public partial class RemoveCommandTests
         };
 
         // Act
-        var result = command.TestValidateRemoveSettings(settings);
+        var result = TestableRemoveCommand.TestValidateRemoveSettings(settings);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();
@@ -39,7 +39,10 @@ public partial class RemoveCommandTests
         var settings = new RemoveCommand.Settings { ExcludePackages = ["critical-package"] };
 
         // Act
-        var result = command.TestPerformRemoval(Directory.GetCurrentDirectory(), settings);
+        var result = TestableRemoveCommand.TestPerformRemoval(
+            Directory.GetCurrentDirectory(),
+            settings
+        );
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -56,7 +59,7 @@ public partial class RemoveCommandTests
         var readOnlyPath = Path.Combine("readonly", "project");
 
         // Act
-        var result = command.TestPerformRemoval(readOnlyPath, settings);
+        var result = TestableRemoveCommand.TestPerformRemoval(readOnlyPath, settings);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -71,7 +74,10 @@ public partial class RemoveCommandTests
         var settings = new RemoveCommand.Settings { ExcludePackages = ["valid-package"] };
 
         // Act
-        var result = command.TestPerformRemoval(Directory.GetCurrentDirectory(), settings);
+        var result = TestableRemoveCommand.TestPerformRemoval(
+            Directory.GetCurrentDirectory(),
+            settings
+        );
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using NuGone.Application.Features.PackageAnalysis.Services.Abstractions;
 using NuGone.Cli.Shared.Constants;
 using NuGone.Cli.Shared.Models;
 using NuGone.Cli.Shared.Utilities;
@@ -12,6 +13,8 @@ namespace NuGone.Cli.Features.RemoveCommand.Commands;
 /// </summary>
 public class RemoveCommand : BaseCommand<RemoveCommand.Settings>
 {
+    private static readonly string[] ValidFormats = ["text", "json"];
+
     public class Settings : CommandSettings
     {
         [Description("Path to project or solution")]
@@ -41,16 +44,14 @@ public class RemoveCommand : BaseCommand<RemoveCommand.Settings>
         [Description("Enable verbose output")]
         [CommandOption("--verbose|-v")]
         public bool Verbose { get; init; }
-
-        // TODO: Add validation logic when ValidationResult is properly imported
     }
 
     protected override Result<int> ExecuteCommand(CommandContext context, Settings settings)
     {
         // Validate settings first
         var settingsValidation = ValidateRemoveSettings(settings);
-        if (settingsValidation.IsFailure)
-            return settingsValidation.Error;
+        if (!settingsValidation.IsValid)
+            return Error.ValidationFailed(string.Join(", ", settingsValidation.Errors));
 
         // Validate and resolve project path using base class method
         var projectPathResult = ValidateAndResolveProjectPath(settings.ProjectPath);
@@ -64,7 +65,7 @@ public class RemoveCommand : BaseCommand<RemoveCommand.Settings>
             ConsoleHelpers.WriteVerbose($"Removing packages from: {projectPath}");
             ConsoleHelpers.WriteVerbose($"Dry run: {settings.DryRun}");
             ConsoleHelpers.WriteVerbose($"Output format: {settings.Format}");
-            if (settings.ExcludePackages?.Any() == true)
+            if (settings.ExcludePackages?.Length > 0)
             {
                 ConsoleHelpers.WriteVerbose(
                     $"Excluded packages: {string.Join(", ", settings.ExcludePackages)}"
@@ -88,7 +89,6 @@ public class RemoveCommand : BaseCommand<RemoveCommand.Settings>
 
         ConsoleHelpers.WriteInfo("Starting package removal...");
 
-        // TODO: Implement actual package removal logic
         var removalResult = PerformRemoval(projectPath, settings);
         if (removalResult.IsFailure)
             return removalResult.Error;
@@ -97,18 +97,17 @@ public class RemoveCommand : BaseCommand<RemoveCommand.Settings>
         return ExitCodes.Success;
     }
 
-    private Result ValidateRemoveSettings(Settings settings)
+    private static ValidationResult ValidateRemoveSettings(Settings settings)
     {
+        var errors = new List<string>();
+
         // Validate format option
         if (
             !string.IsNullOrEmpty(settings.Format)
-            && !new[] { "text", "json" }.Contains(settings.Format.ToLowerInvariant())
+            && !ValidFormats.Contains(settings.Format.ToLowerInvariant())
         )
         {
-            return Error.ValidationFailed(
-                "Format must be either 'text' or 'json'",
-                new Dictionary<string, object> { ["ProvidedFormat"] = settings.Format }
-            );
+            errors.Add($"Format must be either 'text' or 'json'. Provided: {settings.Format}");
         }
 
         // Validate output file path if provided
@@ -119,51 +118,62 @@ public class RemoveCommand : BaseCommand<RemoveCommand.Settings>
                 var directory = Path.GetDirectoryName(settings.OutputFile);
                 if (!string.IsNullOrEmpty(directory) && !Directory.Exists(directory))
                 {
-                    return Error.DirectoryNotFound(directory);
+                    errors.Add($"Output directory not found: {directory}");
                 }
             }
             catch (ArgumentException ex)
             {
-                return Error.InvalidArgument(
-                    $"Invalid output file path: {ex.Message}",
-                    "outputFile"
-                );
+                errors.Add($"Invalid output file path: {ex.Message}");
             }
         }
 
         // Validate that we're not in dry-run mode if skip confirmation is set
         if (settings.SkipConfirmation && settings.DryRun)
         {
-            return Error.ValidationFailed("Cannot skip confirmation in dry-run mode");
+            errors.Add("Cannot skip confirmation in dry-run mode");
         }
 
-        return Result.Success();
+        return errors.Count > 0 ? ValidationResult.Failure(errors) : ValidationResult.Success();
     }
 
-    private Result PerformRemoval(string projectPath, Settings settings)
+    private static Result PerformRemoval(string projectPath, Settings settings)
     {
         try
         {
-            // Placeholder for actual removal logic
-            ConsoleHelpers.WriteInfo($"Removing packages from: {projectPath}");
+            if (settings.Verbose)
+                ConsoleHelpers.WriteVerbose($"Preparing package removal for: {projectPath}");
 
-            // Simulate some removal work with potential failures
-            if (settings.ExcludePackages?.Contains("critical-package") == true)
+            if (settings.DryRun)
             {
-                return Error.OperationFailed("removal", "Cannot exclude critical system packages");
+                ConsoleHelpers.WriteInfo("DRY RUN: Package removal is simulated");
+                ConsoleHelpers.WriteInfo("In a real implementation, this would:");
+                ConsoleHelpers.WriteInfo("  1. Analyze the project to identify unused packages");
+                ConsoleHelpers.WriteInfo("  2. Prompt for confirmation (unless skipped)");
+                ConsoleHelpers.WriteInfo(
+                    "  3. Remove unused package references from project files"
+                );
+                ConsoleHelpers.WriteInfo("  4. Clean up any unused package assets");
+                return Result.Success();
             }
 
-            // Simulate a file access issue
-            if (projectPath.Contains("readonly"))
-            {
-                return Error.AccessDenied(projectPath);
-            }
+            // NOTE: Package removal functionality is planned for a future release (v2.0+)
+            // Implementation will involve:
+            // 1. Using IPackageUsageAnalyzer to identify unused packages
+            // 2. Creating a removal command/handler in the application layer
+            // 3. Using project repository services to modify project files
+            // 4. Implementing safety checks and rollback capabilities per RFC-0004
+            ConsoleHelpers.WriteWarning(
+                "Package removal functionality is planned for a future release"
+            );
+            ConsoleHelpers.WriteInfo("This command will:");
+            ConsoleHelpers.WriteInfo("  - Detect unused packages in the project");
+            ConsoleHelpers.WriteInfo("  - Allow selective removal of unused packages");
+            ConsoleHelpers.WriteInfo("  - Provide backup and rollback capabilities");
 
             return Result.Success();
         }
         catch (Exception ex)
         {
-            // Convert unexpected exceptions to errors where appropriate
             return Error.OperationFailed("removal", ex.Message);
         }
     }
