@@ -29,7 +29,7 @@ public partial class ConfigCommandTests
         var result = TestableConfigCommand.TestValidateConfigSettings(settings);
 
         // Assert
-        result.IsSuccess.ShouldBeTrue();
+        result.IsValid.ShouldBeTrue();
     }
 
     [Theory]
@@ -50,7 +50,7 @@ public partial class ConfigCommandTests
         var result = TestableConfigCommand.TestValidateConfigSettings(settings);
 
         // Assert
-        result.IsSuccess.ShouldBeTrue();
+        result.IsValid.ShouldBeTrue();
     }
 
     [Theory]
@@ -68,11 +68,11 @@ public partial class ConfigCommandTests
         var result = TestableConfigCommand.TestValidateConfigSettings(settings);
 
         // Assert
-        result.IsFailure.ShouldBeTrue();
-        result.Error.Code.ShouldBe("VALIDATION_FAILED");
-        result.Error.Message.ShouldContain("Action must be one of: get, set, list, reset");
-        result.Error.Details.ShouldContainKey("ProvidedAction");
-        result.Error.Details["ProvidedAction"].ShouldBe(action);
+        result.IsValid.ShouldBeFalse();
+        result.Errors.Count.ShouldBeGreaterThan(0);
+        result
+            .Errors.Any(error => error.Contains("Action must be one of: get, set, list, reset"))
+            .ShouldBeTrue();
     }
 
     [Fact]
@@ -86,7 +86,7 @@ public partial class ConfigCommandTests
         var result = TestableConfigCommand.TestValidateConfigSettings(settings);
 
         // Assert
-        result.IsSuccess.ShouldBeTrue();
+        result.IsValid.ShouldBeTrue();
     }
 
     [Fact]
@@ -100,7 +100,7 @@ public partial class ConfigCommandTests
         var result = TestableConfigCommand.TestValidateConfigSettings(settings);
 
         // Assert
-        result.IsSuccess.ShouldBeTrue();
+        result.IsValid.ShouldBeTrue();
     }
 
     [Fact]
@@ -119,7 +119,7 @@ public partial class ConfigCommandTests
         var result = TestableConfigCommand.TestValidateConfigSettings(settings);
 
         // Assert
-        result.IsSuccess.ShouldBeTrue();
+        result.IsValid.ShouldBeTrue();
     }
 
     [Fact]
@@ -138,9 +138,11 @@ public partial class ConfigCommandTests
         var result = TestableConfigCommand.TestValidateConfigSettings(settings);
 
         // Assert
-        result.IsFailure.ShouldBeTrue();
-        result.Error.Code.ShouldBe("VALIDATION_FAILED");
-        result.Error.Message.ShouldContain("Both key and value are required for 'set' action");
+        result.IsValid.ShouldBeFalse();
+        result.Errors.Count.ShouldBeGreaterThan(0);
+        result
+            .Errors.Any(error => error.Contains("Both key and value are required for 'set' action"))
+            .ShouldBeTrue();
     }
 
     [Fact]
@@ -159,9 +161,11 @@ public partial class ConfigCommandTests
         var result = TestableConfigCommand.TestValidateConfigSettings(settings);
 
         // Assert
-        result.IsFailure.ShouldBeTrue();
-        result.Error.Code.ShouldBe("VALIDATION_FAILED");
-        result.Error.Message.ShouldContain("Both key and value are required for 'set' action");
+        result.IsValid.ShouldBeFalse();
+        result.Errors.Count.ShouldBeGreaterThan(0);
+        result
+            .Errors.Any(error => error.Contains("Both key and value are required for 'set' action"))
+            .ShouldBeTrue();
     }
 
     [Fact]
@@ -180,9 +184,11 @@ public partial class ConfigCommandTests
         var result = TestableConfigCommand.TestValidateConfigSettings(settings);
 
         // Assert
-        result.IsFailure.ShouldBeTrue();
-        result.Error.Code.ShouldBe("VALIDATION_FAILED");
-        result.Error.Message.ShouldContain("Both key and value are required for 'set' action");
+        result.IsValid.ShouldBeFalse();
+        result.Errors.Count.ShouldBeGreaterThan(0);
+        result
+            .Errors.Any(error => error.Contains("Both key and value are required for 'set' action"))
+            .ShouldBeTrue();
     }
 
     [Fact]
@@ -201,9 +207,11 @@ public partial class ConfigCommandTests
         var result = TestableConfigCommand.TestValidateConfigSettings(settings);
 
         // Assert
-        result.IsFailure.ShouldBeTrue();
-        result.Error.Code.ShouldBe("VALIDATION_FAILED");
-        result.Error.Message.ShouldContain("Both key and value are required for 'set' action");
+        result.IsValid.ShouldBeFalse();
+        result.Errors.Count.ShouldBeGreaterThan(0);
+        result
+            .Errors.Any(error => error.Contains("Both key and value are required for 'set' action"))
+            .ShouldBeTrue();
     }
 
     [Fact]
@@ -222,9 +230,11 @@ public partial class ConfigCommandTests
         var result = TestableConfigCommand.TestValidateConfigSettings(settings);
 
         // Assert
-        result.IsFailure.ShouldBeTrue();
-        result.Error.Code.ShouldBe("VALIDATION_FAILED");
-        result.Error.Message.ShouldContain("Both key and value are required for 'set' action");
+        result.IsValid.ShouldBeFalse();
+        result.Errors.Count.ShouldBeGreaterThan(0);
+        result
+            .Errors.Any(error => error.Contains("Both key and value are required for 'set' action"))
+            .ShouldBeTrue();
     }
 
     [Theory]
@@ -246,7 +256,7 @@ public partial class ConfigCommandTests
         var result = TestableConfigCommand.TestValidateConfigSettings(settings);
 
         // Assert
-        result.IsSuccess.ShouldBeTrue();
+        result.IsValid.ShouldBeTrue();
     }
 
     #endregion

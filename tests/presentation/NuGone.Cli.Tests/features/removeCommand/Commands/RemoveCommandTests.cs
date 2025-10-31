@@ -1,4 +1,5 @@
 using System.IO.Abstractions.TestingHelpers;
+using NuGone.Application.Features.PackageAnalysis.Services.Abstractions;
 using NuGone.Cli.Features.RemoveCommand.Commands;
 using NuGone.Cli.Shared.Constants;
 using NuGone.Cli.Shared.Models;
@@ -44,28 +45,9 @@ public partial class RemoveCommandTests
             return ValidateAndResolveProjectPath(projectPath);
         }
 
-        public static Result TestValidateRemoveSettings(Settings settings)
+        public static ValidationResult TestValidateRemoveSettings(Settings settings)
         {
-            // Since ValidateRemoveSettings is private, we'll test the validation logic directly
-            // Validate format option
-            if (
-                !string.IsNullOrEmpty(settings.Format)
-                && !ValidFormats.Contains(settings.Format.ToLowerInvariant())
-            )
-            {
-                return Error.ValidationFailed(
-                    "Format must be either 'text' or 'json'",
-                    new Dictionary<string, object> { ["ProvidedFormat"] = settings.Format }
-                );
-            }
-
-            // Validate that we're not in dry-run mode if skip confirmation is set
-            if (settings.SkipConfirmation && settings.DryRun)
-            {
-                return Error.ValidationFailed("Cannot skip confirmation in dry-run mode");
-            }
-
-            return Result.Success();
+            return RemoveCommand.ValidateRemoveSettings(settings);
         }
 
         public static Result TestPerformRemoval(string projectPath, Settings settings)

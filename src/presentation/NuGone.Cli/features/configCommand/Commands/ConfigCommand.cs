@@ -49,7 +49,7 @@ public class ConfigCommand : BaseCommand<ConfigCommand.Settings>
         return ExitCodes.Success;
     }
 
-    private static ValidationResult ValidateConfigSettings(Settings settings)
+    public static ValidationResult ValidateConfigSettings(Settings settings)
     {
         var errors = new List<string>();
 

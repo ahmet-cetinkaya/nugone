@@ -130,7 +130,7 @@ public class AnalyzeCommand(IFileSystem fileSystem)
         return ExitCodes.Success;
     }
 
-    private static ValidationResult ValidateAnalyzeSettings(Settings settings)
+    public static ValidationResult ValidateAnalyzeSettings(Settings settings)
     {
         var errors = new List<string>();
 

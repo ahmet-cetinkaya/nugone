@@ -24,9 +24,8 @@ public partial class ConfigCommandTests
         var result = TestableConfigCommand.TestValidateConfigSettings(settings);
 
         // Assert
-        result.IsFailure.ShouldBeTrue();
-        result.Error.Code.ShouldBe("VALIDATION_FAILED");
-        result.Error.ExitCode.ShouldBe(ExitCodes.InvalidArgument);
+        result.IsValid.ShouldBeFalse();
+        result.Errors.Count.ShouldBeGreaterThan(0);
     }
 
     #endregion

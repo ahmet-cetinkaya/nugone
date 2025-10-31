@@ -28,7 +28,7 @@ public partial class RemoveCommandTests
         var result = TestableRemoveCommand.TestValidateRemoveSettings(settings);
 
         // Assert
-        result.IsSuccess.ShouldBeTrue();
+        result.IsValid.ShouldBeTrue();
     }
 
     [Fact]

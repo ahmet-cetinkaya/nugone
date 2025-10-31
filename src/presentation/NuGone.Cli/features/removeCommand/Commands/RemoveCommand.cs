@@ -97,7 +97,7 @@ public class RemoveCommand : BaseCommand<RemoveCommand.Settings>
         return ExitCodes.Success;
     }
 
-    private static ValidationResult ValidateRemoveSettings(Settings settings)
+    public static ValidationResult ValidateRemoveSettings(Settings settings)
     {
         var errors = new List<string>();
 

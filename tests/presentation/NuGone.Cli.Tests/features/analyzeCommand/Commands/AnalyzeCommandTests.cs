@@ -1,4 +1,5 @@
 using System.IO.Abstractions.TestingHelpers;
+using NuGone.Application.Features.PackageAnalysis.Services.Abstractions;
 using NuGone.Cli.Features.AnalyzeCommand.Commands;
 using NuGone.Cli.Shared.Constants;
 using NuGone.Cli.Shared.Models;
@@ -66,6 +67,12 @@ public partial class AnalyzeCommandTests
         public static bool TestShouldShowProgressMessage(Settings settings)
         {
             return settings.Format?.ToLowerInvariant() != "json" || settings.Verbose;
+        }
+
+        // Method to access the static validation method for testing
+        public static ValidationResult TestValidateAnalyzeSettings(Settings settings)
+        {
+            return AnalyzeCommand.ValidateAnalyzeSettings(settings);
         }
 
         // Override to prevent actual execution during tests

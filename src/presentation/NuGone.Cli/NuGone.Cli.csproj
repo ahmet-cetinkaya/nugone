@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AssemblyName>nugone</AssemblyName>
+    <InternalsVisibleTo>NuGone.Cli.Tests</InternalsVisibleTo>
     <Authors>Ahmet Çetinkaya</Authors>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
