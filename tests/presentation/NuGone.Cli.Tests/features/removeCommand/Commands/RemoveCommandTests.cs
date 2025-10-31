@@ -50,22 +50,6 @@ public partial class RemoveCommandTests
             return RemoveCommand.ValidateRemoveSettings(settings);
         }
 
-        public static Result TestPerformRemoval(string projectPath, Settings settings)
-        {
-            // Since PerformRemoval is private, we'll simulate the logic for testing
-            if (settings.ExcludePackages?.Contains("critical-package") == true)
-            {
-                return Error.OperationFailed("removal", "Cannot exclude critical system packages");
-            }
-
-            if (projectPath.Contains("readonly"))
-            {
-                return Error.AccessDenied(projectPath);
-            }
-
-            return Result.Success();
-        }
-
         public static bool TestNeedsConfirmation(Settings settings)
         {
             return !settings.DryRun && !settings.SkipConfirmation;
@@ -73,7 +57,7 @@ public partial class RemoveCommandTests
 
         public static bool TestIsVerboseMode(Settings settings)
         {
-            return IsVerboseMode(settings);
+            return settings.Verbose;
         }
 
         // Override to prevent actual execution during tests

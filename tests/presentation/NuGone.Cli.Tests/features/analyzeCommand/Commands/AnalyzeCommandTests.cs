@@ -49,14 +49,21 @@ public partial class AnalyzeCommandTests
             return ValidateAndResolveProjectPath(projectPath);
         }
 
-        public static bool TestIsVerboseMode(Settings settings)
+        // Method to access the static validation method for testing
+        public static ValidationResult TestValidateAnalyzeSettings(Settings settings)
         {
-            return IsVerboseMode(settings);
+            return AnalyzeCommand.ValidateAnalyzeSettings(settings);
         }
 
+        // Helper methods for testing
         public static bool TestIsJsonFormat(Settings settings)
         {
             return settings.Format?.ToLowerInvariant() == "json";
+        }
+
+        public static bool TestIsVerboseMode(Settings settings)
+        {
+            return settings.Verbose;
         }
 
         public static bool TestShouldShowSuccessMessage(Settings settings)
@@ -67,12 +74,6 @@ public partial class AnalyzeCommandTests
         public static bool TestShouldShowProgressMessage(Settings settings)
         {
             return settings.Format?.ToLowerInvariant() != "json" || settings.Verbose;
-        }
-
-        // Method to access the static validation method for testing
-        public static ValidationResult TestValidateAnalyzeSettings(Settings settings)
-        {
-            return AnalyzeCommand.ValidateAnalyzeSettings(settings);
         }
 
         // Override to prevent actual execution during tests
