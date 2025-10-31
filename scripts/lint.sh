@@ -69,8 +69,7 @@ if command -v roslynator &>/dev/null; then
   ROSLYNATOR_CMD="roslynator"
 
   echo "  - Analyzing code with Roslynator..."
-  $ROSLYNATOR_CMD analyze "$SOLUTION_FILE" || ROSLYNATOR_FAILED=1
-  if [ "${ROSLYNATOR_FAILED:-0}" -eq 0 ]; then
+  if $ROSLYNATOR_CMD analyze "$SOLUTION_FILE"; then
     echo "✅ Roslynator analysis completed successfully"
   else
     echo "❌ Roslynator found issues"
