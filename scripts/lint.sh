@@ -14,7 +14,11 @@ if [ ! -f "NuGone.sln" ] && [ ! -f "NuGone.slnx" ]; then
 fi
 
 # Get the solution file
-SOLUTION_FILE=$(find . -name "*.sln" -o -name "*.slnx" | head -n 1)
+SOLUTION_FILE=$(find . -maxdepth 1 -name "*.sln" -o -name "*.slnx" | head -n 1)
+if [ -z "$SOLUTION_FILE" ]; then
+  echo "❌ Error: No solution file found in current directory."
+  exit 1
+fi
 echo "📁 Found solution file: $SOLUTION_FILE"
 
 # Track overall success
@@ -85,39 +89,49 @@ echo "🔍 Running additional code analysis..."
 
 # Check for common .NET code issues
 echo "  - Checking for TODO/FIXME/HACK comments..."
-if grep -r -i -n "TODO\|FIXME\|HACK" --include="*.cs" src/ >/dev/null 2>&1; then
-  echo "⚠️  Warning: Found TODO/FIXME/HACK comments in source code"
-  grep -r -i -n "TODO\|FIXME\|HACK" --include="*.cs" src/ || true
+TODO_COUNT=$(grep -r -i -n "TODO\|FIXME\|HACK" --include="*.cs" src/ 2>/dev/null | wc -l || echo "0")
+if [ "$TODO_COUNT" -gt 0 ]; then
+  echo "⚠️  Warning: Found $TODO_COUNT TODO/FIXME/HACK comments in source code"
+  grep -r -i -n "TODO\|FIXME\|HACK" --include="*.cs" src/ 2>/dev/null || true
+  echo "💡 Consider addressing these items or creating issues for them"
 fi
 
 # Check for hardcoded secrets using gitleaks
 echo "  - Checking for potential secrets with gitleaks..."
 if command -v gitleaks &>/dev/null; then
   # Run gitleaks detect in no-git mode (for current directory scanning)
-  if gitleaks detect --no-git --verbose --redact >/dev/null 2>&1; then
+  if gitleaks detect --no-git --verbose --redact --exit-code 0 >/dev/null 2>&1; then
     echo "✅ No secrets detected"
   else
     echo "⚠️  Warning: gitleaks found potential secrets"
-    gitleaks detect --no-git --verbose --redact || true
+    gitleaks detect --no-git --verbose --redact --exit-code 0 || true
+    echo "💡 Review and remove any hardcoded secrets before committing"
   fi
 else
   echo "⚠️  Warning: gitleaks is not installed, falling back to basic pattern check"
   # Fallback to basic pattern checking
-  if grep -r -i -n "password\|secret\|apikey\|connectionstring" --include="*.cs" src/ | grep -v "//.*password\|//.*secret\|//.*apikey\|//.*connectionstring" >/dev/null 2>&1; then
-    echo "⚠️  Warning: Found potential hardcoded secrets"
-    grep -r -i -n "password\|secret\|apikey\|connectionstring" --include="*.cs" src/ | grep -v "//.*password\|//.*secret\|//.*apikey\|//.*connectionstring" || true
+  SECRET_COUNT=$(grep -r -i -n "password\|secret\|apikey\|connectionstring" --include="*.cs" src/ 2>/dev/null | grep -v "//.*password\|//.*secret\|//.*apikey\|//.*connectionstring" | wc -l || echo "0")
+  if [ "$SECRET_COUNT" -gt 0 ]; then
+    echo "⚠️  Warning: Found $SECRET_COUNT potential hardcoded secrets"
+    grep -r -i -n "password\|secret\|apikey\|connectionstring" --include="*.cs" src/ 2>/dev/null | grep -v "//.*password\|//.*secret\|//.*apikey\|//.*connectionstring" || true
+    echo "💡 Review and remove any hardcoded secrets before committing"
   fi
 fi
 
 # Check for proper XML documentation on public APIs
 echo "  - Checking for missing XML documentation..."
-PUBLIC_API_FILES=$(find src/ -name "*.cs" -exec grep -l "public.*class\|public.*interface\|public.*enum" {} \;)
+DOC_MISSING_COUNT=0
+PUBLIC_API_FILES=$(find src/ -name "*.cs" -exec grep -l "public.*class\|public.*interface\|public.*enum" {} \; 2>/dev/null)
 if [ -n "$PUBLIC_API_FILES" ]; then
   for file in $PUBLIC_API_FILES; do
-    if ! grep -q "///" "$file"; then
+    if [ -f "$file" ] && ! grep -q "///" "$file" 2>/dev/null; then
       echo "ℹ️  Consider adding XML documentation for public APIs in: $file"
+      DOC_MISSING_COUNT=$((DOC_MISSING_COUNT + 1))
     fi
   done
+  if [ "$DOC_MISSING_COUNT" -gt 0 ]; then
+    echo "💡 Found $DOC_MISSING_COUNT files with public APIs missing XML documentation"
+  fi
 fi
 
 echo ""
