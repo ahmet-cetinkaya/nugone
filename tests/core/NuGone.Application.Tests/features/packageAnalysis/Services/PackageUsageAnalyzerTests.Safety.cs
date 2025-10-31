@@ -132,7 +132,7 @@ public partial class PackageUsageAnalyzerTests
         // Arrange - RFC-0004: Input validation for file scanning
         var sourceFiles = new[] { "/test/File1.cs", "/test/File2.cs" };
         var packageNamespaces = new[] { "Test.Namespace" };
-        var excludePatterns = new string[0];
+        var excludePatterns = Array.Empty<string>();
 
         SetupMockFileContent("/test/File1.cs", "using Test.Namespace;\nvar obj = new TestClass();");
         SetupMockFileContent("/test/File2.cs", "using System;\nConsole.WriteLine(\"Hello\");");
@@ -187,7 +187,7 @@ public partial class PackageUsageAnalyzerTests
         // Arrange - RFC-0004: Failures do not leave the project in a broken state
         var sourceFiles = new[] { "/test/ErrorFile.cs", "/test/GoodFile.cs" };
         var packageNamespaces = new[] { "Test.Namespace" };
-        var excludePatterns = new string[0];
+        var excludePatterns = Array.Empty<string>();
 
         _ = _mockProjectRepository
             .Setup(r => r.ReadSourceFileAsync("/test/ErrorFile.cs", It.IsAny<CancellationToken>()))

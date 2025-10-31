@@ -15,17 +15,20 @@ Clear, actionable reports are essential for users to understand and act on analy
 ## Detailed Design
 
 ### Report Contents
+
 - List of used packages
 - List of unused packages (with name, version, references found)
 - Summary: total unused, total scanned, percentage unused
 - Project/solution name
 
 ### Output Formats
+
 - Plain text (default, human-readable)
 - JSON (machine-readable, for automation)
 - Option to write report to file via `--output <file>`
 
 ### Example JSON Output
+
 ```json
 {
   "unusedPackages": [
@@ -41,20 +44,26 @@ Clear, actionable reports are essential for users to understand and act on analy
 ```
 
 ### Extensibility
+
 - New formats can be added via modular report generators.
 - CLI flag `--format <type>` selects output format.
 
 ### Input Validation
+
 - Validate output file paths and format types.
 
 ## Alternatives Considered
+
 - Only plain text output (rejected for lack of automation support).
 
 ## Drawbacks
+
 - Supporting multiple formats adds maintenance overhead.
 
 ## Adoption
+
 - All reporting logic must follow this structure and support at least text and JSON.
 
 ## References
+
 - [PRD.md](../PRD.md)

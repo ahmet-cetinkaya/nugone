@@ -1,3 +1,4 @@
+using NuGone.Application.Features.PackageAnalysis.Services.Abstractions;
 using NuGone.Cli.Features.ConfigCommand.Commands;
 using NuGone.Cli.Shared.Constants;
 using NuGone.Cli.Shared.Models;
@@ -18,32 +19,9 @@ public partial class ConfigCommandTests
     /// </summary>
     private class TestableConfigCommand : ConfigCommand
     {
-        public Result TestValidateConfigSettings(Settings settings)
+        public static ValidationResult TestValidateConfigSettings(Settings settings)
         {
-            // Since ValidateConfigSettings is private, we'll test the validation logic directly
-            if (!string.IsNullOrEmpty(settings.Action))
-            {
-                var validActions = new[] { "get", "set", "list", "reset" };
-                if (!validActions.Contains(settings.Action.ToLowerInvariant()))
-                {
-                    return Error.ValidationFailed(
-                        $"Action must be one of: {string.Join(", ", validActions)}",
-                        new Dictionary<string, object> { ["ProvidedAction"] = settings.Action }
-                    );
-                }
-
-                if (
-                    string.Equals(settings.Action, "set", StringComparison.OrdinalIgnoreCase)
-                    && (string.IsNullOrEmpty(settings.Key) || string.IsNullOrEmpty(settings.Value))
-                )
-                {
-                    return Error.ValidationFailed(
-                        "Both key and value are required for 'set' action"
-                    );
-                }
-            }
-
-            return Result.Success();
+            return ConfigCommand.ValidateConfigSettings(settings);
         }
 
         // Override to prevent actual execution during tests

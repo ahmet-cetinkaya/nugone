@@ -23,13 +23,8 @@ public partial class PackageUsageAnalyzer(
     private readonly ILogger<PackageUsageAnalyzer> _logger =
         logger ?? throw new ArgumentNullException(nameof(logger));
 
-    // Regex patterns for detecting namespace usage
-    private static readonly Regex UsingStatementRegex = MyRegex();
-
-    // Regex for detecting namespace aliases (e.g., using PackageSerilog = Serilog;)
-    private static readonly Regex UsingAliasRegex = MyRegex1();
-
-    private static readonly Regex NamespaceUsageRegex = MyRegex2();
+    [GeneratedRegex(@"\b([A-Z][a-zA-Z0-9_]*)\s*[\.\(]", RegexOptions.Compiled)]
+    private static partial Regex UnqualifiedIdentifierRegex();
 
     /// <summary>
     /// Analyzes package usage across all projects in a solution.
@@ -442,7 +437,7 @@ public partial class PackageUsageAnalyzer(
         var foundNamespaces = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         // Scan for using statements
-        var usingMatches = UsingStatementRegex.Matches(content);
+        var usingMatches = UsingStatementRegex().Matches(content);
         foreach (Match match in usingMatches)
         {
             var namespaceName = match.Groups[1].Value;
@@ -456,7 +451,7 @@ public partial class PackageUsageAnalyzer(
         }
 
         // Scan for namespace aliases (e.g., using PackageSerilog = Serilog;)
-        var aliasMatches = UsingAliasRegex.Matches(content);
+        var aliasMatches = UsingAliasRegex().Matches(content);
         var namespaceAliases = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         foreach (Match match in aliasMatches)
@@ -476,7 +471,7 @@ public partial class PackageUsageAnalyzer(
         }
 
         // Scan for direct namespace usage (e.g., System.Console.WriteLine)
-        var usageMatches = NamespaceUsageRegex.Matches(content);
+        var usageMatches = NamespaceUsageRegex().Matches(content);
         foreach (Match match in usageMatches)
         {
             var fullQualifiedName = match.Groups[1].Value;
@@ -540,7 +535,7 @@ public partial class PackageUsageAnalyzer(
         // that would indicate the namespace is being used without explicit using statements.
 
         // Scan for direct namespace usage (e.g., System.Console.WriteLine, Xunit.Assert.True)
-        var usageMatches = NamespaceUsageRegex.Matches(content);
+        var usageMatches = NamespaceUsageRegex().Matches(content);
         foreach (Match match in usageMatches)
         {
             var fullQualifiedName = match.Groups[1].Value;
@@ -584,12 +579,7 @@ public partial class PackageUsageAnalyzer(
 
             // For other namespaces, look for unqualified class/method usage patterns
             // This is a more general approach that looks for identifiers that could be from the namespace
-            var unqualifiedPattern = new Regex(
-                @"\b([A-Z][a-zA-Z0-9_]*)\s*[\.\(]",
-                RegexOptions.Compiled
-            );
-
-            var unqualifiedMatches = unqualifiedPattern.Matches(content);
+            var unqualifiedMatches = UnqualifiedIdentifierRegex().Matches(content);
             foreach (Match match in unqualifiedMatches)
             {
                 var identifier = match.Groups[1].Value;
@@ -645,17 +635,17 @@ public partial class PackageUsageAnalyzer(
         @"^\s*using\s+(?:global\s+)?([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_0-9][a-zA-Z0-9_]*)*)\s*;",
         RegexOptions.Multiline | RegexOptions.Compiled
     )]
-    private static partial Regex MyRegex();
+    private static partial Regex UsingStatementRegex();
 
     [GeneratedRegex(
         @"^\s*using\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_0-9][a-zA-Z0-9_]*)*)\s*;",
         RegexOptions.Multiline | RegexOptions.Compiled
     )]
-    private static partial Regex MyRegex1();
+    private static partial Regex UsingAliasRegex();
 
     [GeneratedRegex(
         @"(?:new\s+)?([a-zA-Z_][a-zA-Z0-9_]*(?:\.[a-zA-Z_0-9][a-zA-Z0-9_]*)*)\s*[\.\(]",
         RegexOptions.Compiled
     )]
-    private static partial Regex MyRegex2();
+    private static partial Regex NamespaceUsageRegex();
 }

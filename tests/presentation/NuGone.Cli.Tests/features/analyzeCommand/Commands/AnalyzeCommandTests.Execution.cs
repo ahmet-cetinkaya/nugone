@@ -82,7 +82,7 @@ public partial class AnalyzeCommandTests
         var settings = new AnalyzeCommand.Settings { Format = format };
 
         // Act
-        var isJsonFormat = command.TestIsJsonFormat(settings);
+        var isJsonFormat = TestableAnalyzeCommand.TestIsJsonFormat(settings);
 
         // Assert
         isJsonFormat.ShouldBeTrue();
@@ -102,7 +102,7 @@ public partial class AnalyzeCommandTests
         var settings = new AnalyzeCommand.Settings { Format = format ?? string.Empty };
 
         // Act
-        var isJsonFormat = command.TestIsJsonFormat(settings);
+        var isJsonFormat = TestableAnalyzeCommand.TestIsJsonFormat(settings);
 
         // Assert
         isJsonFormat.ShouldBeFalse();
@@ -118,8 +118,8 @@ public partial class AnalyzeCommandTests
         var nonVerboseSettings = new AnalyzeCommand.Settings { Verbose = false };
 
         // Act
-        var isVerbose = command.TestIsVerboseMode(verboseSettings);
-        var isNotVerbose = command.TestIsVerboseMode(nonVerboseSettings);
+        var isVerbose = TestableAnalyzeCommand.TestIsVerboseMode(verboseSettings);
+        var isNotVerbose = TestableAnalyzeCommand.TestIsVerboseMode(nonVerboseSettings);
 
         // Assert
         isVerbose.ShouldBeTrue();

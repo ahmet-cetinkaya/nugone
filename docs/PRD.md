@@ -6,18 +6,18 @@ To automatically detect and optionally remove unused NuGet package references in
 
 ### Problem Statement
 
-* Developers frequently add new NuGet packages during development.
-* Over time, some packages become unused but remain referenced in project files:
-  * Increasing project size
-  * Slowing build times
-  * Introducing potential security risks
-* Neither `dotnet` CLI nor Visual Studio fully automates unused package removal.
+- Developers frequently add new NuGet packages during development.
+- Over time, some packages become unused but remain referenced in project files:
+  - Increasing project size
+  - Slowing build times
+  - Introducing potential security risks
+- Neither `dotnet` CLI nor Visual Studio fully automates unused package removal.
 
 ### Goal
 
-* Identify unused NuGet packages.
-* Optionally remove them from project files.
-* Offer this functionality as a cross-platform .NET CLI tool.
+- Identify unused NuGet packages.
+- Optionally remove them from project files.
+- Offer this functionality as a cross-platform .NET CLI tool.
 
 ---
 
@@ -25,20 +25,20 @@ To automatically detect and optionally remove unused NuGet package references in
 
 ### 2.1 Supported Platforms
 
-* .NET Core 3.1+
-* .NET 5+
-* .NET 6+
-* .NET 7+
-* .NET 8+
-* .NET 9+
-* Cross-platform CLI (Windows, macOS, Linux)
+- .NET Core 3.1+
+- .NET 5+
+- .NET 6+
+- .NET 7+
+- .NET 8+
+- .NET 9+
+- Cross-platform CLI (Windows, macOS, Linux)
 
 ---
 
 ### 2.2 Supported Project Types
 
-* SDK-style .NET projects (e.g. *.csproj*)
-* Multi-project solutions (*.sln*, *.slnx*)
+- SDK-style .NET projects (e.g. _.csproj_)
+- Multi-project solutions (_.sln_, _.slnx_)
 
 ---
 
@@ -114,13 +114,8 @@ To automatically detect and optionally remove unused NuGet package references in
 ```json
 {
   "nugone": {
-    "excludeNamespaces": [
-      "System.Text.Json"
-    ],
-    "excludeFiles": [
-      "**/*.Designer.cs",
-      "**/Generated/**"
-    ]
+    "excludeNamespaces": ["System.Text.Json"],
+    "excludeFiles": ["**/*.Designer.cs", "**/Generated/**"]
   }
 }
 ```

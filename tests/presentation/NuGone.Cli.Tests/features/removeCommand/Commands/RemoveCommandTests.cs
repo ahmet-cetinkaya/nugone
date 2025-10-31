@@ -1,4 +1,5 @@
 using System.IO.Abstractions.TestingHelpers;
+using NuGone.Application.Features.PackageAnalysis.Services.Abstractions;
 using NuGone.Cli.Features.RemoveCommand.Commands;
 using NuGone.Cli.Shared.Constants;
 using NuGone.Cli.Shared.Models;
@@ -12,6 +13,8 @@ namespace NuGone.Cli.Tests.Commands;
 /// </summary>
 public partial class RemoveCommandTests
 {
+    private static readonly string[] ValidFormats = ["text", "json"];
+
     private readonly MockFileSystem _fileSystem;
     private readonly string _testProjectPath;
     private readonly string _testSolutionPath;
@@ -42,54 +45,19 @@ public partial class RemoveCommandTests
             return ValidateAndResolveProjectPath(projectPath);
         }
 
-        public Result TestValidateRemoveSettings(Settings settings)
+        public static ValidationResult TestValidateRemoveSettings(Settings settings)
         {
-            // Since ValidateRemoveSettings is private, we'll test the validation logic directly
-            // Validate format option
-            if (
-                !string.IsNullOrEmpty(settings.Format)
-                && !new[] { "text", "json" }.Contains(settings.Format.ToLowerInvariant())
-            )
-            {
-                return Error.ValidationFailed(
-                    "Format must be either 'text' or 'json'",
-                    new Dictionary<string, object> { ["ProvidedFormat"] = settings.Format }
-                );
-            }
-
-            // Validate that we're not in dry-run mode if skip confirmation is set
-            if (settings.SkipConfirmation && settings.DryRun)
-            {
-                return Error.ValidationFailed("Cannot skip confirmation in dry-run mode");
-            }
-
-            return Result.Success();
+            return RemoveCommand.ValidateRemoveSettings(settings);
         }
 
-        public Result TestPerformRemoval(string projectPath, Settings settings)
-        {
-            // Since PerformRemoval is private, we'll simulate the logic for testing
-            if (settings.ExcludePackages?.Contains("critical-package") == true)
-            {
-                return Error.OperationFailed("removal", "Cannot exclude critical system packages");
-            }
-
-            if (projectPath.Contains("readonly"))
-            {
-                return Error.AccessDenied(projectPath);
-            }
-
-            return Result.Success();
-        }
-
-        public bool TestNeedsConfirmation(Settings settings)
+        public static bool TestNeedsConfirmation(Settings settings)
         {
             return !settings.DryRun && !settings.SkipConfirmation;
         }
 
-        public bool TestIsVerboseMode(Settings settings)
+        public static bool TestIsVerboseMode(Settings settings)
         {
-            return IsVerboseMode(settings);
+            return settings.Verbose;
         }
 
         // Override to prevent actual execution during tests

@@ -4,9 +4,12 @@
   "tools": {
     "csharpier": {
       "version": "1.0.3",
-      "commands": [
-        "csharpier"
-      ],
+      "commands": ["csharpier"],
+      "rollForward": false
+    },
+    "roslynator.dotnet.cli": {
+      "version": "0.11.0",
+      "commands": ["roslynator"],
       "rollForward": false
     }
   }

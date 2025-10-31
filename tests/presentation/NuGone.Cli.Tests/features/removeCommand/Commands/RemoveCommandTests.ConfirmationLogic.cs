@@ -20,7 +20,7 @@ public partial class RemoveCommandTests
         var settings = new RemoveCommand.Settings { DryRun = true };
 
         // Act
-        var needsConfirmation = command.TestNeedsConfirmation(settings);
+        var needsConfirmation = TestableRemoveCommand.TestNeedsConfirmation(settings);
 
         // Assert
         needsConfirmation.ShouldBeFalse();
@@ -34,7 +34,7 @@ public partial class RemoveCommandTests
         var settings = new RemoveCommand.Settings { SkipConfirmation = true };
 
         // Act
-        var needsConfirmation = command.TestNeedsConfirmation(settings);
+        var needsConfirmation = TestableRemoveCommand.TestNeedsConfirmation(settings);
 
         // Assert
         needsConfirmation.ShouldBeFalse();
@@ -48,7 +48,7 @@ public partial class RemoveCommandTests
         var settings = new RemoveCommand.Settings { DryRun = false, SkipConfirmation = false };
 
         // Act
-        var needsConfirmation = command.TestNeedsConfirmation(settings);
+        var needsConfirmation = TestableRemoveCommand.TestNeedsConfirmation(settings);
 
         // Assert
         needsConfirmation.ShouldBeTrue();

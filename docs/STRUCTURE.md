@@ -94,6 +94,7 @@ nugone/
 ## 🧩 Layer Responsibilities
 
 ### Core
+
 - **NuGone.Domain**
   - Entities (e.g., packageReference, project, solution)
   - Value Objects
@@ -106,12 +107,14 @@ nugone/
   - Interfaces for infrastructure (ports)
 
 ### Infrastructure
+
 - Implementations for NuGet, file system, config, etc.
 - Data access and external service integration
 - Implements interfaces defined in Application/Core
 - Additional projects can be created for each external system as needed
 
 ### Presentation
+
 - **NuGone.Cli**
   - Command-line interface (argument parsing, commands)
   - User interaction, reporting, and output formatting
@@ -120,12 +123,14 @@ nugone/
 ---
 
 ## 🧪 Testing
+
 - Unit tests for each layer (Core, Application, Infrastructure)
 - Integration tests for end-to-end scenarios
 
 ---
 
 ## 🔗 References
+
 - [Clean Architecture (Uncle Bob)](https://8thlight.com/blog/uncle-bob/2012/08/13/the-clean-architecture.html)
 - [.NET Clean Architecture Template](https://github.com/jasontaylordev/CleanArchitecture)
 

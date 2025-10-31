@@ -1,4 +1,5 @@
 using System.IO.Abstractions.TestingHelpers;
+using NuGone.Application.Features.PackageAnalysis.Services.Abstractions;
 using NuGone.Cli.Features.AnalyzeCommand.Commands;
 using NuGone.Cli.Shared.Constants;
 using NuGone.Cli.Shared.Models;
@@ -48,22 +49,29 @@ public partial class AnalyzeCommandTests
             return ValidateAndResolveProjectPath(projectPath);
         }
 
-        public bool TestIsVerboseMode(Settings settings)
+        // Method to access the static validation method for testing
+        public static ValidationResult TestValidateAnalyzeSettings(Settings settings)
         {
-            return IsVerboseMode(settings);
+            return AnalyzeCommand.ValidateAnalyzeSettings(settings);
         }
 
-        public bool TestIsJsonFormat(Settings settings)
+        // Helper methods for testing
+        public static bool TestIsJsonFormat(Settings settings)
         {
             return settings.Format?.ToLowerInvariant() == "json";
         }
 
-        public bool TestShouldShowSuccessMessage(Settings settings)
+        public static bool TestIsVerboseMode(Settings settings)
+        {
+            return settings.Verbose;
+        }
+
+        public static bool TestShouldShowSuccessMessage(Settings settings)
         {
             return settings.Format?.ToLowerInvariant() != "json" || settings.Verbose;
         }
 
-        public bool TestShouldShowProgressMessage(Settings settings)
+        public static bool TestShouldShowProgressMessage(Settings settings)
         {
             return settings.Format?.ToLowerInvariant() != "json" || settings.Verbose;
         }
@@ -71,7 +79,8 @@ public partial class AnalyzeCommandTests
         // Override to prevent actual execution during tests
         protected override async Task<Result<int>> ExecuteCommandAsync(
             CommandContext context,
-            Settings settings
+            Settings settings,
+            CancellationToken cancellationToken = default
         )
         {
             await Task.CompletedTask;

@@ -21,7 +21,11 @@ public abstract class BaseCommand<TSettings> : Command<TSettings>
     /// <summary>
     /// Executes the command with standardized error handling using Result pattern.
     /// </summary>
-    public sealed override int Execute(CommandContext context, TSettings settings)
+    public sealed override int Execute(
+        CommandContext context,
+        TSettings settings,
+        CancellationToken cancellationToken
+    )
     {
         return GlobalExceptionHandler.ExecuteWithGlobalHandler(
             () =>
@@ -29,7 +33,7 @@ public abstract class BaseCommand<TSettings> : Command<TSettings>
                 // Check if this is an async command
                 if (this is IAsyncCommand<TSettings>)
                 {
-                    var asyncResult = ExecuteCommandAsync(context, settings)
+                    var asyncResult = ExecuteCommandAsync(context, settings, cancellationToken)
                         .GetAwaiter()
                         .GetResult();
                     return asyncResult.Match(
@@ -73,7 +77,8 @@ public abstract class BaseCommand<TSettings> : Command<TSettings>
     /// </summary>
     protected virtual Task<Result<int>> ExecuteCommandAsync(
         CommandContext context,
-        TSettings settings
+        TSettings settings,
+        CancellationToken cancellationToken = default
     )
     {
         throw new NotImplementedException(
@@ -132,11 +137,11 @@ public abstract class BaseCommand<TSettings> : Command<TSettings>
     /// <summary>
     /// Displays error information to the user.
     /// </summary>
-    private void DisplayError(Error error)
+    private static void DisplayError(Error error)
     {
         ConsoleHelpers.WriteError(error.Message);
 
-        if (IsVerboseMode(null) && error.Details.Any())
+        if (IsVerboseMode(null) && error.Details.Count > 0)
         {
             ConsoleHelpers.WriteVerbose("Error Details:");
             foreach (var detail in error.Details)
