@@ -17,6 +17,7 @@
     <PackageTags>nuget;packages;cleanup;dotnet;cli</PackageTags>
     <PackAsTool>true</PackAsTool>
     <RepositoryUrl>https://github.com/ahmet-cetinkaya/nugone</RepositoryUrl>
+    <RollForward>Major</RollForward>
     <TargetFramework>net9.0</TargetFramework>
     <ToolCommandName>nugone</ToolCommandName>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
