@@ -54,10 +54,10 @@ fi
 
 print_section "📄 Checking Prettier formatting"
 if command -v prettier &>/dev/null; then
-  if prettier --check "**/*.{md,json,yml,yaml,js,ts,jsx,tsx,css,scss,html}" \
+  if prettier --check "**/*.{json,yml,yaml,js,ts,jsx,tsx,css,scss,html}" \
     --ignore-path=.gitignore \
     --ignore-path=.prettierignore >/dev/null 2>&1; then
-    print_success "Markdown and other files are properly formatted"
+    print_success "Prettier-formatted files are properly formatted"
   else
     print_error "Some files are not properly formatted"
     print_info "Run './scripts/format.sh' to fix formatting issues"
@@ -68,25 +68,39 @@ else
   print_info "Install it with: npm install -g prettier"
 fi
 
+print_section "📝 Running markdownlint checks"
+if command -v markdownlint-cli2 &>/dev/null; then
+  if markdownlint-cli2 "##*.md" >/dev/null 2>&1; then
+    print_success "Markdown files passed linting checks"
+  else
+    print_error "Markdown files have linting issues"
+    print_info "Run 'markdownlint-cli2 \"##*.md\" --fix' to fix markdown issues"
+    OVERALL_SUCCESS=1
+  fi
+else
+  print_warning "markdownlint-cli2 is not installed"
+  print_info "Install it with: npm install -g markdownlint-cli2"
+fi
+
 print_section "🔍 Running Roslynator analysis"
 if dotnet tool list | grep -q "roslynator.dotnet.cli"; then
-    ROSLYNATOR_CMD="dotnet roslynator"
+  ROSLYNATOR_CMD="dotnet roslynator"
 elif command -v roslynator &>/dev/null; then
-    ROSLYNATOR_CMD="roslynator"
+  ROSLYNATOR_CMD="roslynator"
 else
-    print_warning "Roslynator is not installed"
-    print_info "Install it with: dotnet tool restore"
+  print_warning "Roslynator is not installed"
+  print_info "Install it with: dotnet tool restore"
 fi
 
 # Only run Roslynator if it was found
 if [ -n "$ROSLYNATOR_CMD" ]; then
-    print_info "Analyzing code with Roslynator..."
-    if $ROSLYNATOR_CMD analyze "$SOLUTION_FILE"; then
-        print_success "Roslynator analysis completed successfully"
-    else
-        print_error "Roslynator found issues"
-        OVERALL_SUCCESS=1
-    fi
+  print_info "Analyzing code with Roslynator..."
+  if $ROSLYNATOR_CMD analyze "$SOLUTION_FILE"; then
+    print_success "Roslynator analysis completed successfully"
+  else
+    print_error "Roslynator found issues"
+    OVERALL_SUCCESS=1
+  fi
 fi
 
 print_section "🔍 Running additional code analysis"
