@@ -44,6 +44,7 @@ public class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
     /// </summary>
     public async Task<IEnumerable<PackageReference>> ExtractPackageReferencesAsync(
         string projectFilePath,
+        Dictionary<string, string>? centralPackageVersions = null,
         CancellationToken cancellationToken = default
     )
     {
@@ -80,12 +81,23 @@ public class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
                 var version = GetPackageVersion(packageRefElement);
                 if (string.IsNullOrWhiteSpace(version))
                 {
-                    _logger.LogWarning(
-                        "No version found for package: {PackageId} in project: {ProjectFilePath}",
-                        include,
-                        projectFilePath
-                    );
-                    continue;
+                    // Try to resolve from central package versions
+                    if (
+                        centralPackageVersions != null
+                        && centralPackageVersions.TryGetValue(include, out var centralVersion)
+                    )
+                    {
+                        version = centralVersion;
+                    }
+                    else
+                    {
+                        _logger.LogWarning(
+                            "No version found for package: {PackageId} in project: {ProjectFilePath}",
+                            include,
+                            projectFilePath
+                        );
+                        continue;
+                    }
                 }
 
                 var condition = packageRefElement.Attribute("Condition")?.Value;

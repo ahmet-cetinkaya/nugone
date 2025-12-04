@@ -354,10 +354,23 @@ public class AnalyzePackageUsageHandler(
     {
         try
         {
+            Dictionary<string, string>? centralPackageVersions = null;
+            if (
+                solution.CentralPackageManagementEnabled
+                && !string.IsNullOrEmpty(solution.DirectoryPackagesPropsPath)
+            )
+            {
+                centralPackageVersions = await _solutionRepository.LoadCentralPackageVersionsAsync(
+                    solution.DirectoryPackagesPropsPath,
+                    cancellationToken
+                );
+            }
+
             foreach (var project in solution.Projects)
             {
                 var packageReferences = await _nugetRepository.ExtractPackageReferencesAsync(
                     project.FilePath,
+                    centralPackageVersions,
                     cancellationToken
                 );
 

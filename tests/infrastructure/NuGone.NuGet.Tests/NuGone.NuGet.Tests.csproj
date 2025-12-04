@@ -16,7 +16,7 @@
     <PackageReference Include="Moq" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\infrastructure\NuGone.NuGet\NuGone.NuGet.csproj" />
-    <ProjectReference Include="..\..\src\core\NuGone.Domain\NuGone.Domain.csproj" />
+    <ProjectReference Include="..\..\..\src\infrastructure\NuGone.NuGet\NuGone.NuGet.csproj" />
+    <ProjectReference Include="..\..\..\src\core\NuGone.Domain\NuGone.Domain.csproj" />
   </ItemGroup>
 </Project>

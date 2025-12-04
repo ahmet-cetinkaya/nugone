@@ -17,6 +17,7 @@ public interface INuGetRepository
     /// <returns>Collection of package references</returns>
     Task<IEnumerable<PackageReference>> ExtractPackageReferencesAsync(
         string projectFilePath,
+        Dictionary<string, string>? centralPackageVersions = null,
         CancellationToken cancellationToken = default
     );
 

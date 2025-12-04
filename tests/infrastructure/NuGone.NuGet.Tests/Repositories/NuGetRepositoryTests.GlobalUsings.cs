@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using NuGone.Domain.Features.PackageAnalysis.Entities;
 using NuGone.NuGet.Repositories;
+using Xunit;
 
 namespace NuGone.NuGet.Tests.Repositories;
 
