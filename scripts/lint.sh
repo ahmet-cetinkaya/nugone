@@ -69,23 +69,24 @@ else
 fi
 
 print_section "🔍 Running Roslynator analysis"
-if dotnet tool list | grep -q "roslynator.dotnet.cli" || command -v roslynator &>/dev/null; then
-  if dotnet tool list | grep -q "roslynator.dotnet.cli"; then
+if dotnet tool list | grep -q "roslynator.dotnet.cli"; then
     ROSLYNATOR_CMD="dotnet roslynator"
-  else
+elif command -v roslynator &>/dev/null; then
     ROSLYNATOR_CMD="roslynator"
-  fi
-
-  print_info "Analyzing code with Roslynator..."
-  if $ROSLYNATOR_CMD analyze "$SOLUTION_FILE"; then
-    print_success "Roslynator analysis completed successfully"
-  else
-    print_error "Roslynator found issues"
-    OVERALL_SUCCESS=1
-  fi
 else
-  print_warning "Roslynator is not installed"
-  print_info "Install it with: dotnet tool restore"
+    print_warning "Roslynator is not installed"
+    print_info "Install it with: dotnet tool restore"
+fi
+
+# Only run Roslynator if it was found
+if [ -n "$ROSLYNATOR_CMD" ]; then
+    print_info "Analyzing code with Roslynator..."
+    if $ROSLYNATOR_CMD analyze "$SOLUTION_FILE"; then
+        print_success "Roslynator analysis completed successfully"
+    else
+        print_error "Roslynator found issues"
+        OVERALL_SUCCESS=1
+    fi
 fi
 
 print_section "🔍 Running additional code analysis"
