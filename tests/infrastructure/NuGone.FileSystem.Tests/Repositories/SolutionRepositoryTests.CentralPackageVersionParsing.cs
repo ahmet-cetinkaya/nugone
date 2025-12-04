@@ -30,7 +30,10 @@ public class SolutionRepositoryTests_CentralPackageVersionParsing : SolutionRepo
         FileSystem.AddFile(propsPath, new MockFileData(propsContent));
 
         // Act
-        var result = await Repository.LoadCentralPackageVersionsAsync(propsPath, CancellationToken.None);
+        var result = await Repository.LoadCentralPackageVersionsAsync(
+            propsPath,
+            CancellationToken.None
+        );
 
         // Assert
         result.ShouldNotBeNull();
@@ -64,7 +67,10 @@ public class SolutionRepositoryTests_CentralPackageVersionParsing : SolutionRepo
         FileSystem.AddFile(propsPath, new MockFileData(propsContent));
 
         // Act
-        var result = await Repository.LoadCentralPackageVersionsAsync(propsPath, CancellationToken.None);
+        var result = await Repository.LoadCentralPackageVersionsAsync(
+            propsPath,
+            CancellationToken.None
+        );
 
         // Assert
         result.ShouldNotBeNull();
@@ -99,7 +105,10 @@ public class SolutionRepositoryTests_CentralPackageVersionParsing : SolutionRepo
         FileSystem.AddFile(propsPath, new MockFileData(propsContent));
 
         // Act
-        var result = await Repository.LoadCentralPackageVersionsAsync(propsPath, CancellationToken.None);
+        var result = await Repository.LoadCentralPackageVersionsAsync(
+            propsPath,
+            CancellationToken.None
+        );
 
         // Assert
         result.ShouldNotBeNull();
@@ -123,8 +132,9 @@ public class SolutionRepositoryTests_CentralPackageVersionParsing : SolutionRepo
         FileSystem.AddFile(propsPath, new MockFileData(malformedContent));
 
         // Act & Assert
-        await Should.ThrowAsync<System.Xml.XmlException>(
-            () => Repository.LoadCentralPackageVersionsAsync(propsPath, CancellationToken.None));
+        await Should.ThrowAsync<System.Xml.XmlException>(() =>
+            Repository.LoadCentralPackageVersionsAsync(propsPath, CancellationToken.None)
+        );
     }
 
     [Fact]
@@ -149,7 +159,10 @@ public class SolutionRepositoryTests_CentralPackageVersionParsing : SolutionRepo
         FileSystem.AddFile(propsPath, new MockFileData(propsContent));
 
         // Act
-        var result = await Repository.LoadCentralPackageVersionsAsync(propsPath, CancellationToken.None);
+        var result = await Repository.LoadCentralPackageVersionsAsync(
+            propsPath,
+            CancellationToken.None
+        );
 
         // Assert
         result.ShouldNotBeNull();
@@ -191,7 +204,10 @@ public class SolutionRepositoryTests_CentralPackageVersionParsing : SolutionRepo
         FileSystem.AddFile(propsPath, new MockFileData(propsContent));
 
         // Act
-        var result = await Repository.LoadCentralPackageVersionsAsync(propsPath, CancellationToken.None);
+        var result = await Repository.LoadCentralPackageVersionsAsync(
+            propsPath,
+            CancellationToken.None
+        );
 
         // Assert
         result.ShouldNotBeNull();
@@ -226,7 +242,10 @@ public class SolutionRepositoryTests_CentralPackageVersionParsing : SolutionRepo
         FileSystem.AddFile(propsPath, new MockFileData(propsContent));
 
         // Act
-        var result = await Repository.LoadCentralPackageVersionsAsync(propsPath, CancellationToken.None);
+        var result = await Repository.LoadCentralPackageVersionsAsync(
+            propsPath,
+            CancellationToken.None
+        );
 
         // Assert
         result.ShouldNotBeNull();
@@ -262,7 +281,10 @@ public class SolutionRepositoryTests_CentralPackageVersionParsing : SolutionRepo
         FileSystem.AddFile(propsPath, new MockFileData(propsContent));
 
         // Act
-        var result = await Repository.LoadCentralPackageVersionsAsync(propsPath, CancellationToken.None);
+        var result = await Repository.LoadCentralPackageVersionsAsync(
+            propsPath,
+            CancellationToken.None
+        );
 
         // Assert
         result.ShouldNotBeNull();
@@ -294,7 +316,10 @@ public class SolutionRepositoryTests_CentralPackageVersionParsing : SolutionRepo
         FileSystem.AddFile(propsPath, new MockFileData(propsContent));
 
         // Act
-        var result = await Repository.LoadCentralPackageVersionsAsync(propsPath, CancellationToken.None);
+        var result = await Repository.LoadCentralPackageVersionsAsync(
+            propsPath,
+            CancellationToken.None
+        );
 
         // Assert
         result.ShouldNotBeNull();
