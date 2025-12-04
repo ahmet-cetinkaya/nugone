@@ -33,6 +33,18 @@ public interface ISolutionRepository
     );
 
     /// <summary>
+    /// Loads central package versions from Directory.Packages.props.
+    /// RFC-0002: Central package version resolution.
+    /// </summary>
+    /// <param name="directoryPackagesPropsPath">Path to the Directory.Packages.props file</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Dictionary of package versions</returns>
+    Task<Dictionary<string, string>> LoadCentralPackageVersionsAsync(
+        string directoryPackagesPropsPath,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
     /// Resolves the full path to a project file relative to the solution directory.
     /// </summary>
     /// <param name="solutionDirectoryPath">Path to the solution directory</param>

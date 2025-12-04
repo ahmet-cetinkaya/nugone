@@ -140,12 +140,22 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
         CancellationToken cancellationToken = default
     )
     {
-        var directoryPackagesPropsPath = _fileSystem.Path.Combine(
-            solutionDirectoryPath,
-            "Directory.Packages.props"
-        );
+        var currentDirectory = solutionDirectoryPath;
+        string? directoryPackagesPropsPath = null;
 
-        if (!_fileSystem.File.Exists(directoryPackagesPropsPath))
+        while (!string.IsNullOrEmpty(currentDirectory))
+        {
+            var path = _fileSystem.Path.Combine(currentDirectory, "Directory.Packages.props");
+            if (_fileSystem.File.Exists(path))
+            {
+                directoryPackagesPropsPath = path;
+                break;
+            }
+
+            currentDirectory = _fileSystem.Path.GetDirectoryName(currentDirectory);
+        }
+
+        if (directoryPackagesPropsPath == null)
             return (false, null);
 
         try

@@ -38,7 +38,7 @@ public partial class SolutionRepositoryTests
             solution.ShouldNotBeNull();
             solution.Name.ShouldBe("MySolution");
             solution.FilePath.ShouldBe(solutionPath);
-            solution.Projects.ShouldHaveCount(2);
+            solution.Projects.Count.ShouldBe(2);
             solution.Projects.ShouldContain(p => p.Name == "Project1");
             solution.Projects.ShouldContain(p => p.Name == "Project2");
         }
@@ -67,7 +67,7 @@ public partial class SolutionRepositoryTests
 
             // Assert
             solution.ShouldNotBeNull();
-            solution.Projects.ShouldHaveCount(1);
+            solution.Projects.Count.ShouldBe(1);
             solution.Projects.ShouldContain(p => p.Name == "Project1");
         }
 
@@ -94,7 +94,7 @@ public partial class SolutionRepositoryTests
 
             // Assert
             solution.ShouldNotBeNull();
-            solution.Projects.ShouldHaveCount(1);
+            solution.Projects.Count.ShouldBe(1);
             solution.Projects.ShouldContain(p => p.Name == "Project1");
         }
 
@@ -121,7 +121,7 @@ public partial class SolutionRepositoryTests
 
             // Assert
             solution.ShouldNotBeNull();
-            solution.Projects.ShouldHaveCount(1);
+            solution.Projects.Count.ShouldBe(1);
             solution.Projects.ShouldContain(p => p.Name == "Project1");
         }
 
@@ -148,7 +148,7 @@ public partial class SolutionRepositoryTests
 
             // Assert
             solution.ShouldNotBeNull();
-            solution.Projects.ShouldHaveCount(1);
+            solution.Projects.Count.ShouldBe(1);
             solution.Projects.ShouldContain(p => p.Name == "Project1");
         }
 
@@ -176,7 +176,7 @@ public partial class SolutionRepositoryTests
 
             // Assert
             solution.ShouldNotBeNull();
-            solution.Projects.ShouldHaveCount(2);
+            solution.Projects.Count.ShouldBe(2);
             solution.Projects.ShouldContain(p =>
                 p.FilePath == @"C:\Projects\Project1\Project1.csproj"
             );
@@ -205,7 +205,7 @@ public partial class SolutionRepositoryTests
 
             // Assert
             solution.ShouldNotBeNull();
-            solution.Projects.ShouldHaveCount(1);
+            solution.Projects.Count.ShouldBe(1);
             solution.Projects.ShouldContain(p => p.Name == "Project1");
         }
 
@@ -233,7 +233,7 @@ public partial class SolutionRepositoryTests
 
             // Assert
             solution.ShouldNotBeNull();
-            solution.Projects.ShouldHaveCount(2);
+            solution.Projects.Count.ShouldBe(2);
             solution.Projects.ShouldContain(p =>
                 p.FilePath == @"C:\Test\src\Project1\Project1.csproj"
             );
@@ -270,7 +270,7 @@ public partial class SolutionRepositoryTests
 
             // Assert
             solution.ShouldNotBeNull();
-            solution.Projects.ShouldHaveCount(3);
+            solution.Projects.Count.ShouldBe(3);
             solution.Projects.ShouldContain(p => p.Name == "Project1");
             solution.Projects.ShouldContain(p => p.Name == "Project2");
             solution.Projects.ShouldContain(p => p.Name == "Service1");

@@ -4,8 +4,8 @@
   </PropertyGroup>
   <!-- Common Packages Used Across Multiple Projects -->
   <ItemGroup Label="Microsoft Extensions - Common">
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.7" />
-    <PackageVersion Include="Microsoft.Extensions.Logging" Version="9.0.7" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="9.0.10" />
+    <PackageVersion Include="Microsoft.Extensions.Logging" Version="9.0.10" />
   </ItemGroup>
   <!-- Common Test Framework Packages for All Test Projects -->
   <ItemGroup Label="Testing - Common">
@@ -18,5 +18,7 @@
     <PackageVersion Include="Spectre.Console" Version="0.53.0" />
     <PackageVersion Include="Spectre.Console.Testing" Version="0.53.0" />
     <PackageVersion Include="System.IO.Abstractions.TestingHelpers" Version="22.0.16" />
+    <PackageVersion Include="FluentAssertions" Version="6.12.0" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.10" />
   </ItemGroup>
 </Project>
