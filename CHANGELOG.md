@@ -47,6 +47,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Move TypeRegistrar and TypeResolver to NuGone.Cli.Infrastructure namespace
 
+## [2.0.1] - 2025-12-06
+
+### Added
+
+- Central package management (CPM) support with Directory.Packages.props detection
+- .NET 10 compatibility support through RollForward Major setting
+
+### Changed
+
+- Updated project documentation and banner images
+
+### Fixed
+
+- Fixed version display consistency between CLI and package metadata
+- Corrected central package management detection edge cases
+- Improved error handling in package version resolution
+
 ## [Unreleased]
 
 ### Added
@@ -82,6 +99,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Setup .NET 9.0 SDK in NuGet release workflow.
 - Update GitHub Actions workflow for release process.
 
+[2.0.1]: https://github.com/ahmet-cetinkaya/nugone/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/ahmet-cetinkaya/nugone/compare/v1.1.0...v2.0.0
 [1.1.0]: https://github.com/ahmet-cetinkaya/nugone/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/ahmet-cetinkaya/nugone/releases/tag/v1.0.0

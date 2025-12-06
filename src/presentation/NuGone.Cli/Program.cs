@@ -23,7 +23,7 @@ app.Configure(config =>
 {
     // Configure application metadata
     _ = config.SetApplicationName("nugone");
-    _ = config.SetApplicationVersion("1.1.0");
+    _ = config.SetApplicationVersion("2.0.1");
 
     // Add commands following RFC-0001 structure
     _ = config
