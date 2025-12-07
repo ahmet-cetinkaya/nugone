@@ -30,7 +30,10 @@ public class DotnetToolSettingsTests
         var dir = new DirectoryInfo(startDir);
         while (dir != null)
         {
-            if (dir.GetFiles("*.sln").Length > 0)
+            // Look for both .sln and .slnx files
+            var slnFiles = dir.GetFiles("*.sln");
+            var slnxFiles = dir.GetFiles("*.slnx");
+            if (slnFiles.Length > 0 || slnxFiles.Length > 0)
             {
                 return dir.FullName;
             }

@@ -30,6 +30,8 @@ public class NuGetRepositoryGlobalUsingsTests : IDisposable
         {
             Directory.Delete(_tempDirectory, true);
         }
+
+        GC.SuppressFinalize(this);
     }
 
     [Fact]
