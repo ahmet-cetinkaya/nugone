@@ -317,9 +317,10 @@ public class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
                 namespaces.AddRange(["System.Text.Json", "System.Text.Json.Serialization"]);
                 break;
             case "microsoft.extensions.logging":
-                namespaces.AddRange(
-                    ["Microsoft.Extensions.Logging", "Microsoft.Extensions.DependencyInjection"]
-                );
+                namespaces.AddRange([
+                    "Microsoft.Extensions.Logging",
+                    "Microsoft.Extensions.DependencyInjection",
+                ]);
                 break;
             case "spectre.console":
                 namespaces.AddRange(["Spectre.Console", "Spectre.Console.Cli"]);

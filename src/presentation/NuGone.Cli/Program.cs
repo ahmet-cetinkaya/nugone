@@ -1,8 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using NuGone.Application.Shared.Extensions;
 using NuGone.Cli.Features.AnalyzeCommand.Commands;
-// using NuGone.Cli.Features.ConfigCommand.Commands;
-// using NuGone.Cli.Features.RemoveCommand.Commands;
 using NuGone.Cli.Infrastructure;
 using NuGone.FileSystem.Extensions;
 using NuGone.NuGet.Extensions;
