@@ -260,7 +260,8 @@ public class ProjectRepository(
             // Return the first target framework for simplicity
             return targetFrameworks
                     .Split(';', StringSplitOptions.RemoveEmptyEntries)
-                    .FirstOrDefault() ?? "net9.0";
+                    .FirstOrDefault()
+                ?? "net9.0";
         }
 
         // Default to net9.0 if not found
