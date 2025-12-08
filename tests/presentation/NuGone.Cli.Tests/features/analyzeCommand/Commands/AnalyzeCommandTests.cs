@@ -79,8 +79,7 @@ public partial class AnalyzeCommandTests
         // Override to prevent actual execution during tests
         protected override async Task<Result<int>> ExecuteCommandAsync(
             CommandContext context,
-            Settings settings,
-            CancellationToken cancellationToken = default
+            Settings settings
         )
         {
             await Task.CompletedTask;
