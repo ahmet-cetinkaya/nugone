@@ -1,15 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <!-- Packages -->
   <ItemGroup>
-    <PackageReference Include="System.IO.Abstractions" Version="21.0.29" />
-    <PackageReference
-      Include="Microsoft.Extensions.DependencyInjection"
-      Version="$(MicrosoftExtensionsVersion)"
-    />
-    <PackageReference
-      Include="Microsoft.Extensions.Logging"
-      Version="$(MicrosoftExtensionsVersion)"
-    />
+    <PackageReference Include="System.IO.Abstractions" Version="22.1.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.0" />
   </ItemGroup>
   <!-- References -->
   <ItemGroup>
