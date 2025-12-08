@@ -1,26 +1,26 @@
 <Solution>
-  <Folder Name="/src/" />
-  <Folder Name="/src/core/">
-    <Project Path="src/core/NuGone.Application/NuGone.Application.csproj" />
-    <Project Path="src/core/NuGone.Domain/NuGone.Domain.csproj" />
-  </Folder>
-  <Folder Name="/src/infrastructure/">
-    <Project Path="src/infrastructure/NuGone.FileSystem/NuGone.FileSystem.csproj" />
-    <Project Path="src/infrastructure/NuGone.NuGet/NuGone.NuGet.csproj" />
-  </Folder>
-  <Folder Name="/src/presentation/">
-    <Project Path="src/presentation/NuGone.Cli/NuGone.Cli.csproj" />
-  </Folder>
-  <Folder Name="/tests/" />
-  <Folder Name="/tests/core/">
-    <Project Path="tests/core/NuGone.Application.Tests/NuGone.Application.Tests.csproj" />
-    <Project Path="tests/core/NuGone.Domain.Tests/NuGone.Domain.Tests.csproj" />
-  </Folder>
-  <Folder Name="/tests/infrastructure/">
-    <Project Path="tests/infrastructure/NuGone.FileSystem.Tests/NuGone.FileSystem.Tests.csproj" />
-    <Project Path="tests/infrastructure/NuGone.NuGet.Tests/NuGone.NuGet.Tests.csproj" />
-  </Folder>
-  <Folder Name="/tests/presentation/">
-    <Project Path="tests/presentation/NuGone.Cli.Tests/NuGone.Cli.Tests.csproj" />
-  </Folder>
+    <Folder Name="/src/" />
+    <Folder Name="/src/core/">
+        <Project Path="src/core/NuGone.Application/NuGone.Application.csproj" />
+        <Project Path="src/core/NuGone.Domain/NuGone.Domain.csproj" />
+    </Folder>
+    <Folder Name="/src/infrastructure/">
+        <Project Path="src/infrastructure/NuGone.FileSystem/NuGone.FileSystem.csproj" />
+        <Project Path="src/infrastructure/NuGone.NuGet/NuGone.NuGet.csproj" />
+    </Folder>
+    <Folder Name="/src/presentation/">
+        <Project Path="src/presentation/NuGone.Cli/NuGone.Cli.csproj" />
+    </Folder>
+    <Folder Name="/tests/" />
+    <Folder Name="/tests/core/">
+        <Project Path="tests/core/NuGone.Application.Tests/NuGone.Application.Tests.csproj" />
+        <Project Path="tests/core/NuGone.Domain.Tests/NuGone.Domain.Tests.csproj" />
+    </Folder>
+    <Folder Name="/tests/infrastructure/">
+        <Project Path="tests/infrastructure/NuGone.FileSystem.Tests/NuGone.FileSystem.Tests.csproj" />
+        <Project Path="tests/infrastructure/NuGone.NuGet.Tests/NuGone.NuGet.Tests.csproj" />
+    </Folder>
+    <Folder Name="/tests/presentation/">
+        <Project Path="tests/presentation/NuGone.Cli.Tests/NuGone.Cli.Tests.csproj" />
+    </Folder>
 </Solution>

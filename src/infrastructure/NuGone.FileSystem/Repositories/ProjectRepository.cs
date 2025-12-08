@@ -10,7 +10,7 @@ namespace NuGone.FileSystem.Repositories;
 /// File system implementation of the project repository.
 /// Handles project file discovery and parsing as specified in RFC-0002.
 /// </summary>
-public class ProjectRepository(
+public partial class ProjectRepository(
     IFileSystem fileSystem,
     INuGetRepository nugetRepository,
     ILogger<ProjectRepository> logger
@@ -35,11 +35,11 @@ public class ProjectRepository(
         CancellationToken cancellationToken = default
     )
     {
-        _logger.LogDebug("Discovering project files in: {RootPath}", rootPath);
+        LogDiscoveringProjectFiles(rootPath);
 
         if (!await ExistsAsync(rootPath))
         {
-            _logger.LogWarning("Root path does not exist: {RootPath}", rootPath);
+            LogRootPathNotExists(rootPath);
             return Enumerable.Empty<string>();
         }
 
@@ -57,21 +57,17 @@ public class ProjectRepository(
                 if (IsProjectFile(file.Extension))
                 {
                     projectFiles.Add(file.FullName);
-                    _logger.LogDebug("Found project file: {ProjectFile}", file.FullName);
+                    LogFoundProjectFile(file.FullName);
                 }
             }
         }
         catch (Exception ex) when (!(ex is OperationCanceledException))
         {
-            _logger.LogError(ex, "Error discovering project files in: {RootPath}", rootPath);
+            LogErrorDiscoveringProjectFiles(ex, rootPath);
             throw;
         }
 
-        _logger.LogInformation(
-            "Discovered {Count} project file(s) in: {RootPath}",
-            projectFiles.Count,
-            rootPath
-        );
+        LogDiscoveredProjectFiles(projectFiles.Count, rootPath);
         return projectFiles;
     }
 
@@ -85,7 +81,7 @@ public class ProjectRepository(
         CancellationToken cancellationToken = default
     )
     {
-        _logger.LogDebug("Loading project: {ProjectFilePath}", projectFilePath);
+        LogLoadingProject(projectFilePath);
 
         if (!await ExistsAsync(projectFilePath))
             throw new FileNotFoundException($"Project file not found: {projectFilePath}");
@@ -116,17 +112,12 @@ public class ProjectRepository(
             project.AddExcludePattern("**/.vs/**");
             project.AddExcludePattern("**/.git/**");
 
-            _logger.LogDebug(
-                "Loaded project: {ProjectName} ({TargetFramework}) with {GlobalUsingCount} global usings",
-                projectName,
-                targetFramework,
-                project.GlobalUsings.Count
-            );
+            LogLoadedProject(projectName, targetFramework, project.GlobalUsings.Count);
             return project;
         }
         catch (Exception ex) when (!(ex is OperationCanceledException))
         {
-            _logger.LogError(ex, "Error loading project: {ProjectFilePath}", projectFilePath);
+            LogErrorLoadingProject(ex, projectFilePath);
             throw;
         }
     }
@@ -140,15 +131,12 @@ public class ProjectRepository(
         CancellationToken cancellationToken = default
     )
     {
-        _logger.LogDebug("Getting source files for project: {ProjectName}", project.Name);
+        LogGettingSourceFiles(project.Name);
 
         var projectDirectory = GetDirectoryPath(project.FilePath);
         if (!await ExistsAsync(projectDirectory))
         {
-            _logger.LogWarning(
-                "Project directory does not exist: {ProjectDirectory}",
-                projectDirectory
-            );
+            LogProjectDirectoryNotExists(projectDirectory);
             return Enumerable.Empty<string>();
         }
 
@@ -172,19 +160,11 @@ public class ProjectRepository(
         }
         catch (Exception ex) when (!(ex is OperationCanceledException))
         {
-            _logger.LogError(
-                ex,
-                "Error getting source files for project: {ProjectName}",
-                project.Name
-            );
+            LogErrorGettingSourceFiles(ex, project.Name);
             throw;
         }
 
-        _logger.LogDebug(
-            "Found {Count} source file(s) for project: {ProjectName}",
-            sourceFiles.Count,
-            project.Name
-        );
+        LogFoundSourceFiles(sourceFiles.Count, project.Name);
         return sourceFiles;
     }
 
@@ -206,7 +186,7 @@ public class ProjectRepository(
         }
         catch (Exception ex) when (!(ex is OperationCanceledException))
         {
-            _logger.LogError(ex, "Error reading file: {FilePath}", filePath);
+            LogErrorReadingFile(ex, filePath);
             throw;
         }
     }

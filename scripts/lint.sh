@@ -29,12 +29,12 @@ fi
 print_info "Checking .NET SDK version..."
 if DOTNET_VERSION=$($DOTNET_CMD --version 2>/dev/null); then
   print_info "Found .NET SDK version: $DOTNET_VERSION"
-  # Check if version is at least 9.0 (required by the project)
+  # Check if version is at least 8.0 (minimum required by the project)
   MAJOR_VERSION=$(echo "$DOTNET_VERSION" | cut -d. -f1)
-  if [ "$MAJOR_VERSION" -lt 9 ]; then
-    print_warning ".NET SDK 9.0 or higher is recommended for this project"
-    print_info "Some build/analysis steps may fail with SDK version $DOTNET_VERSION"
-    print_info "Download .NET 9.0 SDK from: https://dotnet.microsoft.com/download"
+  if [ "$MAJOR_VERSION" -lt 8 ]; then
+    print_error ".NET SDK 8.0 or higher is required for this project"
+    print_info "Download .NET 8.0+ SDK from: https://dotnet.microsoft.com/download"
+    exit 1
   fi
 else
   print_error ".NET SDK is not installed or not in PATH"
@@ -78,6 +78,32 @@ fi
 
 # Track overall success
 OVERALL_SUCCESS=0
+
+print_section "📦 Restoring NuGet packages"
+if [ "$USE_PROJECTS" = true ]; then
+  # Restore each project individually
+  RESTORE_SUCCESS=true
+  while IFS= read -r project; do
+    if ! $DOTNET_CMD restore "$project"; then
+      RESTORE_SUCCESS=false
+    fi
+  done <<<"$PROJECT_FILES"
+
+  if [ "$RESTORE_SUCCESS" = true ]; then
+    print_success "Package restore completed successfully"
+  else
+    print_error "Package restore failed"
+    OVERALL_SUCCESS=1
+  fi
+else
+  # Restore the entire solution
+  if $DOTNET_CMD restore "$SOLUTION_FILE"; then
+    print_success "Package restore completed successfully"
+  else
+    print_error "Package restore failed"
+    OVERALL_SUCCESS=1
+  fi
+fi
 
 print_section "🏗️  Running dotnet build (treat warnings as errors)"
 if [ "$USE_PROJECTS" = true ]; then
@@ -168,6 +194,7 @@ else
   # Only run Roslynator if it was found
   if [ -n "$ROSLYNATOR_CMD" ]; then
     print_info "Analyzing code with Roslynator..."
+    # Use --severity-level warning to only report warnings and errors, not info diagnostics
     if $ROSLYNATOR_CMD analyze "$SOLUTION_FILE"; then
       print_success "Roslynator analysis completed successfully"
     else

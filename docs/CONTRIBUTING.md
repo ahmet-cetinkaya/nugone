@@ -4,7 +4,7 @@ Thank you for your interest in contributing to NuGone! This document explains ho
 
 ## 📋 Requirements
 
-- .NET 9+ (primary target)
+- .NET 8+
 - Windows, macOS, or Linux
 - .NET SDK ([Download here](https://dotnet.microsoft.com/download))
 - Git
@@ -34,7 +34,15 @@ git checkout -b feat/your-feature-name
 dotnet build -c Release
 ```
 
-### 5. Run Tests (Optional)
+### 5. Run Tests
+
+We provide a script to run tests and verification checks:
+
+```bash
+./scripts/test.sh
+```
+
+Alternatively, you can run tests manually:
 
 ```bash
 dotnet test

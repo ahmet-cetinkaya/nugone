@@ -4,6 +4,8 @@ using NuGone.Domain.Features.PackageAnalysis.Entities;
 using Shouldly;
 using Xunit;
 
+#pragma warning disable CA1873 // Avoid potentially expensive logging in test verifications
+
 namespace NuGone.Application.Tests.Features.PackageAnalysis.Services;
 
 /// <summary>

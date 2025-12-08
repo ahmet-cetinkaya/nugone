@@ -49,7 +49,7 @@ public partial class ConfigCommandTests
         var settings = new ConfigCommand.Settings { Action = "list" };
 
         // Act
-        var result = command.Execute(context, settings, CancellationToken.None);
+        var result = command.Execute(context, settings);
 
         // Assert
         result.ShouldBe(ExitCodes.Success);

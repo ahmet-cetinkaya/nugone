@@ -10,7 +10,7 @@ namespace NuGone.Application.Features.PackageAnalysis.Commands.AnalyzePackageUsa
 /// Command handler for analyzing package usage in a solution or project.
 /// Implements the core algorithm specified in RFC-0002.
 /// </summary>
-public class AnalyzePackageUsageHandler(
+public partial class AnalyzePackageUsageHandler(
     ISolutionRepository solutionRepository,
     IProjectRepository projectRepository,
     INuGetRepository nugetRepository,
@@ -45,10 +45,7 @@ public class AnalyzePackageUsageHandler(
 
         try
         {
-            _logger.LogInformation(
-                "Starting package usage analysis for path: {Path}",
-                command.Path
-            );
+            LogStartingAnalysis(command.Path);
 
             // Step 1: Validate input
             var validationResult = ValidateCommand(command);
@@ -87,10 +84,7 @@ public class AnalyzePackageUsageHandler(
                 return Result<AnalyzePackageUsageResult>.Failure(analysisResult.Error);
 
             stopwatch.Stop();
-            _logger.LogInformation(
-                "Package usage analysis completed in {ElapsedTime}",
-                stopwatch.Elapsed
-            );
+            LogAnalysisCompleted(stopwatch.Elapsed);
 
             var result = new AnalyzePackageUsageResult(
                 command.Path,
@@ -243,7 +237,7 @@ public class AnalyzePackageUsageHandler(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error loading solution: {SolutionPath}", solutionPath);
+            LogErrorLoadingSolution(ex, solutionPath);
             return Result<Solution>.Failure(
                 "SOLUTION_LOAD_ERROR",
                 $"Failed to load solution: {ex.Message}"
@@ -269,7 +263,7 @@ public class AnalyzePackageUsageHandler(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error loading project as solution: {ProjectPath}", projectPath);
+            LogErrorLoadingProjectAsSolution(ex, projectPath);
             return Result<Solution>.Failure(
                 "PROJECT_LOAD_ERROR",
                 $"Failed to load project: {ex.Message}"
@@ -324,11 +318,7 @@ public class AnalyzePackageUsageHandler(
         }
         catch (Exception ex)
         {
-            _logger.LogError(
-                ex,
-                "Error loading directory as solution: {DirectoryPath}",
-                directoryPath
-            );
+            LogErrorLoadingDirectoryAsSolution(ex, directoryPath);
             return Result<Solution>.Failure(
                 "DIRECTORY_LOAD_ERROR",
                 $"Failed to load directory: {ex.Message}"

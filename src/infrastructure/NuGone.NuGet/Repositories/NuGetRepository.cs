@@ -9,7 +9,7 @@ namespace NuGone.NuGet.Repositories;
 /// NuGet implementation of the NuGet repository.
 /// Handles package reference extraction and metadata operations as specified in RFC-0002.
 /// </summary>
-public class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
+public partial class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
 {
     private readonly ILogger<NuGetRepository> _logger =
         logger ?? throw new ArgumentNullException(nameof(logger));
@@ -48,7 +48,7 @@ public class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
         CancellationToken cancellationToken = default
     )
     {
-        _logger.LogDebug("Extracting package references from: {ProjectFilePath}", projectFilePath);
+        LogExtractingPackageReferences(projectFilePath);
 
         if (!File.Exists(projectFilePath))
             throw new FileNotFoundException($"Project file not found: {projectFilePath}");
@@ -91,11 +91,7 @@ public class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
                     }
                     else
                     {
-                        _logger.LogWarning(
-                            "No version found for package: {PackageId} in project: {ProjectFilePath}",
-                            include,
-                            projectFilePath
-                        );
+                        LogNoVersionFound(include, projectFilePath);
                         continue;
                     }
                 }
@@ -114,21 +110,17 @@ public class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
                 packageReferences.Add(packageRef);
             }
 
-            _logger.LogDebug(
-                "Extracted {Count} package reference(s) from: {ProjectFilePath}, {GlobalUsingCount} with global usings",
+            var globalUsingCount = packageReferences.Count(p => p.HasGlobalUsing);
+            LogExtractedPackageReferences(
                 packageReferences.Count,
                 projectFilePath,
-                packageReferences.Count(p => p.HasGlobalUsing)
+                globalUsingCount
             );
             return packageReferences;
         }
         catch (Exception ex) when (!(ex is OperationCanceledException))
         {
-            _logger.LogError(
-                ex,
-                "Error extracting package references from: {ProjectFilePath}",
-                projectFilePath
-            );
+            LogErrorExtractingPackageReferences(ex, projectFilePath);
             throw;
         }
     }
@@ -144,12 +136,7 @@ public class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
         CancellationToken cancellationToken = default
     )
     {
-        _logger.LogDebug(
-            "Getting namespaces for package: {PackageId} {Version} ({TargetFramework})",
-            packageId,
-            version,
-            targetFramework
-        );
+        LogGettingNamespaces(packageId, version, targetFramework);
 
         // For now, return common namespace patterns based on package ID
         // In a full implementation, this would analyze the actual package assemblies
@@ -169,7 +156,7 @@ public class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
         CancellationToken cancellationToken = default
     )
     {
-        _logger.LogDebug("Getting metadata for package: {PackageId} {Version}", packageId, version);
+        LogGettingMetadata(packageId, version);
 
         // For now, return basic metadata based on known patterns
         // In a full implementation, this would query NuGet API or local cache
@@ -195,12 +182,7 @@ public class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
         CancellationToken cancellationToken = default
     )
     {
-        _logger.LogDebug(
-            "Resolving transitive dependencies for: {PackageId} {Version} ({TargetFramework})",
-            packageId,
-            version,
-            targetFramework
-        );
+        LogResolvingTransitiveDependencies(packageId, version, targetFramework);
 
         // For now, return empty collection
         // In a full implementation, this would analyze package dependencies
@@ -232,7 +214,7 @@ public class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
         CancellationToken cancellationToken = default
     )
     {
-        _logger.LogDebug("Extracting global usings from: {ProjectFilePath}", projectFilePath);
+        LogExtractingGlobalUsings(projectFilePath);
 
         if (!File.Exists(projectFilePath))
             throw new FileNotFoundException($"Project file not found: {projectFilePath}");
@@ -255,20 +237,12 @@ public class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
                 globalUsings.Add(globalUsing);
             }
 
-            _logger.LogDebug(
-                "Extracted {Count} global using(s) from: {ProjectFilePath}",
-                globalUsings.Count,
-                projectFilePath
-            );
+            LogExtractedGlobalUsings(globalUsings.Count, projectFilePath);
             return globalUsings;
         }
         catch (Exception ex) when (!(ex is OperationCanceledException))
         {
-            _logger.LogError(
-                ex,
-                "Error extracting global usings from: {ProjectFilePath}",
-                projectFilePath
-            );
+            LogErrorExtractingGlobalUsings(ex, projectFilePath);
             throw;
         }
     }

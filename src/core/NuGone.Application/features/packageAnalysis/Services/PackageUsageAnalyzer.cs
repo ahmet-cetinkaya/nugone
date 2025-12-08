@@ -35,10 +35,7 @@ public partial class PackageUsageAnalyzer(
         CancellationToken cancellationToken = default
     )
     {
-        _logger.LogInformation(
-            "Starting package usage analysis for solution: {SolutionName}",
-            solution.Name
-        );
+        LogStartingAnalysis(solution.Name);
 
         foreach (var project in solution.Projects)
         {
@@ -46,10 +43,7 @@ public partial class PackageUsageAnalyzer(
             await AnalyzeProjectPackageUsageAsync(project, cancellationToken);
         }
 
-        _logger.LogInformation(
-            "Completed package usage analysis for solution: {SolutionName}",
-            solution.Name
-        );
+        LogCompletedAnalysis(solution.Name);
     }
 
     /// <summary>
@@ -61,7 +55,7 @@ public partial class PackageUsageAnalyzer(
         CancellationToken cancellationToken = default
     )
     {
-        _logger.LogDebug("Analyzing package usage for project: {ProjectName}", project.Name);
+        LogAnalyzingProject(project.Name);
 
         // Step 1: Get all source files for the project
         var sourceFiles = await _projectRepository.GetProjectSourceFilesAsync(
@@ -83,11 +77,7 @@ public partial class PackageUsageAnalyzer(
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            _logger.LogDebug(
-                "Analyzing package: {PackageId} in project: {ProjectName}",
-                packageRef.PackageId,
-                project.Name
-            );
+            LogAnalyzingPackage(packageRef.PackageId, project.Name);
 
             // Reset usage status before analysis
             packageRef.ResetUsageStatus();
@@ -107,19 +97,12 @@ public partial class PackageUsageAnalyzer(
                 }
             }
 
-            _logger.LogDebug(
-                "Package {PackageId} has {NamespaceCount} namespaces: {Namespaces}",
-                packageRef.PackageId,
-                allNamespaces.Count,
-                string.Join(", ", allNamespaces)
-            );
+            var namespacesString = string.Join(", ", allNamespaces);
+            LogPackageNamespaces(packageRef.PackageId, allNamespaces.Count, namespacesString);
 
             if (allNamespaces.Count == 0)
             {
-                _logger.LogWarning(
-                    "No namespaces found for package: {PackageId}",
-                    packageRef.PackageId
-                );
+                LogNoNamespacesFound(packageRef.PackageId);
                 continue;
             }
 
@@ -157,11 +140,8 @@ public partial class PackageUsageAnalyzer(
                 }
             }
 
-            _logger.LogDebug(
-                "Package {PackageId} usage scan found {UsageCount} namespace matches",
-                packageRef.PackageId,
-                usageResults.Sum(kvp => kvp.Value.Count)
-            );
+            var usageCount = usageResults.Sum(kvp => kvp.Value.Count);
+            LogPackageUsageScan(packageRef.PackageId, usageCount);
 
             // Mark package as used if any namespace usage was found
             foreach (var (namespaceName, usageLocations) in usageResults)
@@ -172,8 +152,7 @@ public partial class PackageUsageAnalyzer(
                 }
             }
 
-            _logger.LogDebug(
-                "Package {PackageId} analysis result: IsUsed={IsUsed}, UsageLocations={LocationCount}",
+            LogPackageAnalysisResult(
                 packageRef.PackageId,
                 packageRef.IsUsed,
                 packageRef.UsageLocations.Count
@@ -182,13 +161,7 @@ public partial class PackageUsageAnalyzer(
 
         var usedCount = project.PackageReferences.Count(p => p.IsUsed);
         var unusedCount = project.PackageReferences.Count(p => !p.IsUsed);
-
-        _logger.LogDebug(
-            "Project {ProjectName}: {UsedCount} used, {UnusedCount} unused packages",
-            project.Name,
-            usedCount,
-            unusedCount
-        );
+        LogProjectSummary(project.Name, usedCount, unusedCount);
     }
 
     /// <summary>
@@ -232,11 +205,7 @@ public partial class PackageUsageAnalyzer(
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(
-                    ex,
-                    "Error scanning file for namespace usage: {SourceFile}",
-                    sourceFile
-                );
+                LogErrorScanningFile(ex, sourceFile);
             }
         }
 
@@ -310,11 +279,7 @@ public partial class PackageUsageAnalyzer(
                 // RFC-0004: Avoid duplicate error logging for the same file across all package analyses
                 if (!errorLoggedFiles.Contains(sourceFile))
                 {
-                    _logger.LogWarning(
-                        ex,
-                        "Error scanning file for namespace usage: {SourceFile}",
-                        sourceFile
-                    );
+                    LogErrorScanningFile(ex, sourceFile);
                     _ = errorLoggedFiles.Add(sourceFile);
                 }
             }
@@ -368,11 +333,7 @@ public partial class PackageUsageAnalyzer(
                 // Avoid duplicate error logging for the same file across all package analyses
                 if (!errorLoggedFiles.Contains(sourceFile))
                 {
-                    _logger.LogWarning(
-                        ex,
-                        "Error scanning file for global namespace usage: {SourceFile}",
-                        sourceFile
-                    );
+                    LogErrorScanningGlobalUsage(ex, sourceFile);
                     _ = errorLoggedFiles.Add(sourceFile);
                 }
             }

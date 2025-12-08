@@ -21,11 +21,7 @@ public abstract class BaseCommand<TSettings> : Command<TSettings>
     /// <summary>
     /// Executes the command with standardized error handling using Result pattern.
     /// </summary>
-    public sealed override int Execute(
-        CommandContext context,
-        TSettings settings,
-        CancellationToken cancellationToken
-    )
+    public sealed override int Execute(CommandContext context, TSettings settings)
     {
         return GlobalExceptionHandler.ExecuteWithGlobalHandler(
             () =>
@@ -33,7 +29,7 @@ public abstract class BaseCommand<TSettings> : Command<TSettings>
                 // Check if this is an async command
                 if (this is IAsyncCommand<TSettings>)
                 {
-                    var asyncResult = ExecuteCommandAsync(context, settings, cancellationToken)
+                    var asyncResult = ExecuteCommandAsync(context, settings, CancellationToken.None)
                         .GetAwaiter()
                         .GetResult();
                     return asyncResult.Match(
