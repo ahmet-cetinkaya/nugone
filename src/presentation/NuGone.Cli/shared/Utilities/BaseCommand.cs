@@ -21,7 +21,11 @@ public abstract class BaseCommand<TSettings> : Command<TSettings>
     /// <summary>
     /// Executes the command with standardized error handling using Result pattern.
     /// </summary>
-    public sealed override int Execute(CommandContext context, TSettings settings, CancellationToken cancellationToken)
+    public sealed override int Execute(
+        CommandContext context,
+        TSettings settings,
+        CancellationToken cancellationToken
+    )
     {
         return GlobalExceptionHandler.ExecuteWithGlobalHandler(
             () =>
