@@ -92,16 +92,16 @@ if [ "$USE_PROJECTS" = true ]; then
   if [ "$RESTORE_SUCCESS" = true ]; then
     print_success "Package restore completed successfully"
   else
-    print_error "Package restore failed"
-    OVERALL_SUCCESS=1
+    print_error "Package restore failed; aborting lint script"
+    exit 1
   fi
 else
   # Restore the entire solution
   if $DOTNET_CMD restore "$SOLUTION_FILE"; then
     print_success "Package restore completed successfully"
   else
-    print_error "Package restore failed"
-    OVERALL_SUCCESS=1
+    print_error "Package restore failed; aborting lint script"
+    exit 1
   fi
 fi
 
