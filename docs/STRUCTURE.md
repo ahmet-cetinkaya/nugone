@@ -9,11 +9,11 @@ This document describes the overall structure and organization of the NuGone pro
 NuGone is organized using Clean Architecture to ensure separation of concerns, maintainability, and testability. The main layers are:
 
 - **Core**: Contains the domain and application logic.
-  - **NuGone.Domain**: Business logic, entities, and domain interfaces.
-  - **NuGone.Application**: Use cases, application services, DTOs, and interfaces for external dependencies.
+    - **NuGone.Domain**: Business logic, entities, and domain interfaces.
+    - **NuGone.Application**: Use cases, application services, DTOs, and interfaces for external dependencies.
 - **Infrastructure**: Implementations for external systems (file system, NuGet, etc.), data access, and integrations. Additional projects can be created here for each external system if needed.
 - **Presentation**: User interface layer.
-  - **NuGone.Cli**: Command-line interface, user interaction, and input/output.
+    - **NuGone.Cli**: Command-line interface, user interaction, and input/output.
 
 ---
 
@@ -96,15 +96,15 @@ nugone/
 ### Core
 
 - **NuGone.Domain**
-  - Entities (e.g., packageReference, project, solution)
-  - Value Objects
-  - Domain Interfaces (e.g., iPackageUsageAnalyzer)
-  - Pure business logic, no dependencies on other layers
+    - Entities (e.g., packageReference, project, solution)
+    - Value Objects
+    - Domain Interfaces (e.g., iPackageUsageAnalyzer)
+    - Pure business logic, no dependencies on other layers
 - **NuGone.Application**
-  - Use cases (e.g., packageAnalysis, packageRemoval)
-  - Application services
-  - DTOs and input/output models
-  - Interfaces for infrastructure (ports)
+    - Use cases (e.g., packageAnalysis, packageRemoval)
+    - Application services
+    - DTOs and input/output models
+    - Interfaces for infrastructure (ports)
 
 ### Infrastructure
 
@@ -116,9 +116,9 @@ nugone/
 ### Presentation
 
 - **NuGone.Cli**
-  - Command-line interface (argument parsing, commands)
-  - User interaction, reporting, and output formatting
-  - No business logic
+    - Command-line interface (argument parsing, commands)
+    - User interaction, reporting, and output formatting
+    - No business logic
 
 ---
 

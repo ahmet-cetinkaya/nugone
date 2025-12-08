@@ -23,8 +23,8 @@ Accurate detection of unused packages is the core value proposition of NuGone. T
 ### Usage Scanning
 
 - For each package, scan codebase for:
-  - `using` statements referencing the package's namespaces.
-  - Class or method names from the package used in code.
+    - `using` statements referencing the package's namespaces.
+    - Class or method names from the package used in code.
 - Exclude files/folders by user-defined patterns (e.g., `**/Generated/**`).
 - Support multi-targeted projects.
 - (Planned) Reflection-based usage detection for advanced scenarios.

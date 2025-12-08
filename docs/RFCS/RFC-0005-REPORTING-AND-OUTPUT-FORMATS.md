@@ -31,15 +31,15 @@ Clear, actionable reports are essential for users to understand and act on analy
 
 ```json
 {
-  "unusedPackages": [
-    {
-      "name": "Newtonsoft.Json",
-      "version": "13.0.3",
-      "referencesFound": 0
-    }
-  ],
-  "scannedPackages": 10,
-  "project": "MyProject.csproj"
+    "unusedPackages": [
+        {
+            "name": "Newtonsoft.Json",
+            "version": "13.0.3",
+            "referencesFound": 0
+        }
+    ],
+    "scannedPackages": 10,
+    "project": "MyProject.csproj"
 }
 ```
 
