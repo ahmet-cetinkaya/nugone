@@ -106,8 +106,8 @@ To automatically detect and optionally remove unused NuGet package references in
     - Exclude certain files (e.g., .Designer.cs, .g.cs) for speed.
 - Configuration support:
     - Read configuration options from `global.json` at the solution root (preferred method).
-    - Tüm NuGone konfigürasyonları `nugone` ana objesi altında toplanır.
-    - Exclude namespaces, files, or folders via `nugone` objesi (`global.json` içinde).
+    - All NuGone configurations are collected under the `nugone` main object.
+    - Exclude namespaces, files, or folders via `nugone` object (within `global.json`).
     - Fallback to legacy config file (JSON) only if `global.json` is not present.
     - Specify config file location and precedence (global.json > legacy config > defaults).
 
