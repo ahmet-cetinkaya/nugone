@@ -127,8 +127,22 @@ public class NuGetRepositoryCpmTests : IDisposable
         );
 
         // Assert - Package should be skipped when version is missing and not in central packages
-        // Note: LoggerMessage source generator logging is not easily testable with Moq verification
-        // The important behavior is that the package is skipped, which we verify here
         packageReferences.Should().BeEmpty();
+
+        // Assert - Warning should be logged for missing package version
+        _mockLogger.Verify(
+            x =>
+                x.Log(
+                    LogLevel.Warning,
+                    It.IsAny<EventId>(),
+                    It.Is<It.IsAnyType>(
+                        (v, t) =>
+                            v.ToString()!.Contains("No version found for package: Newtonsoft.Json")
+                    ),
+                    It.IsAny<Exception>(),
+                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()
+                ),
+            Times.Once
+        );
     }
 }
