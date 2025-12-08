@@ -12,26 +12,38 @@ public partial class AnalyzePackageUsageHandler
         Level = LogLevel.Information,
         Message = "Starting package usage analysis for path: {Path}"
     )]
-    private partial void LogStartingAnalysis(string path);
+    private static partial void LogStartingAnalysis(ILogger logger, string path);
 
     [LoggerMessage(
         Level = LogLevel.Information,
         Message = "Package usage analysis completed in {ElapsedTime}"
     )]
-    private partial void LogAnalysisCompleted(TimeSpan elapsedTime);
+    private static partial void LogAnalysisCompleted(ILogger logger, TimeSpan elapsedTime);
 
     [LoggerMessage(Level = LogLevel.Error, Message = "Error loading solution: {SolutionPath}")]
-    private partial void LogErrorLoadingSolution(Exception ex, string solutionPath);
+    private static partial void LogErrorLoadingSolution(
+        ILogger logger,
+        Exception ex,
+        string solutionPath
+    );
 
     [LoggerMessage(
         Level = LogLevel.Error,
         Message = "Error loading project as solution: {ProjectPath}"
     )]
-    private partial void LogErrorLoadingProjectAsSolution(Exception ex, string projectPath);
+    private static partial void LogErrorLoadingProjectAsSolution(
+        ILogger logger,
+        Exception ex,
+        string projectPath
+    );
 
     [LoggerMessage(
         Level = LogLevel.Error,
         Message = "Error loading directory as solution: {DirectoryPath}"
     )]
-    private partial void LogErrorLoadingDirectoryAsSolution(Exception ex, string directoryPath);
+    private static partial void LogErrorLoadingDirectoryAsSolution(
+        ILogger logger,
+        Exception ex,
+        string directoryPath
+    );
 }

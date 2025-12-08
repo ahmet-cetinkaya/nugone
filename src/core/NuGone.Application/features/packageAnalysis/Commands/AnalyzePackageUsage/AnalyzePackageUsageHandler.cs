@@ -45,7 +45,7 @@ public partial class AnalyzePackageUsageHandler(
 
         try
         {
-            LogStartingAnalysis(command.Path);
+            LogStartingAnalysis(_logger, command.Path);
 
             // Step 1: Validate input
             var validationResult = ValidateCommand(command);
@@ -84,7 +84,7 @@ public partial class AnalyzePackageUsageHandler(
                 return Result<AnalyzePackageUsageResult>.Failure(analysisResult.Error);
 
             stopwatch.Stop();
-            LogAnalysisCompleted(stopwatch.Elapsed);
+            LogAnalysisCompleted(_logger, stopwatch.Elapsed);
 
             var result = new AnalyzePackageUsageResult(
                 command.Path,
@@ -237,7 +237,7 @@ public partial class AnalyzePackageUsageHandler(
         }
         catch (Exception ex)
         {
-            LogErrorLoadingSolution(ex, solutionPath);
+            LogErrorLoadingSolution(_logger, ex, solutionPath);
             return Result<Solution>.Failure(
                 "SOLUTION_LOAD_ERROR",
                 $"Failed to load solution: {ex.Message}"
@@ -263,7 +263,7 @@ public partial class AnalyzePackageUsageHandler(
         }
         catch (Exception ex)
         {
-            LogErrorLoadingProjectAsSolution(ex, projectPath);
+            LogErrorLoadingProjectAsSolution(_logger, ex, projectPath);
             return Result<Solution>.Failure(
                 "PROJECT_LOAD_ERROR",
                 $"Failed to load project: {ex.Message}"
@@ -318,7 +318,7 @@ public partial class AnalyzePackageUsageHandler(
         }
         catch (Exception ex)
         {
-            LogErrorLoadingDirectoryAsSolution(ex, directoryPath);
+            LogErrorLoadingDirectoryAsSolution(_logger, ex, directoryPath);
             return Result<Solution>.Failure(
                 "DIRECTORY_LOAD_ERROR",
                 $"Failed to load directory: {ex.Message}"
