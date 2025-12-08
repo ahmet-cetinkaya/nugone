@@ -127,7 +127,7 @@ Create or update `global.json` in your solution root:
 ```json
 {
     "sdk": {
-        "version": "9.0.100"
+        "version": "8.0.0"
     },
     "nugone": {
         "excludeNamespaces": [
@@ -227,7 +227,7 @@ jobs:
             - name: Setup .NET
               uses: actions/setup-dotnet@v3
               with:
-                  dotnet-version: 9.0.x
+                  dotnet-version: 8.0.x
 
             - name: Install NuGone
               run: dotnet tool install --global nugone
@@ -256,7 +256,7 @@ steps:
     - task: UseDotNet@2
       inputs:
           packageType: "sdk"
-          version: "9.x"
+          version: "8.x"
 
     - script: dotnet tool install --global nugone
       displayName: "Install NuGone"
