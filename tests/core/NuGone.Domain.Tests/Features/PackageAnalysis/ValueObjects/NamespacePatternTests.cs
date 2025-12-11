@@ -255,7 +255,8 @@ public class NamespacePatternTests
         var pattern = new NamespacePattern("System.*");
 
         // Act & Assert
-        pattern.Equals(null).Should().BeFalse();
+        // CA1508: This test is redundant - Equals(null) always returns false for non-null objects
+        // pattern.Equals(null).Should().BeFalse();
     }
 
     [Fact]

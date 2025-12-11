@@ -242,7 +242,10 @@ public partial class PackageUsageAnalyzerTests
         // Build tools and analyzers require special consideration for removal
         var potentiallyBuildCritical = solution
             .GetAllUnusedPackages()
-            .Where(p => p.PackageId.Contains("Analyzer") || p.PackageId.Contains("CodeAnalysis"))
+            .Where(p =>
+                p.PackageId.Contains("Analyzer", StringComparison.Ordinal)
+                || p.PackageId.Contains("CodeAnalysis", StringComparison.Ordinal)
+            )
             .ToList();
 
         potentiallyBuildCritical.ShouldContain(buildToolPackage);

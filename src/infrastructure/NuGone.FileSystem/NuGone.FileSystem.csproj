@@ -9,4 +9,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\core\NuGone.Application\NuGone.Application.csproj" />
   </ItemGroup>
+  <!-- Internals -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="NuGone.FileSystem.Tests" />
+  </ItemGroup>
 </Project>

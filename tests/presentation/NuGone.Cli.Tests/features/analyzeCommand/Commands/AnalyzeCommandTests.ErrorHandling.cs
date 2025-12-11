@@ -27,7 +27,7 @@ public partial class AnalyzeCommandTests
         };
 
         // Act
-        var result = command.TestValidateAndResolveProjectPath(settings.ProjectPath);
+        var result = TestableAnalyzeCommand.TestValidateAndResolveProjectPath(settings.ProjectPath);
 
         // Assert
         result.IsFailure.ShouldBeTrue();

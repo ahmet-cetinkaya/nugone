@@ -8,7 +8,7 @@ using Xunit;
 
 namespace NuGone.NuGet.Tests.Repositories;
 
-public class NuGetRepositoryCpmTests : IDisposable
+public sealed class NuGetRepositoryCpmTests : IDisposable
 {
     private readonly Mock<ILogger<NuGetRepository>> _mockLogger;
     private readonly NuGetRepository _repository;
@@ -26,12 +26,19 @@ public class NuGetRepositoryCpmTests : IDisposable
 
     public void Dispose()
     {
-        if (Directory.Exists(_tempDirectory))
-        {
-            Directory.Delete(_tempDirectory, true);
-        }
-
+        Dispose(true);
         GC.SuppressFinalize(this);
+    }
+
+    private void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            if (Directory.Exists(_tempDirectory))
+            {
+                Directory.Delete(_tempDirectory, true);
+            }
+        }
     }
 
     [Fact]

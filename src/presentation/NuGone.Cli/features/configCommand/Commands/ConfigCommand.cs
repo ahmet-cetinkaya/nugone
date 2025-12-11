@@ -14,7 +14,7 @@ namespace NuGone.Cli.Features.ConfigCommand.Commands;
 /// </summary>
 public class ConfigCommand : BaseCommand<ConfigCommand.Settings>
 {
-    public class Settings : CommandSettings
+    public sealed class Settings : CommandSettings
     {
         [Description("Configuration action: get, set, list")]
         [CommandArgument(0, "[action]")]
@@ -55,8 +55,8 @@ public class ConfigCommand : BaseCommand<ConfigCommand.Settings>
 
         if (!string.IsNullOrEmpty(settings.Action))
         {
-            var validActions = new[] { "get", "set", "list", "reset" };
-            if (!validActions.Contains(settings.Action.ToLowerInvariant()))
+            var validActions = new[] { "GET", "SET", "LIST", "RESET" };
+            if (!validActions.Contains(settings.Action.ToUpperInvariant()))
             {
                 errors.Add(
                     $"Action must be one of: {string.Join(", ", validActions)}. Provided: {settings.Action}"

@@ -238,7 +238,7 @@ public partial class PackageUsageAnalyzerTests
         var solution = CreateTestSolution("TestSolution", project);
 
         using var cts = new CancellationTokenSource();
-        cts.Cancel();
+        await cts.CancelAsync();
 
         SetupMockSourceFiles(project, "/test/Program.cs");
         SetupMockPathExists(solution.FilePath, project.FilePath, project.DirectoryPath);

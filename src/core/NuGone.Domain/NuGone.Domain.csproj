@@ -1,3 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <!-- All common properties inherited from Directory.Build.props -->
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="NuGone.Domain.Tests" />
+  </ItemGroup>
 </Project>

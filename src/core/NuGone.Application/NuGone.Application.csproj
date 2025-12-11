@@ -9,4 +9,8 @@
   <ItemGroup>
     <ProjectReference Include="..\NuGone.Domain\NuGone.Domain.csproj" />
   </ItemGroup>
+  <!-- Internals -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="NuGone.Application.Tests" />
+  </ItemGroup>
 </Project>

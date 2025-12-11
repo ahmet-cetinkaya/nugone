@@ -1,3 +1,8 @@
+#pragma warning disable CA1716 // Allow 'Shared' namespace
+#pragma warning disable CA1000 // Allow static members on generic types (Result pattern)
+#pragma warning disable CA1815 // Don't require Equals/GetHashCode for simple result structs
+#pragma warning disable CA2225 // Allow implicit conversion operators for Result pattern
+
 namespace NuGone.Cli.Shared.Models;
 
 /// <summary>

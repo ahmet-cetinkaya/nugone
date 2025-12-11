@@ -122,7 +122,7 @@ public class Error(string code, string message) : IEquatable<Error>
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(Code.ToLowerInvariant(), Message);
+        return HashCode.Combine(Code.ToUpperInvariant(), Message);
     }
 
     public override string ToString()

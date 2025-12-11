@@ -37,7 +37,7 @@ public partial class ProjectRepository(
     {
         LogDiscoveringProjectFiles(rootPath);
 
-        if (!await ExistsAsync(rootPath))
+        if (!await ExistsAsync(rootPath).ConfigureAwait(false))
         {
             LogRootPathNotExists(rootPath);
             return Enumerable.Empty<string>();
@@ -83,12 +83,13 @@ public partial class ProjectRepository(
     {
         LogLoadingProject(projectFilePath);
 
-        if (!await ExistsAsync(projectFilePath))
+        if (!await ExistsAsync(projectFilePath).ConfigureAwait(false))
             throw new FileNotFoundException($"Project file not found: {projectFilePath}");
 
         try
         {
-            var content = await ReadSourceFileAsync(projectFilePath, cancellationToken);
+            var content = await ReadSourceFileAsync(projectFilePath, cancellationToken)
+                .ConfigureAwait(false);
             var document = XDocument.Parse(content);
 
             var projectName = _fileSystem.Path.GetFileNameWithoutExtension(projectFilePath);
@@ -97,10 +98,9 @@ public partial class ProjectRepository(
             var project = new Project(projectFilePath, projectName, targetFramework);
 
             // Load global using declarations
-            var globalUsings = await _nugetRepository.ExtractGlobalUsingsAsync(
-                projectFilePath,
-                cancellationToken
-            );
+            var globalUsings = await _nugetRepository
+                .ExtractGlobalUsingsAsync(projectFilePath, cancellationToken)
+                .ConfigureAwait(false);
             foreach (var globalUsing in globalUsings)
             {
                 project.AddGlobalUsing(globalUsing);
@@ -131,10 +131,12 @@ public partial class ProjectRepository(
         CancellationToken cancellationToken = default
     )
     {
+        ArgumentNullException.ThrowIfNull(project);
+
         LogGettingSourceFiles(project.Name);
 
         var projectDirectory = GetDirectoryPath(project.FilePath);
-        if (!await ExistsAsync(projectDirectory))
+        if (!await ExistsAsync(projectDirectory).ConfigureAwait(false))
         {
             LogProjectDirectoryNotExists(projectDirectory);
             return Enumerable.Empty<string>();
@@ -177,12 +179,14 @@ public partial class ProjectRepository(
         CancellationToken cancellationToken = default
     )
     {
-        if (!await ExistsAsync(filePath))
+        if (!await ExistsAsync(filePath).ConfigureAwait(false))
             throw new FileNotFoundException($"File not found: {filePath}");
 
         try
         {
-            return await _fileSystem.File.ReadAllTextAsync(filePath, cancellationToken);
+            return await _fileSystem
+                .File.ReadAllTextAsync(filePath, cancellationToken)
+                .ConfigureAwait(false);
         }
         catch (Exception ex) when (!(ex is OperationCanceledException))
         {

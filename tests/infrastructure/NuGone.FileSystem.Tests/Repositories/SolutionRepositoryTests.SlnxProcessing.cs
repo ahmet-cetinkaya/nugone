@@ -10,7 +10,7 @@ namespace NuGone.FileSystem.Tests.Repositories;
 /// </summary>
 public partial class SolutionRepositoryTests
 {
-    public class SlnxProcessing : SolutionRepositoryTests
+    public sealed class SlnxProcessing : SolutionRepositoryTests
     {
         [Fact]
         public async Task LoadSolutionAsync_WithValidSlnxFile_ShouldLoadSolutionWithProjects()

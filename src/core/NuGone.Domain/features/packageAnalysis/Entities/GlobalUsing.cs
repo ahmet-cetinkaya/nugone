@@ -53,6 +53,6 @@ public class GlobalUsing
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(PackageId.ToLowerInvariant(), ProjectPath.ToLowerInvariant());
+        return HashCode.Combine(PackageId.ToUpperInvariant(), ProjectPath.ToUpperInvariant());
     }
 }

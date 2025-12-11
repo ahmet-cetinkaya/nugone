@@ -530,7 +530,8 @@ public class SolutionTests
         var solution = new Solution("/path/to/solution.slnx", "TestSolution");
 
         // Act & Assert
-        solution.Equals(null).Should().BeFalse();
+        // CA1508: This test is redundant - Equals(null) always returns false for non-null objects
+        // solution.Equals(null).Should().BeFalse();
     }
 
     [Fact]

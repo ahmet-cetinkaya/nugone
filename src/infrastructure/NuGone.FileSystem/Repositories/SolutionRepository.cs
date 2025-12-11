@@ -78,6 +78,8 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
         CancellationToken cancellationToken = default
     )
     {
+        ArgumentNullException.ThrowIfNull(solutionFilePath);
+
         LogLoadingSolution(solutionFilePath);
 
         if (!_fileSystem.File.Exists(solutionFilePath))
@@ -106,9 +108,10 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
                     lastSeparator > 0 ? solutionFilePath.Substring(0, lastSeparator) : string.Empty;
             }
             var (isEnabled, directoryPackagesPropsPath) = await CheckCentralPackageManagementAsync(
-                solutionDirectory,
-                cancellationToken
-            );
+                    solutionDirectory,
+                    cancellationToken
+                )
+                .ConfigureAwait(false);
 
             if (isEnabled && !string.IsNullOrEmpty(directoryPackagesPropsPath))
             {
@@ -118,11 +121,13 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
             // Parse project references based on solution file type
             if (solutionFilePath.EndsWith(".slnx", StringComparison.OrdinalIgnoreCase))
             {
-                await ParseSlnxFileAsync(solution, solutionFilePath, cancellationToken);
+                await ParseSlnxFileAsync(solution, solutionFilePath, cancellationToken)
+                    .ConfigureAwait(false);
             }
             else
             {
-                await ParseSlnFileAsync(solution, solutionFilePath, cancellationToken);
+                await ParseSlnFileAsync(solution, solutionFilePath, cancellationToken)
+                    .ConfigureAwait(false);
             }
 
             LogLoadedSolution(solutionName, solution.Projects.Count);
@@ -167,10 +172,9 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
 
         try
         {
-            var content = await _fileSystem.File.ReadAllTextAsync(
-                directoryPackagesPropsPath,
-                cancellationToken
-            );
+            var content = await _fileSystem
+                .File.ReadAllTextAsync(directoryPackagesPropsPath, cancellationToken)
+                .ConfigureAwait(false);
             var document = XDocument.Parse(content);
 
             var manageCentrallyElement = document
@@ -207,10 +211,9 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
 
         try
         {
-            var content = await _fileSystem.File.ReadAllTextAsync(
-                directoryPackagesPropsPath,
-                cancellationToken
-            );
+            var content = await _fileSystem
+                .File.ReadAllTextAsync(directoryPackagesPropsPath, cancellationToken)
+                .ConfigureAwait(false);
             var document = XDocument.Parse(content);
 
             var packageVersions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -243,6 +246,9 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
     /// </summary>
     public string ResolveProjectPath(string solutionDirectoryPath, string relativeProjectPath)
     {
+        ArgumentNullException.ThrowIfNull(solutionDirectoryPath);
+        ArgumentNullException.ThrowIfNull(relativeProjectPath);
+
         // Use Path.Combine to handle relative paths properly
         var fullPath = _fileSystem.Path.Combine(solutionDirectoryPath, relativeProjectPath);
 
@@ -274,10 +280,10 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
             // For MockFileSystem, try to resolve relative paths manually
             // when Path.Combine doesn't handle them properly
             if (
-                relativeProjectPath.StartsWith("../")
-                || relativeProjectPath.StartsWith(@"..\")
-                || relativeProjectPath.StartsWith("./")
-                || relativeProjectPath.StartsWith(@".\")
+                relativeProjectPath.StartsWith("../", StringComparison.Ordinal)
+                || relativeProjectPath.StartsWith(@"..\", StringComparison.Ordinal)
+                || relativeProjectPath.StartsWith("./", StringComparison.Ordinal)
+                || relativeProjectPath.StartsWith(@".\", StringComparison.Ordinal)
             )
             {
                 // Handle parent directory navigation manually
@@ -350,7 +356,9 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
         CancellationToken cancellationToken
     )
     {
-        var content = await _fileSystem.File.ReadAllTextAsync(solutionFilePath, cancellationToken);
+        var content = await _fileSystem
+            .File.ReadAllTextAsync(solutionFilePath, cancellationToken)
+            .ConfigureAwait(false);
         var lines = content.Split('\n', StringSplitOptions.RemoveEmptyEntries);
 
         // Fix for MockFileSystem GetDirectoryName issue on Unix with Windows paths
@@ -394,7 +402,9 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
         CancellationToken cancellationToken
     )
     {
-        var content = await _fileSystem.File.ReadAllTextAsync(solutionFilePath, cancellationToken);
+        var content = await _fileSystem
+            .File.ReadAllTextAsync(solutionFilePath, cancellationToken)
+            .ConfigureAwait(false);
 
         // Fix for MockFileSystem GetDirectoryName issue on Unix with Windows paths
         var solutionDirectory = _fileSystem.Path.GetDirectoryName(solutionFilePath);

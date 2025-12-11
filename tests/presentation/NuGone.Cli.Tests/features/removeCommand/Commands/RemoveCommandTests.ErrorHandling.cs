@@ -24,7 +24,7 @@ public partial class RemoveCommandTests
         };
 
         // Act
-        var result = command.TestValidateAndResolveProjectPath(settings.ProjectPath);
+        var result = TestableRemoveCommand.TestValidateAndResolveProjectPath(settings.ProjectPath);
 
         // Assert
         result.IsFailure.ShouldBeTrue();

@@ -41,7 +41,7 @@ public partial class RemoveCommandTests
         var settings = new RemoveCommand.Settings { ProjectPath = "/non/existent/path" };
 
         // Act
-        var result = command.TestValidateAndResolveProjectPath(settings.ProjectPath);
+        var result = TestableRemoveCommand.TestValidateAndResolveProjectPath(settings.ProjectPath);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -57,7 +57,7 @@ public partial class RemoveCommandTests
         var settings = new RemoveCommand.Settings { ProjectPath = null };
 
         // Act
-        var result = command.TestValidateAndResolveProjectPath(settings.ProjectPath);
+        var result = TestableRemoveCommand.TestValidateAndResolveProjectPath(settings.ProjectPath);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

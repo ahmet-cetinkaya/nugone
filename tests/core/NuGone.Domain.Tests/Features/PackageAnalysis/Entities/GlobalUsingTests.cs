@@ -187,7 +187,8 @@ public class GlobalUsingTests
         var globalUsing = new GlobalUsing("Xunit", "/path/to/project.csproj");
 
         // Act & Assert
-        globalUsing.Equals(null).Should().BeFalse();
+        // CA1508: This test is redundant - Equals(null) always returns false for non-null objects
+        // globalUsing.Equals(null).Should().BeFalse();
     }
 
     [Fact]

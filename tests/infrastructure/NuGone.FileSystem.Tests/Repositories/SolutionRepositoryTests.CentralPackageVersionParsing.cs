@@ -5,7 +5,7 @@ using Xunit;
 
 namespace NuGone.FileSystem.Tests.Repositories;
 
-public class SolutionRepositoryTests_CentralPackageVersionParsing : SolutionRepositoryTests
+public sealed class SolutionRepositoryTests_CentralPackageVersionParsing : SolutionRepositoryTests
 {
     [Fact]
     public async Task Should_Parse_Multiple_Packages_Correctly()

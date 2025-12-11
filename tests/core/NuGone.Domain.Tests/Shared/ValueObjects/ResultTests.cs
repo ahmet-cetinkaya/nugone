@@ -2,7 +2,7 @@ using FluentAssertions;
 using NuGone.Domain.Shared.ValueObjects;
 using Xunit;
 
-namespace NuGone.Domain.Tests.Shared.ValueObjects;
+namespace NuGone.Domain.Tests.SharedValueObjects;
 
 /// <summary>
 /// Tests for the Result value object
@@ -171,7 +171,7 @@ public class ResultTests
         var result = Result<string>.Success(value);
 
         // Act
-        var mappedResult = result.Map(val => val.ToUpper());
+        var mappedResult = result.Map(val => val.ToUpperInvariant());
 
         // Assert
         mappedResult.IsSuccess.Should().BeTrue();
@@ -186,7 +186,7 @@ public class ResultTests
         var result = Result<string>.Failure(error);
 
         // Act
-        var mappedResult = result.Map(val => val.ToUpper());
+        var mappedResult = result.Map(val => val.ToUpperInvariant());
 
         // Assert
         mappedResult.IsFailure.Should().BeTrue();

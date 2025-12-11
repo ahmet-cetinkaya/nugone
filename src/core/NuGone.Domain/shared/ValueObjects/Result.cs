@@ -101,6 +101,8 @@ public class Result<T>
     /// <returns>The current result</returns>
     public Result<T> OnSuccess(Action<T> action)
     {
+        ArgumentNullException.ThrowIfNull(action);
+
         if (IsSuccess)
             action(_value!);
 
@@ -114,6 +116,8 @@ public class Result<T>
     /// <returns>The current result</returns>
     public Result<T> OnFailure(Action<Error> action)
     {
+        ArgumentNullException.ThrowIfNull(action);
+
         if (IsFailure)
             action(_error!);
 
@@ -128,6 +132,8 @@ public class Result<T>
     /// <returns>A new result with the transformed value or the original error</returns>
     public Result<TNew> Map<TNew>(Func<T, TNew> func)
     {
+        ArgumentNullException.ThrowIfNull(func);
+
         if (IsFailure)
             return Result<TNew>.Failure(_error!);
 
@@ -142,6 +148,8 @@ public class Result<T>
     /// <returns>The result of the binding function or the original error</returns>
     public Result<TNew> Bind<TNew>(Func<T, Result<TNew>> func)
     {
+        ArgumentNullException.ThrowIfNull(func);
+
         if (IsFailure)
             return Result<TNew>.Failure(_error!);
 
@@ -173,6 +181,11 @@ public class Result<T>
     public override string ToString()
     {
         return IsSuccess ? $"Success: {_value}" : $"Failure: {_error}";
+    }
+
+    public Result<T> ToResult()
+    {
+        throw new NotImplementedException();
     }
 }
 
@@ -256,5 +269,10 @@ public class Result
     public override string ToString()
     {
         return IsSuccess ? "Success" : $"Failure: {_error}";
+    }
+
+    public Result ToResult()
+    {
+        throw new NotImplementedException();
     }
 }

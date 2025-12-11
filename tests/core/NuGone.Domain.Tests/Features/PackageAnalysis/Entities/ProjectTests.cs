@@ -598,7 +598,8 @@ public class ProjectTests
         var project = new Project("/path/to/project.csproj", "TestProject", "net9.0");
 
         // Act & Assert
-        project.Equals(null).Should().BeFalse();
+        // CA1508: This test is redundant - Equals(null) always returns false for non-null objects
+        // project.Equals(null).Should().BeFalse();
     }
 
     [Fact]

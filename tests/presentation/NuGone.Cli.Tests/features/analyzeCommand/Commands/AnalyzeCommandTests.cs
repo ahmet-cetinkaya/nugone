@@ -3,6 +3,7 @@ using NuGone.Application.Features.PackageAnalysis.Services.Abstractions;
 using NuGone.Cli.Features.AnalyzeCommand.Commands;
 using NuGone.Cli.Shared.Constants;
 using NuGone.Cli.Shared.Models;
+using NuGone.Cli.Shared.Utilities;
 using Spectre.Console.Cli;
 
 namespace NuGone.Cli.Tests.Commands;
@@ -41,48 +42,48 @@ public partial class AnalyzeCommandTests
     /// <summary>
     /// Testable version of AnalyzeCommand that exposes protected methods for testing.
     /// </summary>
-    private class TestableAnalyzeCommand(System.IO.Abstractions.IFileSystem fileSystem)
+    private sealed class TestableAnalyzeCommand(System.IO.Abstractions.IFileSystem fileSystem)
         : AnalyzeCommand(fileSystem)
     {
-        public Result<string> TestValidateAndResolveProjectPath(string? projectPath)
+        public static Result<string> TestValidateAndResolveProjectPath(string? projectPath)
         {
-            return ValidateAndResolveProjectPath(projectPath);
+            return BaseCommand<AnalyzeCommand.Settings>.ValidateAndResolveProjectPath(projectPath!);
         }
 
         // Method to access the static validation method for testing
-        public static ValidationResult TestValidateAnalyzeSettings(Settings settings)
+        public static ValidationResult TestValidateAnalyzeSettings(AnalyzeCommand.Settings settings)
         {
             return AnalyzeCommand.ValidateAnalyzeSettings(settings);
         }
 
         // Helper methods for testing
-        public static bool TestIsJsonFormat(Settings settings)
+        public static bool TestIsJsonFormat(AnalyzeCommand.Settings settings)
         {
-            return settings.Format?.ToLowerInvariant() == "json";
+            return settings.Format?.ToUpperInvariant() == "JSON";
         }
 
-        public static bool TestIsVerboseMode(Settings settings)
+        public static bool TestIsVerboseMode(AnalyzeCommand.Settings settings)
         {
             return settings.Verbose;
         }
 
-        public static bool TestShouldShowSuccessMessage(Settings settings)
+        public static bool TestShouldShowSuccessMessage(AnalyzeCommand.Settings settings)
         {
-            return settings.Format?.ToLowerInvariant() != "json" || settings.Verbose;
+            return settings.Format?.ToUpperInvariant() != "JSON" || settings.Verbose;
         }
 
-        public static bool TestShouldShowProgressMessage(Settings settings)
+        public static bool TestShouldShowProgressMessage(AnalyzeCommand.Settings settings)
         {
-            return settings.Format?.ToLowerInvariant() != "json" || settings.Verbose;
+            return settings.Format?.ToUpperInvariant() != "JSON" || settings.Verbose;
         }
 
         // Override to prevent actual execution during tests
         protected override async Task<Result<int>> ExecuteCommandAsync(
             CommandContext context,
-            Settings settings
+            AnalyzeCommand.Settings settings
         )
         {
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
             return ExitCodes.Success;
         }
     }

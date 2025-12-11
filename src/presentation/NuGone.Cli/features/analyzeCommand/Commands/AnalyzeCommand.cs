@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Globalization;
 using System.IO.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using NuGone.Application.Features.PackageAnalysis.Commands.AnalyzePackageUsage;
@@ -21,7 +22,7 @@ public class AnalyzeCommand(IFileSystem fileSystem)
     : BaseCommand<AnalyzeCommand.Settings>,
         IAsyncCommand<AnalyzeCommand.Settings>
 {
-    private static readonly string[] ValidFormats = ["text", "json"];
+    private static readonly string[] ValidFormats = ["TEXT", "JSON"];
 
     private static readonly System.Text.Json.JsonSerializerOptions JsonOptions = new()
     {
@@ -31,7 +32,7 @@ public class AnalyzeCommand(IFileSystem fileSystem)
 
     private readonly IFileSystem _fileSystem = fileSystem;
 
-    public class Settings : CommandSettings
+    public sealed class Settings : CommandSettings
     {
         [Description("Path to project or solution")]
         [CommandOption("--project|-p")]
@@ -69,7 +70,9 @@ public class AnalyzeCommand(IFileSystem fileSystem)
             return Error.ValidationFailed(string.Join(", ", settingsValidation.Errors));
 
         // Validate and resolve project path using base class method
-        var projectPathResult = ValidateAndResolveProjectPath(settings.ProjectPath);
+        var projectPathResult = BaseCommand<Settings>.ValidateAndResolveProjectPath(
+            settings.ProjectPath
+        );
         if (projectPathResult.IsFailure)
             return projectPathResult.Error;
 
@@ -92,7 +95,7 @@ public class AnalyzeCommand(IFileSystem fileSystem)
         var projectPath = projectPathResult.Value;
 
         // Show verbose info and progress messages (except for JSON format without verbose)
-        if (settings.Format?.ToLowerInvariant() != "json" || settings.Verbose)
+        if (settings.Format?.ToUpperInvariant() != "JSON" || settings.Verbose)
         {
             if (settings.Verbose)
             {
@@ -106,14 +109,15 @@ public class AnalyzeCommand(IFileSystem fileSystem)
                 }
             }
 
-            if (settings.Format?.ToLowerInvariant() != "json" || settings.Verbose)
+            if (settings.Format?.ToUpperInvariant() != "JSON" || settings.Verbose)
             {
                 ConsoleHelpers.WriteInfo("Starting package analysis...");
             }
         }
 
         // Perform the actual package analysis using the CQRS handler
-        var analysisResult = await PerformAnalysisAsync(projectPath, settings);
+        var analysisResult = await PerformAnalysisAsync(projectPath, settings)
+            .ConfigureAwait(false);
         if (analysisResult.IsFailure)
             return analysisResult.Error;
 
@@ -121,7 +125,7 @@ public class AnalyzeCommand(IFileSystem fileSystem)
         DisplayResults(analysisResult.Value, settings);
 
         // Show success message for non-JSON formats or when verbose is enabled
-        if (settings.Format?.ToLowerInvariant() != "json" || settings.Verbose)
+        if (settings.Format?.ToUpperInvariant() != "JSON" || settings.Verbose)
         {
             ConsoleHelpers.WriteSuccess("Analysis completed successfully");
         }
@@ -136,7 +140,7 @@ public class AnalyzeCommand(IFileSystem fileSystem)
         // Validate format option
         if (
             !string.IsNullOrEmpty(settings.Format)
-            && !ValidFormats.Contains(settings.Format.ToLowerInvariant())
+            && !ValidFormats.Contains(settings.Format.ToUpperInvariant())
         )
         {
             errors.Add($"Format must be either 'text' or 'json'. Provided: {settings.Format}");
@@ -170,7 +174,7 @@ public class AnalyzeCommand(IFileSystem fileSystem)
         try
         {
             // Show progress message for non-JSON formats or when verbose is enabled
-            if (settings.Format?.ToLowerInvariant() != "json" || settings.Verbose)
+            if (settings.Format?.ToUpperInvariant() != "JSON" || settings.Verbose)
             {
                 ConsoleHelpers.WriteInfo($"Analyzing packages in: {projectPath}");
             }
@@ -197,7 +201,9 @@ public class AnalyzeCommand(IFileSystem fileSystem)
             }
 
             // Execute the analysis
-            var result = await handler.HandleAsync(command, CancellationToken.None);
+            var result = await handler
+                .HandleAsync(command, CancellationToken.None)
+                .ConfigureAwait(false);
             if (result.IsFailure)
             {
                 return Result<AnalyzePackageUsageResult>.Failure(
@@ -218,7 +224,7 @@ public class AnalyzeCommand(IFileSystem fileSystem)
     private static void DisplayResults(AnalyzePackageUsageResult result, Settings settings)
     {
         // Display results based on format
-        if (settings.Format?.ToLowerInvariant() == "json")
+        if (settings.Format?.ToUpperInvariant() == "JSON")
         {
             // For JSON format, show verbose info if requested, then output JSON
             if (settings.Verbose)
@@ -226,7 +232,7 @@ public class AnalyzeCommand(IFileSystem fileSystem)
                 ConsoleHelpers.WriteInfo(
                     $"Analysis completed in {result.AnalysisTime.TotalSeconds:F2} seconds"
                 );
-                ConsoleHelpers.WriteInfo(result.GetSummary());
+                ConsoleHelpers.WriteInfo(result.Summary);
             }
 
             var jsonOutput = SerializeToJson(result);
@@ -240,7 +246,7 @@ public class AnalyzeCommand(IFileSystem fileSystem)
                 ConsoleHelpers.WriteInfo(
                     $"Analysis completed in {result.AnalysisTime.TotalSeconds:F2} seconds"
                 );
-                ConsoleHelpers.WriteInfo(result.GetSummary());
+                ConsoleHelpers.WriteInfo(result.Summary);
             }
 
             DisplayTextResults(result, settings);
@@ -279,14 +285,14 @@ public class AnalyzeCommand(IFileSystem fileSystem)
         try
         {
             var content =
-                settings.Format?.ToLowerInvariant() == "json"
+                settings.Format?.ToUpperInvariant() == "JSON"
                     ? SerializeToJson(result)
                     : SerializeToText(result);
 
             File.WriteAllText(settings.OutputFile!, content);
 
             // Show save message for non-JSON console output or when verbose is enabled
-            if (settings.Format?.ToLowerInvariant() != "json" || settings.Verbose)
+            if (settings.Format?.ToUpperInvariant() != "JSON" || settings.Verbose)
             {
                 ConsoleHelpers.WriteSuccess($"Results saved to: {settings.OutputFile}");
             }
@@ -355,24 +361,33 @@ public class AnalyzeCommand(IFileSystem fileSystem)
     private static string SerializeToText(AnalyzePackageUsageResult result)
     {
         var sb = new System.Text.StringBuilder();
-        _ = sb.AppendLine($"Package Analysis Results");
-        _ = sb.AppendLine($"=======================");
-        _ = sb.AppendLine($"Analyzed Path: {result.AnalyzedPath}");
-        _ = sb.AppendLine($"Analysis Time: {result.AnalysisTime}");
-        _ = sb.AppendLine($"Summary: {result.GetSummary()}");
+        _ = sb.AppendLine(CultureInfo.InvariantCulture, $"Package Analysis Results");
+        _ = sb.AppendLine(CultureInfo.InvariantCulture, $"=======================");
+        _ = sb.AppendLine(CultureInfo.InvariantCulture, $"Analyzed Path: {result.AnalyzedPath}");
+        _ = sb.AppendLine(CultureInfo.InvariantCulture, $"Analysis Time: {result.AnalysisTime}");
+        _ = sb.AppendLine(CultureInfo.InvariantCulture, $"Summary: {result.Summary}");
         _ = sb.AppendLine();
 
         foreach (var project in result.ProjectResults)
         {
-            _ = sb.AppendLine($"Project: {project.ProjectName} ({project.TargetFramework})");
-            _ = sb.AppendLine($"Path: {project.ProjectPath}");
+            _ = sb.AppendLine(
+                CultureInfo.InvariantCulture,
+                $"Project: {project.ProjectName} ({project.TargetFramework})"
+            );
+            _ = sb.AppendLine(CultureInfo.InvariantCulture, $"Path: {project.ProjectPath}");
 
             if (project.UnusedPackages > 0)
             {
-                _ = sb.AppendLine($"Unused Packages ({project.UnusedPackages}):");
+                _ = sb.AppendLine(
+                    CultureInfo.InvariantCulture,
+                    $"Unused Packages ({project.UnusedPackages}):"
+                );
                 foreach (var package in project.UnusedPackageDetails)
                 {
-                    _ = sb.AppendLine($"  - {package.GetDisplayString()}");
+                    _ = sb.AppendLine(
+                        CultureInfo.InvariantCulture,
+                        $"  - {package.GetDisplayString()}"
+                    );
                 }
             }
             else

@@ -13,9 +13,9 @@ namespace NuGone.Cli.Features.RemoveCommand.Commands;
 /// </summary>
 public class RemoveCommand : BaseCommand<RemoveCommand.Settings>
 {
-    private static readonly string[] ValidFormats = ["text", "json"];
+    private static readonly string[] ValidFormats = ["TEXT", "JSON"];
 
-    public class Settings : CommandSettings
+    public sealed class Settings : CommandSettings
     {
         [Description("Path to project or solution")]
         [CommandOption("--project|-p")]
@@ -54,7 +54,9 @@ public class RemoveCommand : BaseCommand<RemoveCommand.Settings>
             return Error.ValidationFailed(string.Join(", ", settingsValidation.Errors));
 
         // Validate and resolve project path using base class method
-        var projectPathResult = ValidateAndResolveProjectPath(settings.ProjectPath);
+        var projectPathResult = BaseCommand<Settings>.ValidateAndResolveProjectPath(
+            settings.ProjectPath
+        );
         if (projectPathResult.IsFailure)
             return projectPathResult.Error;
 
@@ -104,7 +106,7 @@ public class RemoveCommand : BaseCommand<RemoveCommand.Settings>
         // Validate format option
         if (
             !string.IsNullOrEmpty(settings.Format)
-            && !ValidFormats.Contains(settings.Format.ToLowerInvariant())
+            && !ValidFormats.Contains(settings.Format.ToUpperInvariant())
         )
         {
             errors.Add($"Format must be either 'text' or 'json'. Provided: {settings.Format}");

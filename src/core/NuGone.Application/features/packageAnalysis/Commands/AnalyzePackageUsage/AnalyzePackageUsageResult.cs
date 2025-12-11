@@ -104,11 +104,13 @@ public class AnalyzePackageUsageResult
     /// <summary>
     /// Gets a summary string of the analysis results.
     /// </summary>
-    /// <returns>Summary string</returns>
-    public string GetSummary()
+    public string Summary
     {
-        return $"Analyzed {TotalProjects} project(s) with {TotalPackages} package(s). "
-            + $"Found {UnusedPackages} unused package(s) ({UnusedPercentage:F1}%) and {UsedPackages} used package(s).";
+        get
+        {
+            return $"Analyzed {TotalProjects} project(s) with {TotalPackages} package(s). "
+                + $"Found {UnusedPackages} unused package(s) ({UnusedPercentage:F1}%) and {UsedPackages} used package(s).";
+        }
     }
 }
 

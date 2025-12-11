@@ -1,3 +1,4 @@
+#pragma warning disable CA1716 // Allow 'Shared' namespace
 namespace NuGone.Cli.Shared.Constants;
 
 /// <summary>

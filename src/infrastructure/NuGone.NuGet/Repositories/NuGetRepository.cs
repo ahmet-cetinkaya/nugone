@@ -55,7 +55,8 @@ public partial class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRe
 
         try
         {
-            var content = await File.ReadAllTextAsync(projectFilePath, cancellationToken);
+            var content = await File.ReadAllTextAsync(projectFilePath, cancellationToken)
+                .ConfigureAwait(false);
             var document = XDocument.Parse(content);
 
             var packageReferences = new List<PackageReference>();
@@ -136,13 +137,17 @@ public partial class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRe
         CancellationToken cancellationToken = default
     )
     {
+        ArgumentNullException.ThrowIfNull(packageId);
+        ArgumentNullException.ThrowIfNull(version);
+        ArgumentNullException.ThrowIfNull(targetFramework);
+
         LogGettingNamespaces(packageId, version, targetFramework);
 
         // For now, return common namespace patterns based on package ID
         // In a full implementation, this would analyze the actual package assemblies
         var namespaces = GetCommonNamespacesForPackage(packageId);
 
-        await Task.CompletedTask; // Placeholder for async operations
+        await Task.CompletedTask.ConfigureAwait(false); // Placeholder for async operations
         return namespaces;
     }
 
@@ -167,7 +172,7 @@ public partial class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRe
             isDevelopmentDependency: isDevelopmentDependency
         );
 
-        await Task.CompletedTask; // Placeholder for async operations
+        await Task.CompletedTask.ConfigureAwait(false); // Placeholder for async operations
         return metadata;
     }
 
@@ -186,7 +191,7 @@ public partial class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRe
 
         // For now, return empty collection
         // In a full implementation, this would analyze package dependencies
-        await Task.CompletedTask; // Placeholder for async operations
+        await Task.CompletedTask.ConfigureAwait(false); // Placeholder for async operations
         return Enumerable.Empty<PackageReference>();
     }
 
@@ -221,7 +226,8 @@ public partial class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRe
 
         try
         {
-            var content = await File.ReadAllTextAsync(projectFilePath, cancellationToken);
+            var content = await File.ReadAllTextAsync(projectFilePath, cancellationToken)
+                .ConfigureAwait(false);
             var document = XDocument.Parse(content);
 
             var globalUsings = new List<GlobalUsing>();
@@ -264,7 +270,7 @@ public partial class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRe
         namespaces.Add(packageId);
 
         // Add common variations
-        if (packageId.Contains('.'))
+        if (packageId.Contains('.', StringComparison.Ordinal))
         {
             var parts = packageId.Split('.');
             if (parts.Length >= 2)
@@ -282,30 +288,30 @@ public partial class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRe
         }
 
         // Add some common patterns for well-known packages
-        switch (packageId.ToLowerInvariant())
+        switch (packageId.ToUpperInvariant())
         {
-            case "newtonsoft.json":
+            case "NEWTONSOFT.JSON":
                 namespaces.AddRange(["Newtonsoft.Json", "Newtonsoft.Json.Linq"]);
                 break;
-            case "system.text.json":
+            case "SYSTEM.TEXT.JSON":
                 namespaces.AddRange(["System.Text.Json", "System.Text.Json.Serialization"]);
                 break;
-            case "microsoft.extensions.logging":
+            case "MICROSOFT.EXTENSIONS.LOGGING":
                 namespaces.AddRange([
                     "Microsoft.Extensions.Logging",
                     "Microsoft.Extensions.DependencyInjection",
                 ]);
                 break;
-            case "spectre.console":
+            case "SPECTRE.CONSOLE":
                 namespaces.AddRange(["Spectre.Console", "Spectre.Console.Cli"]);
                 break;
-            case "xunit":
+            case "XUNIT":
                 namespaces.AddRange(["Xunit", "Xunit.Abstractions"]);
                 break;
-            case "moq":
+            case "MOQ":
                 namespaces.Add("Moq");
                 break;
-            case "fluentassertions":
+            case "FLUENTASSERTIONS":
                 namespaces.Add("FluentAssertions");
                 break;
         }

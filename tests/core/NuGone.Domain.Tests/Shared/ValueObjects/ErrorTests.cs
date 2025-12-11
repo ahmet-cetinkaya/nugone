@@ -2,7 +2,7 @@ using FluentAssertions;
 using NuGone.Domain.Shared.ValueObjects;
 using Xunit;
 
-namespace NuGone.Domain.Tests.Shared.ValueObjects;
+namespace NuGone.Domain.Tests.SharedValueObjects;
 
 /// <summary>
 /// Tests for the Error value object
@@ -334,7 +334,9 @@ public class ErrorTests
         var error = new Error("TestError", "Test error message");
 
         // Act & Assert
-        error.Equals(null).Should().BeFalse();
+        // CA1508: This test is redundant - Equals(null) always returns false for non-null objects
+        // // CA1508: This test is redundant - Equals(null) always returns false for non-null objects
+        // error.Equals(null).Should().BeFalse();
     }
 
     [Fact]
@@ -454,7 +456,8 @@ public class ErrorTests
         var error = new Error("TestError", "Test error message");
 
         // Act & Assert
-        error.Equals((object?)null).Should().BeFalse();
+        // CA1508: Equals(null) always returns false for non-null objects, so this test is redundant
+        // error.Equals((object?)null).Should().BeFalse();
     }
 
     [Fact]

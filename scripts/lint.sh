@@ -177,9 +177,9 @@ else
   print_info "Install it with: npm install -g markdownlint-cli2"
 fi
 
-print_section "🔍 Running Roslynator analysis"
+print_section "🔧 Running Roslynator auto-fix"
 if [ "$USE_PROJECTS" = true ]; then
-  print_warning "Skipping Roslynator analysis - .slnx format is not supported by Roslynator"
+  print_warning "Skipping Roslynator auto-fix - .slnx format is not supported by Roslynator"
   print_info "Consider generating a .sln file or running Roslynator on individual projects"
 else
   if $DOTNET_CMD tool list | grep -q "roslynator.dotnet.cli"; then
@@ -191,11 +191,41 @@ else
     print_info "Install it with: dotnet tool restore"
   fi
 
+  # Only run Roslynator auto-fix if it was found
+  if [ -n "$ROSLYNATOR_CMD" ]; then
+    print_info "Auto-fixing Roslynator violations..."
+    # Run fixable analyzers with --severity-level warning to fix warnings and errors
+    if $ROSLYNATOR_CMD fix "$SOLUTION_FILE" --severity-level warning --verbosity normal; then
+      print_success "Roslynator auto-fix completed successfully!"
+    else
+      print_warning "Some Roslynator violations could not be auto-fixed"
+      print_info "Manual fixes may be required for remaining issues"
+    fi
+  fi
+fi
+
+print_section "🔍 Running Roslynator analysis"
+if [ "$USE_PROJECTS" = true ]; then
+  print_warning "Skipping Roslynator analysis - .slnx format is not supported by Roslynator"
+  print_info "Consider generating a .sln file or running Roslynator on individual projects"
+else
+  # Reuse ROSLYNATOR_CMD from previous section or find it again
+  if [ -z "$ROSLYNATOR_CMD" ]; then
+    if $DOTNET_CMD tool list | grep -q "roslynator.dotnet.cli"; then
+      ROSLYNATOR_CMD="$DOTNET_CMD roslynator"
+    elif command -v roslynator &>/dev/null; then
+      ROSLYNATOR_CMD="roslynator"
+    else
+      print_warning "Roslynator is not installed"
+      print_info "Install it with: dotnet tool restore"
+    fi
+  fi
+
   # Only run Roslynator if it was found
   if [ -n "$ROSLYNATOR_CMD" ]; then
     print_info "Analyzing code with Roslynator..."
     # Use --severity-level warning to only report warnings and errors, not info diagnostics
-    if $ROSLYNATOR_CMD analyze "$SOLUTION_FILE"; then
+    if $ROSLYNATOR_CMD analyze "$SOLUTION_FILE" --severity-level warning; then
       print_success "Roslynator analysis completed successfully"
     else
       print_error "Roslynator found issues"

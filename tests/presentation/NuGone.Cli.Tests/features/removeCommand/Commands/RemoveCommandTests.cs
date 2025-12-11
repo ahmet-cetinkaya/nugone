@@ -3,6 +3,7 @@ using NuGone.Application.Features.PackageAnalysis.Services.Abstractions;
 using NuGone.Cli.Features.RemoveCommand.Commands;
 using NuGone.Cli.Shared.Constants;
 using NuGone.Cli.Shared.Models;
+using NuGone.Cli.Shared.Utilities;
 using Spectre.Console.Cli;
 
 namespace NuGone.Cli.Tests.Commands;
@@ -13,8 +14,6 @@ namespace NuGone.Cli.Tests.Commands;
 /// </summary>
 public partial class RemoveCommandTests
 {
-    private static readonly string[] ValidFormats = ["text", "json"];
-
     private readonly MockFileSystem _fileSystem;
     private readonly string _testProjectPath;
     private readonly string _testSolutionPath;
@@ -38,30 +37,33 @@ public partial class RemoveCommandTests
     /// <summary>
     /// Testable version of RemoveCommand that exposes protected methods for testing.
     /// </summary>
-    private class TestableRemoveCommand : RemoveCommand
+    private sealed class TestableRemoveCommand : RemoveCommand
     {
-        public Result<string> TestValidateAndResolveProjectPath(string? projectPath)
+        public static Result<string> TestValidateAndResolveProjectPath(string? projectPath)
         {
-            return ValidateAndResolveProjectPath(projectPath);
+            return BaseCommand<RemoveCommand.Settings>.ValidateAndResolveProjectPath(projectPath!);
         }
 
-        public static ValidationResult TestValidateRemoveSettings(Settings settings)
+        public static ValidationResult TestValidateRemoveSettings(RemoveCommand.Settings settings)
         {
             return RemoveCommand.ValidateRemoveSettings(settings);
         }
 
-        public static bool TestNeedsConfirmation(Settings settings)
+        public static bool TestNeedsConfirmation(RemoveCommand.Settings settings)
         {
             return !settings.DryRun && !settings.SkipConfirmation;
         }
 
-        public static bool TestIsVerboseMode(Settings settings)
+        public static bool TestIsVerboseMode(RemoveCommand.Settings settings)
         {
             return settings.Verbose;
         }
 
         // Override to prevent actual execution during tests
-        protected override Result<int> ExecuteCommand(CommandContext context, Settings settings)
+        protected override Result<int> ExecuteCommand(
+            CommandContext context,
+            RemoveCommand.Settings settings
+        )
         {
             return ExitCodes.Success;
         }

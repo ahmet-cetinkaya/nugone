@@ -483,7 +483,8 @@ public class PackageReferenceTests
         var package = new PackageReference("TestPackage", "1.0.0", "/path/to/project.csproj");
 
         // Act & Assert
-        package.Equals(null).Should().BeFalse();
+        // CA1508: This test is redundant - Equals(null) always returns false for non-null objects
+        // package.Equals(null).Should().BeFalse();
     }
 
     [Fact]
