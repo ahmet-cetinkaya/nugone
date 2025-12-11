@@ -1,4 +1,7 @@
+using System.Collections.Generic;
+using System.IO;
 using System.IO.Abstractions.TestingHelpers;
+using System.Threading.Tasks;
 using NuGone.FileSystem.Repositories;
 using Shouldly;
 using Xunit;
@@ -43,6 +46,96 @@ public sealed class SolutionRepositoryTests_CpmProcessing : SolutionRepositoryTe
         // Assert
         solution.CentralPackageManagementEnabled.ShouldBeTrue();
         solution.DirectoryPackagesPropsPath.ShouldBe(propsPath);
+    }
+
+    [Fact]
+    public async Task Should_Detect_Cpm_In_Project_Directory_When_Missing_In_Solution_Directory()
+    {
+        // Arrange
+        var projectPath = "/solution/src/project";
+        FileSystem.Directory.CreateDirectory(projectPath);
+
+        // Solution level - NO Directory.Packages.props
+
+        // Project level - HAS Directory.Packages.props
+        var projectCpmPath = Path.Combine(projectPath, "Directory.Packages.props");
+        CreateDirectoryPackagesProps(projectCpmPath, enableCentralManagement: true);
+
+        // Act
+        var result = await Repository.CheckCentralPackageManagementAsync(projectPath);
+
+        // Assert
+        result.IsEnabled.ShouldBeTrue();
+        result.DirectoryPackagesPropsPath.ShouldBe(projectCpmPath);
+    }
+
+    [Fact]
+    public async Task Should_Resolve_Recursive_CPM_Imports()
+    {
+        // Arrange
+        var rootPath = "/solution";
+        var srcPath = "/solution/src";
+        var projectPath = "/solution/src/project";
+        FileSystem.Directory.CreateDirectory(projectPath); // Recursively creates src and root if needed in mock
+
+        // 1. Root: ManageCentrally=true, NewtonSoft
+        var rootPropsContent =
+            @"
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include=""Newtonsoft.Json"" Version=""13.0.1"" />
+  </ItemGroup>
+</Project>";
+        FileSystem.AddFile(
+            Path.Combine(rootPath, "Directory.Packages.props"),
+            new MockFileData(rootPropsContent)
+        );
+
+        // 2. Src: Import Root, NLog
+        var srcPropsContent =
+            @"
+<Project>
+  <Import Project=""../Directory.Packages.props"" />
+  <ItemGroup>
+    <PackageVersion Include=""NLog"" Version=""5.0.0"" />
+  </ItemGroup>
+</Project>";
+        FileSystem.AddFile(
+            Path.Combine(srcPath, "Directory.Packages.props"),
+            new MockFileData(srcPropsContent)
+        );
+
+        // 3. Project: Import Src, Polly
+        var projectPropsContent =
+            @"
+<Project>
+  <Import Project=""../Directory.Packages.props"" />
+  <ItemGroup>
+    <PackageVersion Include=""Polly"" Version=""8.0.0"" />
+  </ItemGroup>
+</Project>";
+        var projectCpmFile = Path.Combine(projectPath, "Directory.Packages.props");
+        FileSystem.AddFile(projectCpmFile, new MockFileData(projectPropsContent));
+
+        // Act - Check (should see enabled from root via chain)
+        var checkResult = await Repository.CheckCentralPackageManagementAsync(projectPath);
+
+        // Act - Load (should see all 3 packages)
+        var versions = await Repository.LoadCentralPackageVersionsAsync(projectCpmFile);
+
+        // Assert
+        checkResult.IsEnabled.ShouldBeTrue();
+        checkResult.DirectoryPackagesPropsPath.ShouldBe(projectCpmFile);
+
+        versions.ShouldContainKey("Newtonsoft.Json");
+        versions["Newtonsoft.Json"].ShouldBe("13.0.1");
+        versions.ShouldContainKey("NLog");
+        versions["NLog"].ShouldBe("5.0.0");
+        versions.ShouldContainKey("Polly");
+        versions["Polly"].ShouldBe("8.0.0");
     }
 
     [Fact]

@@ -1,5 +1,8 @@
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Abstractions;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
@@ -107,18 +110,8 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
                 solutionDirectory =
                     lastSeparator > 0 ? solutionFilePath.Substring(0, lastSeparator) : string.Empty;
             }
-            var (isEnabled, directoryPackagesPropsPath) = await CheckCentralPackageManagementAsync(
-                    solutionDirectory,
-                    cancellationToken
-                )
-                .ConfigureAwait(false);
-
-            if (isEnabled && !string.IsNullOrEmpty(directoryPackagesPropsPath))
-            {
-                solution.EnableCentralPackageManagement(directoryPackagesPropsPath);
-            }
-
-            // Parse project references based on solution file type
+            // Parse project references based on solution file type relative to the solution
+            // We parse projects first so we can use their locations to find Directory.Packages.props
             if (solutionFilePath.EndsWith(".slnx", StringComparison.OrdinalIgnoreCase))
             {
                 await ParseSlnxFileAsync(solution, solutionFilePath, cancellationToken)
@@ -128,6 +121,58 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
             {
                 await ParseSlnFileAsync(solution, solutionFilePath, cancellationToken)
                     .ConfigureAwait(false);
+            }
+
+            var (isEnabled, directoryPackagesPropsPath) = await CheckCentralPackageManagementAsync(
+                    solutionDirectory,
+                    cancellationToken
+                )
+                .ConfigureAwait(false);
+
+            // If not found at solution level, check project levels
+            if (!isEnabled && solution.Projects.Count > 0)
+            {
+                var projectCpmRoots = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+                foreach (var project in solution.Projects)
+                {
+                    var (isProjectCpmEnabled, projectCpmPath) =
+                        await CheckCentralPackageManagementAsync(
+                                project.DirectoryPath,
+                                cancellationToken
+                            )
+                            .ConfigureAwait(false);
+
+                    if (isProjectCpmEnabled && !string.IsNullOrWhiteSpace(projectCpmPath))
+                    {
+                        projectCpmRoots.Add(projectCpmPath);
+                    }
+                }
+
+                if (projectCpmRoots.Count == 1)
+                {
+                    // All CPM-enabled projects share the same root - treat it as the solution root
+                    isEnabled = true;
+                    directoryPackagesPropsPath = projectCpmRoots.Single();
+                }
+                else if (projectCpmRoots.Count > 1)
+                {
+                    // Multiple distinct CPM roots discovered - choose deterministically by:
+                    //  1. Path length (shortest is considered "closest" to the solution root)
+                    //  2. Lexicographical order as a stable tiebreaker
+                    var orderedRoots = projectCpmRoots
+                        .OrderBy(path => path.Length)
+                        .ThenBy(path => path, StringComparer.OrdinalIgnoreCase)
+                        .ToList();
+
+                    isEnabled = true;
+                    directoryPackagesPropsPath = orderedRoots.First();
+                }
+            }
+
+            if (isEnabled && !string.IsNullOrEmpty(directoryPackagesPropsPath))
+            {
+                solution.EnableCentralPackageManagement(directoryPackagesPropsPath);
             }
 
             LogLoadedSolution(solutionName, solution.Projects.Count);
@@ -141,18 +186,18 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
     }
 
     /// <summary>
-    /// Checks if central package management is enabled for a solution.
+    /// Checks if central package management is enabled by searching up from a given directory.
     /// RFC-0002: Central package management detection.
     /// </summary>
     public async Task<(
         bool IsEnabled,
         string? DirectoryPackagesPropsPath
     )> CheckCentralPackageManagementAsync(
-        string solutionDirectoryPath,
+        string startDirectoryPath,
         CancellationToken cancellationToken = default
     )
     {
-        var currentDirectory = solutionDirectoryPath;
+        var currentDirectory = startDirectoryPath;
         string? directoryPackagesPropsPath = null;
 
         while (!string.IsNullOrEmpty(currentDirectory))
@@ -164,7 +209,29 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
                 break;
             }
 
-            currentDirectory = _fileSystem.Path.GetDirectoryName(currentDirectory);
+            // Fix for MockFileSystem GetDirectoryName issue on Unix with Windows paths
+            var parentDir = _fileSystem.Path.GetDirectoryName(currentDirectory);
+            if (
+                string.IsNullOrEmpty(parentDir)
+                && (
+                    currentDirectory.Contains('/', StringComparison.Ordinal)
+                    || currentDirectory.Contains('\\', StringComparison.Ordinal)
+                )
+            )
+            {
+                var lastSeparator = Math.Max(
+                    currentDirectory.LastIndexOf('\\'),
+                    currentDirectory.LastIndexOf('/')
+                );
+                parentDir = lastSeparator > 0 ? currentDirectory.Substring(0, lastSeparator) : null;
+            }
+
+            // To prevent infinite loops if GetDirectoryName returns same path or empty
+            if (string.IsNullOrEmpty(parentDir) || parentDir == currentDirectory)
+            {
+                break;
+            }
+            currentDirectory = parentDir;
         }
 
         if (directoryPackagesPropsPath == null)
@@ -172,17 +239,12 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
 
         try
         {
-            var content = await _fileSystem
-                .File.ReadAllTextAsync(directoryPackagesPropsPath, cancellationToken)
+            var isEnabled = await IsCpmEnabledRecursiveAsync(
+                    directoryPackagesPropsPath,
+                    new HashSet<string>(StringComparer.Ordinal),
+                    cancellationToken
+                )
                 .ConfigureAwait(false);
-            var document = XDocument.Parse(content);
-
-            var manageCentrallyElement = document
-                .Descendants("ManagePackageVersionsCentrally")
-                .FirstOrDefault();
-            var isEnabled =
-                manageCentrallyElement?.Value.Equals("true", StringComparison.OrdinalIgnoreCase)
-                == true;
 
             return (isEnabled, isEnabled ? directoryPackagesPropsPath : null);
         }
@@ -191,6 +253,53 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
             LogErrorCheckingCpm(ex, directoryPackagesPropsPath);
             return (false, null);
         }
+    }
+
+    private async Task<bool> IsCpmEnabledRecursiveAsync(
+        string path,
+        HashSet<string> visitedPaths,
+        CancellationToken cancellationToken
+    )
+    {
+        if (!visitedPaths.Add(path))
+            return false; // Cycle detection
+
+        if (!_fileSystem.File.Exists(path))
+            return false;
+
+        var content = await _fileSystem
+            .File.ReadAllTextAsync(path, cancellationToken)
+            .ConfigureAwait(false);
+        var document = XDocument.Parse(content);
+
+        // Check locally for 'true' first - this takes precedence
+        if (
+            document
+                .Descendants("ManagePackageVersionsCentrally")
+                .Any(e => e.Value.Equals("true", StringComparison.OrdinalIgnoreCase))
+        )
+        {
+            return true;
+        }
+
+        // Check imports recursively
+        foreach (var import in document.Descendants("Import"))
+        {
+            var projectAttribute = import.Attribute("Project")?.Value;
+            if (!string.IsNullOrWhiteSpace(projectAttribute))
+            {
+                var directory = _fileSystem.Path.GetDirectoryName(path);
+                var importedPath = ResolveProjectPath(directory ?? string.Empty, projectAttribute);
+
+                if (
+                    await IsCpmEnabledRecursiveAsync(importedPath, visitedPaths, cancellationToken)
+                        .ConfigureAwait(false)
+                )
+                    return true;
+            }
+        }
+
+        return false;
     }
 
     /// <summary>
@@ -211,23 +320,14 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
 
         try
         {
-            var content = await _fileSystem
-                .File.ReadAllTextAsync(directoryPackagesPropsPath, cancellationToken)
-                .ConfigureAwait(false);
-            var document = XDocument.Parse(content);
-
             var packageVersions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (var packageVersionElement in document.Descendants("PackageVersion"))
-            {
-                var include = packageVersionElement.Attribute("Include")?.Value;
-                var version = packageVersionElement.Attribute("Version")?.Value;
-
-                if (!string.IsNullOrWhiteSpace(include) && !string.IsNullOrWhiteSpace(version))
-                {
-                    packageVersions[include] = version;
-                }
-            }
+            await LoadCentralPackageVersionsRecursiveAsync(
+                    directoryPackagesPropsPath,
+                    packageVersions,
+                    new HashSet<string>(StringComparer.OrdinalIgnoreCase),
+                    cancellationToken
+                )
+                .ConfigureAwait(false);
 
             LogLoadedCentralPackageVersions(packageVersions.Count);
             return packageVersions;
@@ -236,6 +336,60 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
         {
             LogErrorLoadingCentralPackageVersions(ex, directoryPackagesPropsPath);
             throw;
+        }
+    }
+
+    private async Task LoadCentralPackageVersionsRecursiveAsync(
+        string path,
+        Dictionary<string, string> packageVersions,
+        HashSet<string> visitedPaths,
+        CancellationToken cancellationToken
+    )
+    {
+        if (!visitedPaths.Add(path))
+            return; // Cycle detection
+
+        if (!_fileSystem.File.Exists(path))
+            return;
+
+        var content = await _fileSystem
+            .File.ReadAllTextAsync(path, cancellationToken)
+            .ConfigureAwait(false);
+        var document = XDocument.Parse(content);
+
+        // Current implementation does not strictly follow MSBuild evaluation order (which would handle imports interleaved with items).
+        // Instead, it loads Imports first (base values), then overrides with local values. This is generally correct for property composition.
+
+        // 1. Process Imports first (Base values)
+        foreach (var import in document.Descendants("Import"))
+        {
+            var projectAttribute = import.Attribute("Project")?.Value;
+            if (!string.IsNullOrWhiteSpace(projectAttribute))
+            {
+                var directory = _fileSystem.Path.GetDirectoryName(path);
+                var importedPath = ResolveProjectPath(directory ?? string.Empty, projectAttribute);
+                await LoadCentralPackageVersionsRecursiveAsync(
+                        importedPath,
+                        packageVersions,
+                        visitedPaths,
+                        cancellationToken
+                    )
+                    .ConfigureAwait(false);
+            }
+        }
+
+        // 2. Process Local PackageVersions (Overrides)
+        foreach (var packageVersionElement in document.Descendants("PackageVersion"))
+        {
+            var include =
+                packageVersionElement.Attribute("Include")?.Value
+                ?? packageVersionElement.Attribute("Update")?.Value;
+            var version = packageVersionElement.Attribute("Version")?.Value;
+
+            if (!string.IsNullOrWhiteSpace(include) && !string.IsNullOrWhiteSpace(version))
+            {
+                packageVersions[include] = version;
+            }
         }
     }
 

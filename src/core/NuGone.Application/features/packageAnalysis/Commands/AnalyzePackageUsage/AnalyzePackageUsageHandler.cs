@@ -400,26 +400,35 @@ public partial class AnalyzePackageUsageHandler(
     {
         try
         {
-            Dictionary<string, string>? centralPackageVersions = null;
-            if (
-                solution.CentralPackageManagementEnabled
-                && !string.IsNullOrEmpty(solution.DirectoryPackagesPropsPath)
-            )
-            {
-                centralPackageVersions = await _solutionRepository
-                    .LoadCentralPackageVersionsAsync(
-                        solution.DirectoryPackagesPropsPath,
-                        cancellationToken
-                    )
-                    .ConfigureAwait(false);
-            }
+            var cpmCache = new Dictionary<string, Dictionary<string, string>>(
+                StringComparer.OrdinalIgnoreCase
+            );
 
             foreach (var project in solution.Projects)
             {
+                Dictionary<string, string>? projectCpmVersions = null;
+
+                // Try to find CPM for this project specifically
+                // RFC-0002: Per-project CPM resolution to support hierarchical Directory.Packages.props
+                var (isEnabled, cpmPath) = await _solutionRepository
+                    .CheckCentralPackageManagementAsync(project.DirectoryPath, cancellationToken)
+                    .ConfigureAwait(false);
+
+                if (isEnabled && !string.IsNullOrEmpty(cpmPath))
+                {
+                    if (!cpmCache.TryGetValue(cpmPath, out projectCpmVersions))
+                    {
+                        projectCpmVersions = await _solutionRepository
+                            .LoadCentralPackageVersionsAsync(cpmPath, cancellationToken)
+                            .ConfigureAwait(false);
+                        cpmCache[cpmPath] = projectCpmVersions;
+                    }
+                }
+
                 var packageReferences = await _nugetRepository
                     .ExtractPackageReferencesAsync(
                         project.FilePath,
-                        centralPackageVersions,
+                        projectCpmVersions,
                         cancellationToken
                     )
                     .ConfigureAwait(false);

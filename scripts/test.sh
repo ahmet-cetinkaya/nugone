@@ -142,7 +142,21 @@ test_cli_functionality() {
 }
 
 run_multi_framework_validation() {
-  local frameworks=("net8.0" "net9.0" "net10.0")
+  local frameworks=()
+  if [ -f "Directory.Build.props" ]; then
+    # Extract content between <TargetFrameworks> tags
+    local tf_string
+    tf_string=$(grep "<TargetFrameworks>" Directory.Build.props | sed -E 's/.*<TargetFrameworks>(.*)<\/TargetFrameworks>.*/\1/')
+    # Split by semicolon into array
+    IFS=';' read -ra frameworks <<<"$tf_string"
+  fi
+
+  # Fallback if detection failed or file missing
+  if [ ${#frameworks[@]} -eq 0 ]; then
+    print_warning "Could not detect frameworks from Directory.Build.props, defaulting to net8.0"
+    frameworks=("net8.0")
+  fi
+  print_info "Testing detected .NET frameworks: ${frameworks[*]}"
   local configurations=("Debug" "Release")
   local failed_tests=()
   local total_tests=0
@@ -205,7 +219,7 @@ run_multi_framework_validation() {
 # Main execution logic
 print_header "🌐 NuGone Multi-Framework Testing"
 print_info "Detected .NET SDK version: $DOTNET_VERSION"
-print_info "Testing all supported .NET frameworks: 8.0, 9.0, and 10.0"
+
 echo ""
 
 # Always run multi-framework validation
