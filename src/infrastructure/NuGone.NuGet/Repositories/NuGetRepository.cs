@@ -29,7 +29,7 @@ public partial class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRe
         "NUnit",
         "MSTest",
         "Moq",
-        "FluentAssertions",
+        "Shouldly",
         "coverlet",
         "ReportGenerator",
         "Swashbuckle",
@@ -311,8 +311,8 @@ public partial class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRe
             case "MOQ":
                 namespaces.Add("Moq");
                 break;
-            case "FLUENTASSERTIONS":
-                namespaces.Add("FluentAssertions");
+            case "SHOULDLY":
+                namespaces.Add("Shouldly");
                 break;
         }
 

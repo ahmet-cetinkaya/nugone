@@ -35,7 +35,7 @@ public abstract class BaseCommand<TSettings> : Command<TSettings>
                 // Check if this is an async command
                 if (this is IAsyncCommand<TSettings>)
                 {
-                    var asyncResult = ExecuteCommandAsync(context, settings)
+                    var asyncResult = ExecuteCommandAsync(context, settings, cancellationToken)
                         .GetAwaiter()
                         .GetResult();
                     return asyncResult.Match(
@@ -76,11 +76,11 @@ public abstract class BaseCommand<TSettings> : Command<TSettings>
 
     /// <summary>
     /// Executes the specific command logic asynchronously using Result pattern. Override this method in async derived classes.
-    /// Note: CancellationToken is managed internally by the base command for consistent behavior across sync and async commands.
     /// </summary>
     protected virtual Task<Result<int>> ExecuteCommandAsync(
         CommandContext context,
-        TSettings settings
+        TSettings settings,
+        CancellationToken cancellationToken
     )
     {
         throw new NotImplementedException(

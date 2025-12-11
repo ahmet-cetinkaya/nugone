@@ -371,7 +371,10 @@ public partial class PackageUsageAnalyzer(
     /// </summary>
     public async Task<ValidationResult> ValidateInputsAsync(Solution solution)
     {
-        ArgumentNullException.ThrowIfNull(solution);
+        if (solution == null)
+        {
+            return ValidationResult.Failure(["Solution cannot be null"]);
+        }
 
         var errors = new List<string>();
 
