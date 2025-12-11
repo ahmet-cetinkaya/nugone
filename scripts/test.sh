@@ -144,11 +144,26 @@ test_cli_functionality() {
 run_multi_framework_validation() {
   local frameworks=()
   if [ -f "Directory.Build.props" ]; then
-    # Extract content between <TargetFrameworks> tags
+    # Extract content between <TargetFrameworks> tags - more robust approach
+    # Handles whitespace and attributes in the XML tag
     local tf_string
-    tf_string=$(grep "<TargetFrameworks>" Directory.Build.props | sed -E 's/.*<TargetFrameworks>(.*)<\/TargetFrameworks>.*/\1/')
-    # Split by semicolon into array
-    IFS=';' read -ra frameworks <<<"$tf_string"
+    # First try with xmlstarlet if available (most robust)
+    if command -v xmlstarlet >/dev/null 2>&1; then
+      tf_string=$(xmlstarlet sel -t -v "//TargetFrameworks" Directory.Build.props 2>/dev/null || echo "")
+    # Fallback to grep with improved regex
+    else
+      tf_string=$(grep -o '<TargetFrameworks[^>]*>[^<]*' Directory.Build.props | sed 's/<TargetFrameworks[^>]*>//; s/^[[:space:]]*//; s/[[:space:]]*$//' || echo "")
+    fi
+
+    # Split by semicolon into array if we found frameworks
+    if [ -n "$tf_string" ]; then
+      # Remove whitespace around each framework
+      IFS=';' read -ra frameworks <<<"$tf_string"
+      # Trim whitespace from each framework
+      for i in "${!frameworks[@]}"; do
+        frameworks[$i]=$(echo "${frameworks[$i]}" | xargs)
+      done
+    fi
   fi
 
   # Fallback if detection failed or file missing
