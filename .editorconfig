@@ -1,0 +1,118 @@
+# EditorConfig is awesome: https://editorconfig.org
+
+# Top-most EditorConfig file
+root = true
+
+# Default settings for all files
+[*]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+# C# files
+[*.cs]
+indent_size = 4
+# CA2007: Consider calling ConfigureAwait on the awaited task
+dotnet_diagnostic.CA2007.severity = warning
+
+# Suppress warnings for test projects
+[tests/**/*.cs]
+# CA1873: Allow expensive logging in test files - these are test helpers
+dotnet_diagnostic.CA1873.severity = none
+# CA1707: Allow underscores in test method names (conventional for BDD-style tests)
+dotnet_diagnostic.CA1707.severity = none
+# CA2007: xUnit requires NOT using ConfigureAwait(false) in test methods (xUnit1030)
+# These rules conflict, so we suppress CA2007 in tests
+dotnet_diagnostic.CA2007.severity = none
+
+# Suppress CA1716 for Domain and Application namespace conflicts
+[src/core/NuGone.Domain/shared/**/*.cs]
+# CA1716: Namespace 'Shared' and type 'Error' conflicts with language keywords
+# This is an intentional naming choice for the domain model
+dotnet_diagnostic.CA1716.severity = none
+
+[src/core/NuGone.Application/shared/**/*.cs]
+# CA1716: Namespace 'Shared' conflicts with language keywords
+# This is an intentional naming choice for the application architecture
+dotnet_diagnostic.CA1716.severity = none
+
+# Suppress CA1812 for CLI Commands and Test Classes
+[src/presentation/NuGone.Cli/features/**/*.cs]
+# CA1812: CLI commands are instantiated via reflection by Spectre.Console.Cli
+dotnet_diagnostic.CA1812.severity = none
+
+[tests/**/*.cs]
+# CA1812: Test classes are instantiated via reflection by test frameworks
+dotnet_diagnostic.CA1812.severity = none
+# CA1051: Allow visible fields in test classes for test fixtures
+dotnet_diagnostic.CA1051.severity = none
+# CA1034: Allow nested test classes for organization
+dotnet_diagnostic.CA1034.severity = none
+# CA1515: Test APIs can be public for test infrastructure
+dotnet_diagnostic.CA1515.severity = none
+
+# Suppress CA1000 for Result factory pattern
+[src/core/NuGone.Domain/shared/ValueObjects/Result.cs]
+# CA1000: Static factory methods on Result<T> are a common pattern
+dotnet_diagnostic.CA1000.severity = none
+
+# Suppress CA1031 for global exception handlers and CLI error handling
+[src/presentation/NuGone.Cli/shared/Utilities/GlobalExceptionHandler.cs]
+# CA1031: Global exception handlers need to catch all exceptions
+dotnet_diagnostic.CA1031.severity = none
+
+[src/presentation/NuGone.Cli/features/**/*.cs]
+# CA1031: CLI commands need broad exception handling for user-facing scenarios
+dotnet_diagnostic.CA1031.severity = none
+
+[src/presentation/NuGone.Cli/shared/**/*.cs]
+# CA1031: CLI shared utilities need broad exception handling for user-facing scenarios
+dotnet_diagnostic.CA1031.severity = none
+# CA1062: Public APIs already have null checks from callers
+dotnet_diagnostic.CA1062.severity = none
+# CA1515: CLI types need to be public for testability
+dotnet_diagnostic.CA1515.severity = none
+
+[src/presentation/NuGone.Cli/features/**/*.cs]
+# CA1062: Public APIs already have null checks from callers
+dotnet_diagnostic.CA1062.severity = none
+# CA1034: Nested Settings classes are fine for CLI commands
+dotnet_diagnostic.CA1034.severity = none
+# CA1515: CLI types need to be public for testability
+dotnet_diagnostic.CA1515.severity = none
+# CA1724: Command names intentionally match namespace for organization
+dotnet_diagnostic.CA1724.severity = none
+# CA1040: IAsyncCommand is a marker interface
+dotnet_diagnostic.CA1040.severity = none
+# CA1716: 'Shared' namespace is intentional for architecture
+dotnet_diagnostic.CA1716.severity = none
+# CA1819: Arrays are fine for small constant arrays
+dotnet_diagnostic.CA1819.severity = none
+# CA2225: Implicit conversion operators are intentional
+dotnet_diagnostic.CA2225.severity = none
+# CA1815: Result structs are simple value types
+dotnet_diagnostic.CA1815.severity = none
+
+# XML files (csproj, etc.)
+[*.{csproj,props,targets,xml}]
+indent_size = 2
+
+# JSON files
+[*.json]
+indent_size = 2
+
+# YAML files
+[*.{yml,yaml}]
+indent_size = 2
+
+# Markdown files
+[*.md]
+trim_trailing_whitespace = false
+
+# Shell scripts
+[*.sh]
+indent_size = 2
+end_of_line = lf

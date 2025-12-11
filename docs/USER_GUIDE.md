@@ -126,19 +126,22 @@ Create or update `global.json` in your solution root:
 
 ```json
 {
-  "sdk": {
-    "version": "9.0.100"
-  },
-  "nugone": {
-    "excludeNamespaces": ["System.Text.Json", "Microsoft.Extensions.Logging"],
-    "excludeFiles": [
-      "**/*.Designer.cs",
-      "**/Generated/**",
-      "**/obj/**",
-      "**/bin/**"
-    ],
-    "excludePackages": ["Microsoft.NET.Test.Sdk", "coverlet.collector"]
-  }
+    "sdk": {
+        "version": "8.0.0"
+    },
+    "nugone": {
+        "excludeNamespaces": [
+            "System.Text.Json",
+            "Microsoft.Extensions.Logging"
+        ],
+        "excludeFiles": [
+            "**/*.Designer.cs",
+            "**/Generated/**",
+            "**/obj/**",
+            "**/bin/**"
+        ],
+        "excludePackages": ["Microsoft.NET.Test.Sdk", "coverlet.collector"]
+    }
 }
 ```
 
@@ -156,9 +159,9 @@ If you don't have `global.json`, NuGone will also look for a `nugone.config.json
 
 ```json
 {
-  "excludeNamespaces": ["System.Text.Json"],
-  "excludeFiles": ["**/*.Designer.cs"],
-  "excludePackages": ["Microsoft.NET.Test.Sdk"]
+    "excludeNamespaces": ["System.Text.Json"],
+    "excludeFiles": ["**/*.Designer.cs"],
+    "excludePackages": ["Microsoft.NET.Test.Sdk"]
 }
 ```
 
@@ -216,55 +219,55 @@ name: Analyze Unused Packages
 on: [push, pull_request]
 
 jobs:
-  analyze:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
+    analyze:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: 9.0.x
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v3
+              with:
+                  dotnet-version: 8.0.x
 
-      - name: Install NuGone
-        run: dotnet tool install --global nugone
+            - name: Install NuGone
+              run: dotnet tool install --global nugone
 
-      - name: Analyze packages
-        run: |
-          nugone analyze --project . --format json --output unused-packages.json
+            - name: Analyze packages
+              run: |
+                  nugone analyze --project . --format json --output unused-packages.json
 
-      - name: Upload results
-        uses: actions/upload-artifact@v3
-        with:
-          name: package-analysis
-          path: unused-packages.json
+            - name: Upload results
+              uses: actions/upload-artifact@v3
+              with:
+                  name: package-analysis
+                  path: unused-packages.json
 ```
 
 ### Azure DevOps
 
 ```yaml
 trigger:
-  - main
+    - main
 
 pool:
-  vmImage: "ubuntu-latest"
+    vmImage: "ubuntu-latest"
 
 steps:
-  - task: UseDotNet@2
-    inputs:
-      packageType: "sdk"
-      version: "9.x"
+    - task: UseDotNet@2
+      inputs:
+          packageType: "sdk"
+          version: "8.x"
 
-  - script: dotnet tool install --global nugone
-    displayName: "Install NuGone"
+    - script: dotnet tool install --global nugone
+      displayName: "Install NuGone"
 
-  - script: nugone analyze --project . --format json --output unused-packages.json
-    displayName: "Analyze unused packages"
+    - script: nugone analyze --project . --format json --output unused-packages.json
+      displayName: "Analyze unused packages"
 
-  - task: PublishBuildArtifacts@1
-    inputs:
-      pathtoPublish: "unused-packages.json"
-      artifactName: "package-analysis"
+    - task: PublishBuildArtifacts@1
+      inputs:
+          pathtoPublish: "unused-packages.json"
+          artifactName: "package-analysis"
 ```
 
 ### PowerShell Script

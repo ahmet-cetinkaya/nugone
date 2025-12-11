@@ -33,11 +33,11 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
         CancellationToken cancellationToken = default
     )
     {
-        _logger.LogDebug("Discovering solution files in: {RootPath}", rootPath);
+        LogDiscoveringSolutionFiles(rootPath);
 
         if (!_fileSystem.Directory.Exists(rootPath))
         {
-            _logger.LogWarning("Root path does not exist: {RootPath}", rootPath);
+            LogRootPathNotExists(rootPath);
             return Task.FromResult(Enumerable.Empty<string>());
         }
 
@@ -55,21 +55,17 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
                 if (IsSolutionFile(file.Extension))
                 {
                     solutionFiles.Add(file.FullName);
-                    _logger.LogDebug("Found solution file: {SolutionFile}", file.FullName);
+                    LogFoundSolutionFile(file.FullName);
                 }
             }
         }
         catch (Exception ex) when (!(ex is OperationCanceledException))
         {
-            _logger.LogError(ex, "Error discovering solution files in: {RootPath}", rootPath);
+            LogErrorDiscoveringSolutionFiles(ex, rootPath);
             throw;
         }
 
-        _logger.LogInformation(
-            "Discovered {Count} solution file(s) in: {RootPath}",
-            solutionFiles.Count,
-            rootPath
-        );
+        LogDiscoveredSolutionFiles(solutionFiles.Count, rootPath);
         return Task.FromResult<IEnumerable<string>>(solutionFiles);
     }
 
@@ -82,7 +78,9 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
         CancellationToken cancellationToken = default
     )
     {
-        _logger.LogDebug("Loading solution: {SolutionFilePath}", solutionFilePath);
+        ArgumentNullException.ThrowIfNull(solutionFilePath);
+
+        LogLoadingSolution(solutionFilePath);
 
         if (!_fileSystem.File.Exists(solutionFilePath))
             throw new FileNotFoundException($"Solution file not found: {solutionFilePath}");
@@ -110,9 +108,10 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
                     lastSeparator > 0 ? solutionFilePath.Substring(0, lastSeparator) : string.Empty;
             }
             var (isEnabled, directoryPackagesPropsPath) = await CheckCentralPackageManagementAsync(
-                solutionDirectory,
-                cancellationToken
-            );
+                    solutionDirectory,
+                    cancellationToken
+                )
+                .ConfigureAwait(false);
 
             if (isEnabled && !string.IsNullOrEmpty(directoryPackagesPropsPath))
             {
@@ -122,23 +121,21 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
             // Parse project references based on solution file type
             if (solutionFilePath.EndsWith(".slnx", StringComparison.OrdinalIgnoreCase))
             {
-                await ParseSlnxFileAsync(solution, solutionFilePath, cancellationToken);
+                await ParseSlnxFileAsync(solution, solutionFilePath, cancellationToken)
+                    .ConfigureAwait(false);
             }
             else
             {
-                await ParseSlnFileAsync(solution, solutionFilePath, cancellationToken);
+                await ParseSlnFileAsync(solution, solutionFilePath, cancellationToken)
+                    .ConfigureAwait(false);
             }
 
-            _logger.LogDebug(
-                "Loaded solution: {SolutionName} with {ProjectCount} project(s)",
-                solutionName,
-                solution.Projects.Count
-            );
+            LogLoadedSolution(solutionName, solution.Projects.Count);
             return solution;
         }
         catch (Exception ex) when (!(ex is OperationCanceledException))
         {
-            _logger.LogError(ex, "Error loading solution: {SolutionFilePath}", solutionFilePath);
+            LogErrorLoadingSolution(ex, solutionFilePath);
             throw;
         }
     }
@@ -175,10 +172,9 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
 
         try
         {
-            var content = await _fileSystem.File.ReadAllTextAsync(
-                directoryPackagesPropsPath,
-                cancellationToken
-            );
+            var content = await _fileSystem
+                .File.ReadAllTextAsync(directoryPackagesPropsPath, cancellationToken)
+                .ConfigureAwait(false);
             var document = XDocument.Parse(content);
 
             var manageCentrallyElement = document
@@ -192,11 +188,7 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
         }
         catch (Exception ex) when (!(ex is OperationCanceledException))
         {
-            _logger.LogWarning(
-                ex,
-                "Error checking central package management in: {DirectoryPackagesPropsPath}",
-                directoryPackagesPropsPath
-            );
+            LogErrorCheckingCpm(ex, directoryPackagesPropsPath);
             return (false, null);
         }
     }
@@ -210,10 +202,7 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
         CancellationToken cancellationToken = default
     )
     {
-        _logger.LogDebug(
-            "Loading central package versions from: {DirectoryPackagesPropsPath}",
-            directoryPackagesPropsPath
-        );
+        LogLoadingCentralPackageVersions(directoryPackagesPropsPath);
 
         if (!_fileSystem.File.Exists(directoryPackagesPropsPath))
             throw new FileNotFoundException(
@@ -222,10 +211,9 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
 
         try
         {
-            var content = await _fileSystem.File.ReadAllTextAsync(
-                directoryPackagesPropsPath,
-                cancellationToken
-            );
+            var content = await _fileSystem
+                .File.ReadAllTextAsync(directoryPackagesPropsPath, cancellationToken)
+                .ConfigureAwait(false);
             var document = XDocument.Parse(content);
 
             var packageVersions = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -241,16 +229,12 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
                 }
             }
 
-            _logger.LogDebug("Loaded {Count} central package version(s)", packageVersions.Count);
+            LogLoadedCentralPackageVersions(packageVersions.Count);
             return packageVersions;
         }
         catch (Exception ex) when (!(ex is OperationCanceledException))
         {
-            _logger.LogError(
-                ex,
-                "Error loading central package versions from: {DirectoryPackagesPropsPath}",
-                directoryPackagesPropsPath
-            );
+            LogErrorLoadingCentralPackageVersions(ex, directoryPackagesPropsPath);
             throw;
         }
     }
@@ -262,6 +246,9 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
     /// </summary>
     public string ResolveProjectPath(string solutionDirectoryPath, string relativeProjectPath)
     {
+        ArgumentNullException.ThrowIfNull(solutionDirectoryPath);
+        ArgumentNullException.ThrowIfNull(relativeProjectPath);
+
         // Use Path.Combine to handle relative paths properly
         var fullPath = _fileSystem.Path.Combine(solutionDirectoryPath, relativeProjectPath);
 
@@ -293,10 +280,10 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
             // For MockFileSystem, try to resolve relative paths manually
             // when Path.Combine doesn't handle them properly
             if (
-                relativeProjectPath.StartsWith("../")
-                || relativeProjectPath.StartsWith(@"..\")
-                || relativeProjectPath.StartsWith("./")
-                || relativeProjectPath.StartsWith(@".\")
+                relativeProjectPath.StartsWith("../", StringComparison.Ordinal)
+                || relativeProjectPath.StartsWith(@"..\", StringComparison.Ordinal)
+                || relativeProjectPath.StartsWith("./", StringComparison.Ordinal)
+                || relativeProjectPath.StartsWith(@".\", StringComparison.Ordinal)
             )
             {
                 // Handle parent directory navigation manually
@@ -369,7 +356,9 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
         CancellationToken cancellationToken
     )
     {
-        var content = await _fileSystem.File.ReadAllTextAsync(solutionFilePath, cancellationToken);
+        var content = await _fileSystem
+            .File.ReadAllTextAsync(solutionFilePath, cancellationToken)
+            .ConfigureAwait(false);
         var lines = content.Split('\n', StringSplitOptions.RemoveEmptyEntries);
 
         // Fix for MockFileSystem GetDirectoryName issue on Unix with Windows paths
@@ -413,7 +402,9 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
         CancellationToken cancellationToken
     )
     {
-        var content = await _fileSystem.File.ReadAllTextAsync(solutionFilePath, cancellationToken);
+        var content = await _fileSystem
+            .File.ReadAllTextAsync(solutionFilePath, cancellationToken)
+            .ConfigureAwait(false);
 
         // Fix for MockFileSystem GetDirectoryName issue on Unix with Windows paths
         var solutionDirectory = _fileSystem.Path.GetDirectoryName(solutionFilePath);
@@ -468,10 +459,7 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
 
                 if (string.IsNullOrWhiteSpace(relativePath))
                 {
-                    _logger.LogWarning(
-                        "Project entry missing Path element or attribute in: {SolutionFilePath}",
-                        solutionFilePath
-                    );
+                    LogMissingProjectPath(solutionFilePath);
                     continue;
                 }
 
@@ -487,31 +475,23 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
                 {
                     var project = new Project(fullPath, projectName, "net9.0");
                     solution.AddProject(project);
-                    _logger.LogDebug(
-                        "Added project: {ProjectName} from {RelativePath}",
-                        projectName,
-                        relativePath
-                    );
+                    LogAddedProject(projectName, relativePath);
                 }
                 else
                 {
-                    _logger.LogWarning("Project file not found: {ProjectPath}", fullPath);
+                    LogProjectFileNotFound(fullPath);
                 }
             }
         }
         catch (XmlException ex)
         {
-            _logger.LogError(
-                ex,
-                "Invalid XML format in .slnx file: {SolutionFilePath}",
-                solutionFilePath
-            );
+            LogInvalidSlnxFormat(ex, solutionFilePath);
             throw new InvalidDataException($"Invalid .slnx file format: {solutionFilePath}", ex);
         }
     }
 
     [GeneratedRegex(
-        @"Project\(""{[^}]+}""\)\s*=\s*""([^""]+)"",\s*""([^""]+)""",
+        @"Project\(""\{[^}]+\}""\)\s*=\s*""([^""]+)"",\s*""([^""]+)""",
         RegexOptions.Compiled
     )]
     private static partial Regex MyRegex();

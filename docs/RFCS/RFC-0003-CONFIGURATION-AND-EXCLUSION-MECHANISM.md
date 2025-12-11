@@ -35,10 +35,10 @@ Flexible configuration and exclusion are essential for accurate analysis and use
 
 ```json
 {
-  "nugone": {
-    "excludeNamespaces": ["System.Text.Json"],
-    "excludeFiles": ["**/*.Designer.cs", "**/Generated/**"]
-  }
+    "nugone": {
+        "excludeNamespaces": ["System.Text.Json"],
+        "excludeFiles": ["**/*.Designer.cs", "**/Generated/**"]
+    }
 }
 ```
 

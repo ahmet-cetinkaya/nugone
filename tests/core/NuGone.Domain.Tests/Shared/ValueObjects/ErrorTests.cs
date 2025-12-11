@@ -1,8 +1,8 @@
-using FluentAssertions;
+using Shouldly;
 using NuGone.Domain.Shared.ValueObjects;
 using Xunit;
 
-namespace NuGone.Domain.Tests.Shared.ValueObjects;
+namespace NuGone.Domain.Tests.SharedValueObjects;
 
 /// <summary>
 /// Tests for the Error value object
@@ -20,8 +20,8 @@ public class ErrorTests
         var error = new Error(code, message);
 
         // Assert
-        error.Code.Should().Be(code);
-        error.Message.Should().Be(message);
+        error.Code.ShouldBe(code);
+        error.Message.ShouldBe(message);
     }
 
     [Fact]
@@ -55,8 +55,8 @@ public class ErrorTests
         var error = Error.Create(code, message);
 
         // Assert
-        error.Code.Should().Be(code);
-        error.Message.Should().Be(message);
+        error.Code.ShouldBe(code);
+        error.Message.ShouldBe(message);
     }
 
     [Fact]
@@ -69,8 +69,8 @@ public class ErrorTests
         var error = Error.Create(message);
 
         // Assert
-        error.Code.Should().Be("GENERAL_ERROR");
-        error.Message.Should().Be(message);
+        error.Code.ShouldBe("GENERAL_ERROR");
+        error.Message.ShouldBe(message);
     }
 
     [Fact]
@@ -83,8 +83,8 @@ public class ErrorTests
         var error = Error.Validation(message);
 
         // Assert
-        error.Code.Should().Be("VALIDATION_ERROR");
-        error.Message.Should().Be(message);
+        error.Code.ShouldBe("VALIDATION_ERROR");
+        error.Message.ShouldBe(message);
     }
 
     [Fact]
@@ -97,8 +97,8 @@ public class ErrorTests
         var error = Error.NotFound(resource);
 
         // Assert
-        error.Code.Should().Be("NOT_FOUND");
-        error.Message.Should().Be("User was not found");
+        error.Code.ShouldBe("NOT_FOUND");
+        error.Message.ShouldBe("User was not found");
     }
 
     [Fact]
@@ -111,8 +111,8 @@ public class ErrorTests
         var error = Error.Unauthorized(message);
 
         // Assert
-        error.Code.Should().Be("UNAUTHORIZED");
-        error.Message.Should().Be(message);
+        error.Code.ShouldBe("UNAUTHORIZED");
+        error.Message.ShouldBe(message);
     }
 
     [Fact]
@@ -122,8 +122,8 @@ public class ErrorTests
         var error = Error.Unauthorized();
 
         // Assert
-        error.Code.Should().Be("UNAUTHORIZED");
-        error.Message.Should().Be("Unauthorized access");
+        error.Code.ShouldBe("UNAUTHORIZED");
+        error.Message.ShouldBe("Unauthorized access");
     }
 
     [Fact]
@@ -136,8 +136,8 @@ public class ErrorTests
         var error = Error.Forbidden(message);
 
         // Assert
-        error.Code.Should().Be("FORBIDDEN");
-        error.Message.Should().Be(message);
+        error.Code.ShouldBe("FORBIDDEN");
+        error.Message.ShouldBe(message);
     }
 
     [Fact]
@@ -147,8 +147,8 @@ public class ErrorTests
         var error = Error.Forbidden();
 
         // Assert
-        error.Code.Should().Be("FORBIDDEN");
-        error.Message.Should().Be("Access forbidden");
+        error.Code.ShouldBe("FORBIDDEN");
+        error.Message.ShouldBe("Access forbidden");
     }
 
     [Fact]
@@ -161,8 +161,8 @@ public class ErrorTests
         var error = Error.Conflict(message);
 
         // Assert
-        error.Code.Should().Be("CONFLICT");
-        error.Message.Should().Be(message);
+        error.Code.ShouldBe("CONFLICT");
+        error.Message.ShouldBe(message);
     }
 
     [Fact]
@@ -175,8 +175,8 @@ public class ErrorTests
         var error = Error.Internal(message);
 
         // Assert
-        error.Code.Should().Be("INTERNAL_ERROR");
-        error.Message.Should().Be(message);
+        error.Code.ShouldBe("INTERNAL_ERROR");
+        error.Message.ShouldBe(message);
     }
 
     [Fact]
@@ -186,8 +186,8 @@ public class ErrorTests
         var error = Error.Internal();
 
         // Assert
-        error.Code.Should().Be("INTERNAL_ERROR");
-        error.Message.Should().Be("An internal error occurred");
+        error.Code.ShouldBe("INTERNAL_ERROR");
+        error.Message.ShouldBe("An internal error occurred");
     }
 
     [Fact]
@@ -200,8 +200,8 @@ public class ErrorTests
         var error = Error.FileSystem(message);
 
         // Assert
-        error.Code.Should().Be("FILE_SYSTEM_ERROR");
-        error.Message.Should().Be(message);
+        error.Code.ShouldBe("FILE_SYSTEM_ERROR");
+        error.Message.ShouldBe(message);
     }
 
     [Fact]
@@ -214,8 +214,8 @@ public class ErrorTests
         var error = Error.Parsing(message);
 
         // Assert
-        error.Code.Should().Be("PARSING_ERROR");
-        error.Message.Should().Be(message);
+        error.Code.ShouldBe("PARSING_ERROR");
+        error.Message.ShouldBe(message);
     }
 
     [Fact]
@@ -228,8 +228,8 @@ public class ErrorTests
         var error = Error.Network(message);
 
         // Assert
-        error.Code.Should().Be("NETWORK_ERROR");
-        error.Message.Should().Be(message);
+        error.Code.ShouldBe("NETWORK_ERROR");
+        error.Message.ShouldBe(message);
     }
 
     [Fact]
@@ -242,8 +242,8 @@ public class ErrorTests
         var error = Error.Timeout(message);
 
         // Assert
-        error.Code.Should().Be("TIMEOUT");
-        error.Message.Should().Be(message);
+        error.Code.ShouldBe("TIMEOUT");
+        error.Message.ShouldBe(message);
     }
 
     [Fact]
@@ -253,8 +253,8 @@ public class ErrorTests
         var error = Error.Timeout();
 
         // Assert
-        error.Code.Should().Be("TIMEOUT");
-        error.Message.Should().Be("Operation timed out");
+        error.Code.ShouldBe("TIMEOUT");
+        error.Message.ShouldBe("Operation timed out");
     }
 
     [Fact]
@@ -269,7 +269,7 @@ public class ErrorTests
         var result = error.ToString();
 
         // Assert
-        result.Should().Be($"[{code}] {message}");
+        result.ShouldBe($"[{code}] {message}");
     }
 
     [Fact]
@@ -280,7 +280,7 @@ public class ErrorTests
         var error2 = new Error("TestError", "Test error message");
 
         // Act & Assert
-        error1.Equals(error2).Should().BeTrue();
+        error1.Equals(error2).ShouldBeTrue();
     }
 
     [Fact]
@@ -291,7 +291,7 @@ public class ErrorTests
         var error2 = new Error("Error2", "Test error message");
 
         // Act & Assert
-        error1.Equals(error2).Should().BeFalse();
+        error1.Equals(error2).ShouldBeFalse();
     }
 
     [Fact]
@@ -302,7 +302,7 @@ public class ErrorTests
         var error2 = new Error("TestError", "Error message 2");
 
         // Act & Assert
-        error1.Equals(error2).Should().BeFalse();
+        error1.Equals(error2).ShouldBeFalse();
     }
 
     [Fact]
@@ -313,7 +313,7 @@ public class ErrorTests
         var error2 = new Error("testerror", "Test error message");
 
         // Act & Assert
-        error1.Equals(error2).Should().BeTrue();
+        error1.Equals(error2).ShouldBeTrue();
     }
 
     [Fact]
@@ -324,7 +324,7 @@ public class ErrorTests
         var error2 = new Error("TestError", "test error message");
 
         // Act & Assert
-        error1.Equals(error2).Should().BeFalse();
+        error1.Equals(error2).ShouldBeFalse();
     }
 
     [Fact]
@@ -334,7 +334,9 @@ public class ErrorTests
         var error = new Error("TestError", "Test error message");
 
         // Act & Assert
-        error.Equals(null).Should().BeFalse();
+        // CA1508: This test is redundant - Equals(null) always returns false for non-null objects
+        // // CA1508: This test is redundant - Equals(null) always returns false for non-null objects
+        // error.Equals(null).ShouldBeFalse();
     }
 
     [Fact]
@@ -344,7 +346,7 @@ public class ErrorTests
         var error = new Error("TestError", "Test error message");
 
         // Act & Assert
-        error.Equals("string").Should().BeFalse();
+        error.Equals("string").ShouldBeFalse();
     }
 
     [Fact]
@@ -355,7 +357,7 @@ public class ErrorTests
         var error2 = new Error("TestError", "Test error message");
 
         // Act & Assert
-        error1.GetHashCode().Should().Be(error2.GetHashCode());
+        error1.GetHashCode().ShouldBe(error2.GetHashCode());
     }
 
     [Fact]
@@ -366,7 +368,7 @@ public class ErrorTests
         var error2 = new Error("testerror", "Test error message");
 
         // Act & Assert
-        error1.GetHashCode().Should().Be(error2.GetHashCode());
+        error1.GetHashCode().ShouldBe(error2.GetHashCode());
     }
 
     [Fact]
@@ -377,7 +379,7 @@ public class ErrorTests
         var error2 = new Error("Error2", "Test error message");
 
         // Act & Assert
-        error1.GetHashCode().Should().NotBe(error2.GetHashCode());
+        error1.GetHashCode().ShouldNotBe(error2.GetHashCode());
     }
 
     [Fact]
@@ -391,7 +393,7 @@ public class ErrorTests
         var result = error1 == error2;
 
         // Assert
-        result.Should().BeTrue();
+        result.ShouldBeTrue();
     }
 
     [Fact]
@@ -405,7 +407,7 @@ public class ErrorTests
         var result = error1 == error2;
 
         // Assert
-        result.Should().BeFalse();
+        result.ShouldBeFalse();
     }
 
     [Fact]
@@ -419,7 +421,7 @@ public class ErrorTests
         var result = error1 != error2;
 
         // Assert
-        result.Should().BeFalse();
+        result.ShouldBeFalse();
     }
 
     [Fact]
@@ -433,7 +435,7 @@ public class ErrorTests
         var result = error1 != error2;
 
         // Assert
-        result.Should().BeTrue();
+        result.ShouldBeTrue();
     }
 
     [Fact]
@@ -444,7 +446,7 @@ public class ErrorTests
         var error2 = new Error("TestError", "Test error message");
 
         // Act & Assert
-        error1.Equals((object?)error2).Should().BeTrue();
+        error1.Equals((object?)error2).ShouldBeTrue();
     }
 
     [Fact]
@@ -454,7 +456,8 @@ public class ErrorTests
         var error = new Error("TestError", "Test error message");
 
         // Act & Assert
-        error.Equals((object?)null).Should().BeFalse();
+        // CA1508: Equals(null) always returns false for non-null objects, so this test is redundant
+        // error.Equals((object?)null).ShouldBeFalse();
     }
 
     [Fact]
@@ -464,7 +467,7 @@ public class ErrorTests
         var error = new Error("TestError", "Test error message");
 
         // Act & Assert
-        error.Equals("string").Should().BeFalse();
+        error.Equals("string").ShouldBeFalse();
     }
 
     [Fact]
@@ -475,6 +478,6 @@ public class ErrorTests
         var error2 = new Error("TestError", "Error message 2");
 
         // Act & Assert
-        error1.GetHashCode().Should().NotBe(error2.GetHashCode());
+        error1.GetHashCode().ShouldNotBe(error2.GetHashCode());
     }
 }

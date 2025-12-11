@@ -3,6 +3,8 @@ using Moq;
 using Shouldly;
 using Xunit;
 
+#pragma warning disable CA1873 // Avoid potentially expensive logging in test verifications
+
 namespace NuGone.Application.Tests.Features.PackageAnalysis.Services;
 
 /// <summary>
@@ -240,7 +242,10 @@ public partial class PackageUsageAnalyzerTests
         // Build tools and analyzers require special consideration for removal
         var potentiallyBuildCritical = solution
             .GetAllUnusedPackages()
-            .Where(p => p.PackageId.Contains("Analyzer") || p.PackageId.Contains("CodeAnalysis"))
+            .Where(p =>
+                p.PackageId.Contains("Analyzer", StringComparison.Ordinal)
+                || p.PackageId.Contains("CodeAnalysis", StringComparison.Ordinal)
+            )
             .ToList();
 
         potentiallyBuildCritical.ShouldContain(buildToolPackage);
@@ -425,7 +430,7 @@ public partial class PackageUsageAnalyzerTests
 
         // RFC-0004 Safety: Provide clear removal guidance
         var safeToRemove = unusedPackages.Where(p => p.IsDirect).ToList();
-        safeToRemove.Count.ShouldBe(3); // Serilog, Polly, Swashbuckle
+        safeToRemove.Count().ShouldBe(3); // Serilog, Polly, Swashbuckle
 
         // Verify statistics
         var stats = solution.GetPackageStatistics();

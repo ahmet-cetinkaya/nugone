@@ -7,7 +7,7 @@ namespace NuGone.Cli.Infrastructure;
 /// Type registrar for Spectre.Console.Cli dependency injection.
 /// Bridges the Microsoft.Extensions.DependencyInjection container with Spectre.Console.Cli.
 /// </summary>
-public sealed class TypeRegistrar(IServiceCollection builder) : ITypeRegistrar
+internal sealed class TypeRegistrar(IServiceCollection builder) : ITypeRegistrar
 {
     private readonly IServiceCollection _builder = builder;
 

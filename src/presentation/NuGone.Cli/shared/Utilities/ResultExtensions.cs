@@ -5,7 +5,7 @@ namespace NuGone.Cli.Shared.Utilities;
 /// <summary>
 /// Extension methods for working with Result types.
 /// </summary>
-public static class ResultExtensions
+internal static class ResultExtensions
 {
     /// <summary>
     /// Converts a Result to a Result&lt;T&gt; with a specific value on success.

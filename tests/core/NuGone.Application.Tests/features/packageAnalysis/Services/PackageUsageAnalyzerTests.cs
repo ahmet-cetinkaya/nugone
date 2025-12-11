@@ -23,6 +23,8 @@ public partial class PackageUsageAnalyzerTests
         _mockProjectRepository = new Mock<IProjectRepository>();
         _mockNuGetRepository = new Mock<INuGetRepository>();
         _mockLogger = new Mock<ILogger<PackageUsageAnalyzer>>();
+        // Enable log levels so LoggerMessage source generator actually logs
+        _mockLogger.Setup(x => x.IsEnabled(It.IsAny<LogLevel>())).Returns(true);
 
         _analyzer = new PackageUsageAnalyzer(
             _mockProjectRepository.Object,

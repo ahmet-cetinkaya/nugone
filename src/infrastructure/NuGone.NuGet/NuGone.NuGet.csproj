@@ -1,18 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net9.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <WarningsAsErrors />
-    <WarningsNotAsErrors>NU1701;NU1604;NU1602</WarningsNotAsErrors>
-  </PropertyGroup>
+  <!-- Packages -->
   <ItemGroup>
-    <PackageReference Include="System.Text.Json" Version="9.0.10" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.10" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.10" />
+    <!-- System.Text.Json is built into .NET 8+, only include explicitly if needed for source builds -->
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="10.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="10.0.1" />
   </ItemGroup>
+  <!-- References -->
   <ItemGroup>
     <ProjectReference Include="..\..\core\NuGone.Application\NuGone.Application.csproj" />
+  </ItemGroup>
+  <!-- Internals -->
+  <ItemGroup>
+    <InternalsVisibleTo Include="NuGone.NuGet.Tests" />
   </ItemGroup>
 </Project>

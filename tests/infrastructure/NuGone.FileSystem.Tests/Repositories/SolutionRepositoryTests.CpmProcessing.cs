@@ -5,7 +5,7 @@ using Xunit;
 
 namespace NuGone.FileSystem.Tests.Repositories;
 
-public class SolutionRepositoryTests_CpmProcessing : SolutionRepositoryTests
+public sealed class SolutionRepositoryTests_CpmProcessing : SolutionRepositoryTests
 {
     [Fact]
     public async Task Should_Detect_Cpm_In_Solution_Directory()

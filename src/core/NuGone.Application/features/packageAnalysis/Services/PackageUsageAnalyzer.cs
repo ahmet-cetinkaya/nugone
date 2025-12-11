@@ -35,21 +35,17 @@ public partial class PackageUsageAnalyzer(
         CancellationToken cancellationToken = default
     )
     {
-        _logger.LogInformation(
-            "Starting package usage analysis for solution: {SolutionName}",
-            solution.Name
-        );
+        ArgumentNullException.ThrowIfNull(solution);
+
+        LogStartingAnalysis(solution.Name);
 
         foreach (var project in solution.Projects)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            await AnalyzeProjectPackageUsageAsync(project, cancellationToken);
+            await AnalyzeProjectPackageUsageAsync(project, cancellationToken).ConfigureAwait(false);
         }
 
-        _logger.LogInformation(
-            "Completed package usage analysis for solution: {SolutionName}",
-            solution.Name
-        );
+        LogCompletedAnalysis(solution.Name);
     }
 
     /// <summary>
@@ -61,13 +57,13 @@ public partial class PackageUsageAnalyzer(
         CancellationToken cancellationToken = default
     )
     {
-        _logger.LogDebug("Analyzing package usage for project: {ProjectName}", project.Name);
+        ArgumentNullException.ThrowIfNull(project);
+        LogAnalyzingProject(project.Name);
 
         // Step 1: Get all source files for the project
-        var sourceFiles = await _projectRepository.GetProjectSourceFilesAsync(
-            project,
-            cancellationToken
-        );
+        var sourceFiles = await _projectRepository
+            .GetProjectSourceFilesAsync(project, cancellationToken)
+            .ConfigureAwait(false);
 
         // Step 2: Parse target frameworks for multi-target support (RFC-0002)
         var targetFrameworks = project.TargetFramework.Split(
@@ -83,11 +79,7 @@ public partial class PackageUsageAnalyzer(
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            _logger.LogDebug(
-                "Analyzing package: {PackageId} in project: {ProjectName}",
-                packageRef.PackageId,
-                project.Name
-            );
+            LogAnalyzingPackage(packageRef.PackageId, project.Name);
 
             // Reset usage status before analysis
             packageRef.ResetUsageStatus();
@@ -97,51 +89,47 @@ public partial class PackageUsageAnalyzer(
             foreach (var targetFramework in targetFrameworks)
             {
                 var namespaces = await GetPackageNamespacesAsync(
-                    packageRef.PackageId,
-                    packageRef.Version,
-                    targetFramework.Trim()
-                );
+                        packageRef.PackageId,
+                        packageRef.Version,
+                        targetFramework.Trim()
+                    )
+                    .ConfigureAwait(false);
                 foreach (var ns in namespaces)
                 {
                     _ = allNamespaces.Add(ns);
                 }
             }
 
-            _logger.LogDebug(
-                "Package {PackageId} has {NamespaceCount} namespaces: {Namespaces}",
-                packageRef.PackageId,
-                allNamespaces.Count,
-                string.Join(", ", allNamespaces)
-            );
+            var namespacesString = string.Join(", ", allNamespaces);
+            LogPackageNamespaces(packageRef.PackageId, allNamespaces.Count, namespacesString);
 
             if (allNamespaces.Count == 0)
             {
-                _logger.LogWarning(
-                    "No namespaces found for package: {PackageId}",
-                    packageRef.PackageId
-                );
+                LogNoNamespacesFound(packageRef.PackageId);
                 continue;
             }
 
             // Scan source files for usage of these namespaces
             var usageResults = await ScanSourceFilesForUsageAsync(
-                sourceFiles,
-                allNamespaces,
-                project,
-                errorLoggedFiles,
-                cancellationToken
-            );
-
-            // If package has global using, also scan for implicit usage
-            if (packageRef.HasGlobalUsing)
-            {
-                var globalUsageResults = await ScanSourceFilesForGlobalUsageAsync(
                     sourceFiles,
                     allNamespaces,
                     project,
                     errorLoggedFiles,
                     cancellationToken
-                );
+                )
+                .ConfigureAwait(false);
+
+            // If package has global using, also scan for implicit usage
+            if (packageRef.HasGlobalUsing)
+            {
+                var globalUsageResults = await ScanSourceFilesForGlobalUsageAsync(
+                        sourceFiles,
+                        allNamespaces,
+                        project,
+                        errorLoggedFiles,
+                        cancellationToken
+                    )
+                    .ConfigureAwait(false);
 
                 // Merge global usage results with regular usage results
                 foreach (var (namespaceName, usageLocations) in globalUsageResults)
@@ -157,11 +145,8 @@ public partial class PackageUsageAnalyzer(
                 }
             }
 
-            _logger.LogDebug(
-                "Package {PackageId} usage scan found {UsageCount} namespace matches",
-                packageRef.PackageId,
-                usageResults.Sum(kvp => kvp.Value.Count)
-            );
+            var usageCount = usageResults.Sum(kvp => kvp.Value.Count);
+            LogPackageUsageScan(packageRef.PackageId, usageCount);
 
             // Mark package as used if any namespace usage was found
             foreach (var (namespaceName, usageLocations) in usageResults)
@@ -172,8 +157,7 @@ public partial class PackageUsageAnalyzer(
                 }
             }
 
-            _logger.LogDebug(
-                "Package {PackageId} analysis result: IsUsed={IsUsed}, UsageLocations={LocationCount}",
+            LogPackageAnalysisResult(
                 packageRef.PackageId,
                 packageRef.IsUsed,
                 packageRef.UsageLocations.Count
@@ -182,13 +166,7 @@ public partial class PackageUsageAnalyzer(
 
         var usedCount = project.PackageReferences.Count(p => p.IsUsed);
         var unusedCount = project.PackageReferences.Count(p => !p.IsUsed);
-
-        _logger.LogDebug(
-            "Project {ProjectName}: {UsedCount} used, {UnusedCount} unused packages",
-            project.Name,
-            usedCount,
-            unusedCount
-        );
+        LogProjectSummary(project.Name, usedCount, unusedCount);
     }
 
     /// <summary>
@@ -202,6 +180,10 @@ public partial class PackageUsageAnalyzer(
         CancellationToken cancellationToken = default
     )
     {
+        ArgumentNullException.ThrowIfNull(sourceFiles);
+        ArgumentNullException.ThrowIfNull(packageNamespaces);
+        ArgumentNullException.ThrowIfNull(excludePatterns);
+
         var usageResults = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
         var namespacePatterns = packageNamespaces.Select(ns => new NamespacePattern(ns)).ToList();
 
@@ -215,10 +197,9 @@ public partial class PackageUsageAnalyzer(
 
             try
             {
-                var content = await _projectRepository.ReadSourceFileAsync(
-                    sourceFile,
-                    cancellationToken
-                );
+                var content = await _projectRepository
+                    .ReadSourceFileAsync(sourceFile, cancellationToken)
+                    .ConfigureAwait(false);
                 var foundNamespaces = ScanFileForNamespaceUsage(content, namespacePatterns);
 
                 foreach (var foundNamespace in foundNamespaces)
@@ -230,13 +211,11 @@ public partial class PackageUsageAnalyzer(
                         usageResults[foundNamespace].Add(sourceFile);
                 }
             }
+#pragma warning disable CA1031 // File I/O operations can throw various exception types (IOException, UnauthorizedAccessException, etc.)
             catch (Exception ex)
+#pragma warning restore CA1031
             {
-                _logger.LogWarning(
-                    ex,
-                    "Error scanning file for namespace usage: {SourceFile}",
-                    sourceFile
-                );
+                LogErrorScanningFile(ex, sourceFile);
             }
         }
 
@@ -256,12 +235,13 @@ public partial class PackageUsageAnalyzer(
     {
         var errorLoggedFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         return await ScanSourceFilesForUsageAsync(
-            sourceFiles,
-            packageNamespaces,
-            project,
-            errorLoggedFiles,
-            cancellationToken
-        );
+                sourceFiles,
+                packageNamespaces,
+                project,
+                errorLoggedFiles,
+                cancellationToken
+            )
+            .ConfigureAwait(false);
     }
 
     /// <summary>
@@ -277,6 +257,11 @@ public partial class PackageUsageAnalyzer(
         CancellationToken cancellationToken = default
     )
     {
+        ArgumentNullException.ThrowIfNull(sourceFiles);
+        ArgumentNullException.ThrowIfNull(packageNamespaces);
+        ArgumentNullException.ThrowIfNull(project);
+        ArgumentNullException.ThrowIfNull(errorLoggedFiles);
+
         var usageResults = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
         var namespacePatterns = packageNamespaces.Select(ns => new NamespacePattern(ns)).ToList();
 
@@ -290,10 +275,9 @@ public partial class PackageUsageAnalyzer(
 
             try
             {
-                var content = await _projectRepository.ReadSourceFileAsync(
-                    sourceFile,
-                    cancellationToken
-                );
+                var content = await _projectRepository
+                    .ReadSourceFileAsync(sourceFile, cancellationToken)
+                    .ConfigureAwait(false);
                 var foundNamespaces = ScanFileForNamespaceUsage(content, namespacePatterns);
 
                 foreach (var foundNamespace in foundNamespaces)
@@ -305,16 +289,14 @@ public partial class PackageUsageAnalyzer(
                         usageResults[foundNamespace].Add(sourceFile);
                 }
             }
+#pragma warning disable CA1031 // File I/O operations can throw various exception types (IOException, UnauthorizedAccessException, etc.)
             catch (Exception ex)
+#pragma warning restore CA1031
             {
                 // RFC-0004: Avoid duplicate error logging for the same file across all package analyses
                 if (!errorLoggedFiles.Contains(sourceFile))
                 {
-                    _logger.LogWarning(
-                        ex,
-                        "Error scanning file for namespace usage: {SourceFile}",
-                        sourceFile
-                    );
+                    LogErrorScanningFile(ex, sourceFile);
                     _ = errorLoggedFiles.Add(sourceFile);
                 }
             }
@@ -335,6 +317,11 @@ public partial class PackageUsageAnalyzer(
         CancellationToken cancellationToken = default
     )
     {
+        ArgumentNullException.ThrowIfNull(sourceFiles);
+        ArgumentNullException.ThrowIfNull(packageNamespaces);
+        ArgumentNullException.ThrowIfNull(project);
+        ArgumentNullException.ThrowIfNull(errorLoggedFiles);
+
         var usageResults = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
         var namespacePatterns = packageNamespaces.Select(ns => new NamespacePattern(ns)).ToList();
 
@@ -348,10 +335,9 @@ public partial class PackageUsageAnalyzer(
 
             try
             {
-                var content = await _projectRepository.ReadSourceFileAsync(
-                    sourceFile,
-                    cancellationToken
-                );
+                var content = await _projectRepository
+                    .ReadSourceFileAsync(sourceFile, cancellationToken)
+                    .ConfigureAwait(false);
                 var foundNamespaces = ScanFileForGlobalNamespaceUsage(content, namespacePatterns);
 
                 foreach (var foundNamespace in foundNamespaces)
@@ -363,16 +349,14 @@ public partial class PackageUsageAnalyzer(
                         usageResults[foundNamespace].Add(sourceFile);
                 }
             }
+#pragma warning disable CA1031 // File I/O operations can throw various exception types (IOException, UnauthorizedAccessException, etc.)
             catch (Exception ex)
+#pragma warning restore CA1031
             {
                 // Avoid duplicate error logging for the same file across all package analyses
                 if (!errorLoggedFiles.Contains(sourceFile))
                 {
-                    _logger.LogWarning(
-                        ex,
-                        "Error scanning file for global namespace usage: {SourceFile}",
-                        sourceFile
-                    );
+                    LogErrorScanningGlobalUsage(ex, sourceFile);
                     _ = errorLoggedFiles.Add(sourceFile);
                 }
             }
@@ -387,25 +371,27 @@ public partial class PackageUsageAnalyzer(
     /// </summary>
     public async Task<ValidationResult> ValidateInputsAsync(Solution solution)
     {
-        var errors = new List<string>();
-
         if (solution == null)
         {
-            errors.Add("Solution cannot be null");
-            return ValidationResult.Failure(errors);
+            return ValidationResult.Failure(["Solution cannot be null"]);
         }
 
+        var errors = new List<string>();
+
         // Validate solution file exists (skip for virtual solutions)
-        if (!solution.IsVirtual && !await _projectRepository.ExistsAsync(solution.FilePath))
+        if (
+            !solution.IsVirtual
+            && !await _projectRepository.ExistsAsync(solution.FilePath).ConfigureAwait(false)
+        )
             errors.Add($"Solution file does not exist: {solution.FilePath}");
 
         // Validate each project
         foreach (var project in solution.Projects)
         {
-            if (!await _projectRepository.ExistsAsync(project.FilePath))
+            if (!await _projectRepository.ExistsAsync(project.FilePath).ConfigureAwait(false))
                 errors.Add($"Project file does not exist: {project.FilePath}");
 
-            if (!await _projectRepository.ExistsAsync(project.DirectoryPath))
+            if (!await _projectRepository.ExistsAsync(project.DirectoryPath).ConfigureAwait(false))
                 errors.Add($"Project directory does not exist: {project.DirectoryPath}");
         }
 
@@ -422,11 +408,9 @@ public partial class PackageUsageAnalyzer(
         string targetFramework
     )
     {
-        return await _nugetRepository.GetPackageNamespacesAsync(
-            packageId,
-            version,
-            targetFramework
-        );
+        return await _nugetRepository
+            .GetPackageNamespacesAsync(packageId, version, targetFramework)
+            .ConfigureAwait(false);
     }
 
     private static HashSet<string> ScanFileForNamespaceUsage(
@@ -567,10 +551,10 @@ public partial class PackageUsageAnalyzer(
             {
                 // Look for Xunit attributes and classes
                 if (
-                    content.Contains("[Fact]")
-                    || content.Contains("[Theory]")
-                    || content.Contains("Assert.")
-                    || content.Contains("[InlineData")
+                    content.Contains("[Fact]", StringComparison.Ordinal)
+                    || content.Contains("[Theory]", StringComparison.Ordinal)
+                    || content.Contains("Assert.", StringComparison.Ordinal)
+                    || content.Contains("[InlineData", StringComparison.Ordinal)
                 )
                 {
                     _ = foundNamespaces.Add(namespaceName);

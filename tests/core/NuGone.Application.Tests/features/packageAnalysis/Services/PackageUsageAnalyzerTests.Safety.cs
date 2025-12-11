@@ -4,6 +4,8 @@ using NuGone.Domain.Features.PackageAnalysis.Entities;
 using Shouldly;
 using Xunit;
 
+#pragma warning disable CA1873 // Avoid potentially expensive logging in test verifications
+
 namespace NuGone.Application.Tests.Features.PackageAnalysis.Services;
 
 /// <summary>
@@ -118,7 +120,7 @@ public partial class PackageUsageAnalyzerTests
 
         // Assert
         result.IsValid.ShouldBeFalse();
-        result.Errors.Count.ShouldBe(5); // Solution + 2 projects + 2 directories
+        result.Errors.Count().ShouldBe(5); // Solution + 2 projects + 2 directories
         result.Errors.ShouldContain($"Solution file does not exist: {solution.FilePath}");
         result.Errors.ShouldContain($"Project file does not exist: {project1.FilePath}");
         result.Errors.ShouldContain($"Project directory does not exist: {project1.DirectoryPath}");

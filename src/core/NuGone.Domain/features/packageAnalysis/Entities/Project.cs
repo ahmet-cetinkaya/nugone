@@ -214,7 +214,7 @@ public class Project
     private static bool IsFileMatchingPattern(string filePath, string pattern)
     {
         // Simple pattern matching - could be enhanced with more sophisticated glob patterns
-        if (pattern.Contains("**"))
+        if (pattern.Contains("**", StringComparison.Ordinal))
         {
             // Handle recursive directory patterns like **/Generated/**
             var parts = pattern.Split(["**"], StringSplitOptions.RemoveEmptyEntries);
@@ -229,7 +229,10 @@ public class Project
         }
 
         // Simple wildcard matching
-        return filePath.Contains(pattern.Replace("*", ""), StringComparison.OrdinalIgnoreCase);
+        return filePath.Contains(
+            pattern.Replace("*", "", StringComparison.Ordinal),
+            StringComparison.OrdinalIgnoreCase
+        );
     }
 
     public override string ToString()
@@ -247,6 +250,6 @@ public class Project
 
     public override int GetHashCode()
     {
-        return FilePath.ToLowerInvariant().GetHashCode();
+        return FilePath.ToUpperInvariant().GetHashCode(StringComparison.Ordinal);
     }
 }

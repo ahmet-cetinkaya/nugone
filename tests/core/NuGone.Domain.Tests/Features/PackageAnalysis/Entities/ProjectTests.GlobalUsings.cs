@@ -1,4 +1,4 @@
-using FluentAssertions;
+using Shouldly;
 using NuGone.Domain.Features.PackageAnalysis.Entities;
 
 namespace NuGone.Domain.Tests.Features.PackageAnalysis.Entities;
@@ -15,8 +15,8 @@ public class ProjectGlobalUsingsTests
         var project = new Project("/path/to/project.csproj", "TestProject", "net9.0");
 
         // Assert
-        project.GlobalUsings.Should().NotBeNull();
-        project.GlobalUsings.Should().BeEmpty();
+        project.GlobalUsings.ShouldNotBeNull();
+        project.GlobalUsings.ShouldBeEmpty();
     }
 
     [Fact]
@@ -30,8 +30,8 @@ public class ProjectGlobalUsingsTests
         project.AddGlobalUsing(globalUsing);
 
         // Assert
-        project.GlobalUsings.Should().HaveCount(1);
-        project.GlobalUsings.Should().Contain(globalUsing);
+        project.GlobalUsings.Count.ShouldBe(1);
+        project.GlobalUsings.ShouldContain(globalUsing);
     }
 
     [Fact]
@@ -41,8 +41,7 @@ public class ProjectGlobalUsingsTests
         var project = new Project("/path/to/project.csproj", "TestProject", "net9.0");
 
         // Act & Assert
-        var action = () => project.AddGlobalUsing(null!);
-        action.Should().Throw<ArgumentNullException>();
+        Should.Throw<ArgumentNullException>(() => project.AddGlobalUsing(null!));
     }
 
     [Fact]
@@ -57,8 +56,8 @@ public class ProjectGlobalUsingsTests
         project.AddGlobalUsing(globalUsing); // Add the same global using again
 
         // Assert
-        project.GlobalUsings.Should().HaveCount(1);
-        project.GlobalUsings.Should().Contain(globalUsing);
+        project.GlobalUsings.Count.ShouldBe(1);
+        project.GlobalUsings.ShouldContain(globalUsing);
     }
 
     [Fact]
@@ -73,8 +72,8 @@ public class ProjectGlobalUsingsTests
         var result = project.RemoveGlobalUsing(globalUsing);
 
         // Assert
-        result.Should().BeTrue();
-        project.GlobalUsings.Should().BeEmpty();
+        result.ShouldBeTrue();
+        project.GlobalUsings.ShouldBeEmpty();
     }
 
     [Fact]
@@ -88,8 +87,8 @@ public class ProjectGlobalUsingsTests
         var result = project.RemoveGlobalUsing(globalUsing);
 
         // Assert
-        result.Should().BeFalse();
-        project.GlobalUsings.Should().BeEmpty();
+        result.ShouldBeFalse();
+        project.GlobalUsings.ShouldBeEmpty();
     }
 
     [Fact]
@@ -99,8 +98,7 @@ public class ProjectGlobalUsingsTests
         var project = new Project("/path/to/project.csproj", "TestProject", "net9.0");
 
         // Act & Assert
-        var action = () => project.RemoveGlobalUsing(null!);
-        action.Should().Throw<ArgumentNullException>();
+        Should.Throw<ArgumentNullException>(() => project.RemoveGlobalUsing(null!));
     }
 
     [Fact]
@@ -115,7 +113,7 @@ public class ProjectGlobalUsingsTests
         var result = project.HasGlobalUsingForPackage("Xunit");
 
         // Assert
-        result.Should().BeTrue();
+        result.ShouldBeTrue();
     }
 
     [Fact]
@@ -130,7 +128,7 @@ public class ProjectGlobalUsingsTests
         var result = project.HasGlobalUsingForPackage("Moq");
 
         // Assert
-        result.Should().BeFalse();
+        result.ShouldBeFalse();
     }
 
     [Fact]
@@ -145,7 +143,7 @@ public class ProjectGlobalUsingsTests
         var result = project.HasGlobalUsingForPackage("XUNIT");
 
         // Assert
-        result.Should().BeTrue();
+        result.ShouldBeTrue();
     }
 
     [Fact]
@@ -157,9 +155,9 @@ public class ProjectGlobalUsingsTests
         project.AddGlobalUsing(globalUsing);
 
         // Act & Assert
-        project.HasGlobalUsingForPackage(null!).Should().BeFalse();
-        project.HasGlobalUsingForPackage("").Should().BeFalse();
-        project.HasGlobalUsingForPackage("   ").Should().BeFalse();
+        project.HasGlobalUsingForPackage(null!).ShouldBeFalse();
+        project.HasGlobalUsingForPackage("").ShouldBeFalse();
+        project.HasGlobalUsingForPackage("   ").ShouldBeFalse();
     }
 
     [Fact]
@@ -177,9 +175,9 @@ public class ProjectGlobalUsingsTests
         project.AddGlobalUsing(globalUsing3);
 
         // Assert
-        project.GlobalUsings.Should().HaveCount(3);
-        project.GlobalUsings.Should().Contain(globalUsing1);
-        project.GlobalUsings.Should().Contain(globalUsing2);
-        project.GlobalUsings.Should().Contain(globalUsing3);
+        project.GlobalUsings.Count.ShouldBe(3);
+        project.GlobalUsings.ShouldContain(globalUsing1);
+        project.GlobalUsings.ShouldContain(globalUsing2);
+        project.GlobalUsings.ShouldContain(globalUsing3);
     }
 }

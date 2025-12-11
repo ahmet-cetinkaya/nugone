@@ -56,7 +56,7 @@ public abstract partial class SolutionRepositoryTests
         var content =
             $@"<Project>
   <PropertyGroup>
-    <ManagePackageVersionsCentrally>{enableCentralManagement.ToString().ToLower()}</ManagePackageVersionsCentrally>
+    <ManagePackageVersionsCentrally>{enableCentralManagement.ToString().ToUpperInvariant()}</ManagePackageVersionsCentrally>
   </PropertyGroup>
 </Project>";
         FileSystem.AddFile(path, new MockFileData(content));

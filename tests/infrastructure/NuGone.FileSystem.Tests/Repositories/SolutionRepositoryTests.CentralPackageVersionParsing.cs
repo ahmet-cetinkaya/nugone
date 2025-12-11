@@ -5,7 +5,7 @@ using Xunit;
 
 namespace NuGone.FileSystem.Tests.Repositories;
 
-public class SolutionRepositoryTests_CentralPackageVersionParsing : SolutionRepositoryTests
+public sealed class SolutionRepositoryTests_CentralPackageVersionParsing : SolutionRepositoryTests
 {
     [Fact]
     public async Task Should_Parse_Multiple_Packages_Correctly()
@@ -37,7 +37,7 @@ public class SolutionRepositoryTests_CentralPackageVersionParsing : SolutionRepo
 
         // Assert
         result.ShouldNotBeNull();
-        result.Count.ShouldBe(3);
+        result.Count().ShouldBe(3);
         result["Package.A"].ShouldBe("1.2.3");
         result["Package.B"].ShouldBe("4.5.6");
         result["Package.C"].ShouldBe("7.8.9");
@@ -112,7 +112,7 @@ public class SolutionRepositoryTests_CentralPackageVersionParsing : SolutionRepo
 
         // Assert
         result.ShouldNotBeNull();
-        result.Count.ShouldBe(1);
+        result.Count().ShouldBe(1);
         result.ContainsKey("Valid.Package").ShouldBeTrue();
         result["Valid.Package"].ShouldBe("1.0.0");
     }
@@ -166,7 +166,7 @@ public class SolutionRepositoryTests_CentralPackageVersionParsing : SolutionRepo
 
         // Assert
         result.ShouldNotBeNull();
-        result.Count.ShouldBe(2);
+        result.Count().ShouldBe(2);
 
         // Test case-insensitive lookup
         result.ContainsKey("newtonsoft.json").ShouldBeTrue();
@@ -211,7 +211,7 @@ public class SolutionRepositoryTests_CentralPackageVersionParsing : SolutionRepo
 
         // Assert
         result.ShouldNotBeNull();
-        result.Count.ShouldBe(2);
+        result.Count().ShouldBe(2);
 
         // The last occurrence should win
         result["Duplicate.Package"].ShouldBe("3.0.0");
@@ -249,7 +249,7 @@ public class SolutionRepositoryTests_CentralPackageVersionParsing : SolutionRepo
 
         // Assert
         result.ShouldNotBeNull();
-        result.Count.ShouldBe(0);
+        result.Count().ShouldBe(0);
     }
 
     [Fact]
@@ -288,7 +288,7 @@ public class SolutionRepositoryTests_CentralPackageVersionParsing : SolutionRepo
 
         // Assert
         result.ShouldNotBeNull();
-        result.Count.ShouldBe(2);
+        result.Count().ShouldBe(2);
         result["Package.One"].ShouldBe("1.0.0");
         result["Package.Two"].ShouldBe("2.0.0");
     }
@@ -323,7 +323,7 @@ public class SolutionRepositoryTests_CentralPackageVersionParsing : SolutionRepo
 
         // Assert
         result.ShouldNotBeNull();
-        result.Count.ShouldBe(3);
+        result.Count().ShouldBe(3);
         result["System.Text.Json"].ShouldBe("9.0.0");
         result["Microsoft.Extensions.Configuration.Abstractions"].ShouldBe("9.0.0");
         result["NLog.Extensions.Logging"].ShouldBe("5.3.0");

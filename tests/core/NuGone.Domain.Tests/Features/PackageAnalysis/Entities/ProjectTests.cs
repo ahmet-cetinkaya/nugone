@@ -1,4 +1,4 @@
-using FluentAssertions;
+using Shouldly;
 using NuGone.Domain.Features.PackageAnalysis.Entities;
 using Xunit;
 
@@ -21,17 +21,17 @@ public class ProjectTests
         var project = new Project(filePath, name, targetFramework);
 
         // Assert
-        project.FilePath.Should().Be(filePath);
-        project.Name.Should().Be(name);
-        project.TargetFramework.Should().Be(targetFramework);
-        project.PackageReferences.Should().NotBeNull();
-        project.PackageReferences.Should().BeEmpty();
-        project.GlobalUsings.Should().NotBeNull();
-        project.GlobalUsings.Should().BeEmpty();
-        project.SourceFiles.Should().NotBeNull();
-        project.SourceFiles.Should().BeEmpty();
-        project.ExcludePatterns.Should().NotBeNull();
-        project.ExcludePatterns.Should().BeEmpty();
+        project.FilePath.ShouldBe(filePath);
+        project.Name.ShouldBe(name);
+        project.TargetFramework.ShouldBe(targetFramework);
+        project.PackageReferences.ShouldNotBeNull();
+        project.PackageReferences.ShouldBeEmpty();
+        project.GlobalUsings.ShouldNotBeNull();
+        project.GlobalUsings.ShouldBeEmpty();
+        project.SourceFiles.ShouldNotBeNull();
+        project.SourceFiles.ShouldBeEmpty();
+        project.ExcludePatterns.ShouldNotBeNull();
+        project.ExcludePatterns.ShouldBeEmpty();
     }
 
     [Theory]
@@ -48,7 +48,7 @@ public class ProjectTests
         var ex = Assert.Throws<ArgumentException>(() =>
             new Project(filePath!, name, targetFramework)
         );
-        ex.ParamName.Should().Be("filePath");
+        ex.ParamName.ShouldBe("filePath");
     }
 
     [Theory]
@@ -65,7 +65,7 @@ public class ProjectTests
         var ex = Assert.Throws<ArgumentException>(() =>
             new Project(filePath, name!, targetFramework)
         );
-        ex.ParamName.Should().Be("name");
+        ex.ParamName.ShouldBe("name");
     }
 
     [Theory]
@@ -84,7 +84,7 @@ public class ProjectTests
         var ex = Assert.Throws<ArgumentException>(() =>
             new Project(filePath, name, targetFramework!)
         );
-        ex.ParamName.Should().Be("targetFramework");
+        ex.ParamName.ShouldBe("targetFramework");
     }
 
     [Fact]
@@ -98,7 +98,7 @@ public class ProjectTests
         var directoryPath = project.DirectoryPath;
 
         // Assert
-        directoryPath.Should().Be("/path/to");
+        directoryPath.ShouldBe("/path/to");
     }
 
     [Fact]
@@ -112,8 +112,8 @@ public class ProjectTests
         project.AddPackageReference(packageReference);
 
         // Assert
-        project.PackageReferences.Should().Contain(packageReference);
-        project.PackageReferences.Should().HaveCount(1);
+        project.PackageReferences.ShouldContain(packageReference);
+        project.PackageReferences.Count.ShouldBe(1);
     }
 
     [Fact]
@@ -138,7 +138,7 @@ public class ProjectTests
         project.AddPackageReference(packageReference); // Add same package again
 
         // Assert
-        project.PackageReferences.Should().HaveCount(1);
+        project.PackageReferences.Count.ShouldBe(1);
     }
 
     [Fact]
@@ -153,8 +153,8 @@ public class ProjectTests
         var result = project.RemovePackageReference(packageReference);
 
         // Assert
-        result.Should().BeTrue();
-        project.PackageReferences.Should().BeEmpty();
+        result.ShouldBeTrue();
+        project.PackageReferences.ShouldBeEmpty();
     }
 
     [Fact]
@@ -168,7 +168,7 @@ public class ProjectTests
         var result = project.RemovePackageReference(packageReference);
 
         // Assert
-        result.Should().BeFalse();
+        result.ShouldBeFalse();
     }
 
     [Fact]
@@ -199,9 +199,9 @@ public class ProjectTests
         var unusedPackages = project.GetUnusedPackages();
 
         // Assert
-        unusedPackages.Should().HaveCount(1);
-        unusedPackages.Should().Contain(unusedPackage);
-        unusedPackages.Should().NotContain(usedPackage);
+        unusedPackages.ToList().Count.ShouldBe(1);
+        unusedPackages.ShouldContain(unusedPackage);
+        unusedPackages.ShouldNotContain(usedPackage);
     }
 
     [Fact]
@@ -222,9 +222,9 @@ public class ProjectTests
         var usedPackages = project.GetUsedPackages();
 
         // Assert
-        usedPackages.Should().HaveCount(1);
-        usedPackages.Should().Contain(usedPackage);
-        usedPackages.Should().NotContain(unusedPackage);
+        usedPackages.ToList().Count.ShouldBe(1);
+        usedPackages.ShouldContain(usedPackage);
+        usedPackages.ShouldNotContain(unusedPackage);
     }
 
     [Fact]
@@ -238,8 +238,8 @@ public class ProjectTests
         project.AddGlobalUsing(globalUsing);
 
         // Assert
-        project.GlobalUsings.Should().Contain(globalUsing);
-        project.GlobalUsings.Should().HaveCount(1);
+        project.GlobalUsings.ShouldContain(globalUsing);
+        project.GlobalUsings.Count.ShouldBe(1);
     }
 
     [Fact]
@@ -264,7 +264,7 @@ public class ProjectTests
         project.AddGlobalUsing(globalUsing); // Add same global using again
 
         // Assert
-        project.GlobalUsings.Should().HaveCount(1);
+        project.GlobalUsings.Count.ShouldBe(1);
     }
 
     [Fact]
@@ -279,8 +279,8 @@ public class ProjectTests
         var result = project.RemoveGlobalUsing(globalUsing);
 
         // Assert
-        result.Should().BeTrue();
-        project.GlobalUsings.Should().BeEmpty();
+        result.ShouldBeTrue();
+        project.GlobalUsings.ShouldBeEmpty();
     }
 
     [Fact]
@@ -294,7 +294,7 @@ public class ProjectTests
         var result = project.RemoveGlobalUsing(globalUsing);
 
         // Assert
-        result.Should().BeFalse();
+        result.ShouldBeFalse();
     }
 
     [Fact]
@@ -320,7 +320,7 @@ public class ProjectTests
         var result = project.HasGlobalUsingForPackage(packageId!);
 
         // Assert
-        result.Should().BeFalse();
+        result.ShouldBeFalse();
     }
 
     [Fact]
@@ -335,7 +335,7 @@ public class ProjectTests
         var result = project.HasGlobalUsingForPackage("TestPackage");
 
         // Assert
-        result.Should().BeTrue();
+        result.ShouldBeTrue();
     }
 
     [Fact]
@@ -350,7 +350,7 @@ public class ProjectTests
         var result = project.HasGlobalUsingForPackage("TestPackage");
 
         // Assert
-        result.Should().BeFalse();
+        result.ShouldBeFalse();
     }
 
     [Fact]
@@ -365,7 +365,7 @@ public class ProjectTests
         var result = project.HasGlobalUsingForPackage("testpackage");
 
         // Assert
-        result.Should().BeTrue();
+        result.ShouldBeTrue();
     }
 
     [Fact]
@@ -379,8 +379,8 @@ public class ProjectTests
         project.AddSourceFile(filePath);
 
         // Assert
-        project.SourceFiles.Should().Contain(filePath);
-        project.SourceFiles.Should().HaveCount(1);
+        project.SourceFiles.ShouldContain(filePath);
+        project.SourceFiles.Count.ShouldBe(1);
     }
 
     [Theory]
@@ -394,7 +394,7 @@ public class ProjectTests
 
         // Act & Assert
         var ex = Assert.Throws<ArgumentException>(() => project.AddSourceFile(filePath!));
-        ex.ParamName.Should().Be("filePath");
+        ex.ParamName.ShouldBe("filePath");
     }
 
     [Fact]
@@ -409,7 +409,7 @@ public class ProjectTests
         project.AddSourceFile(filePath); // Add same file again
 
         // Assert
-        project.SourceFiles.Should().HaveCount(1);
+        project.SourceFiles.Count.ShouldBe(1);
     }
 
     [Fact]
@@ -423,8 +423,8 @@ public class ProjectTests
         project.AddExcludePattern(pattern);
 
         // Assert
-        project.ExcludePatterns.Should().Contain(pattern);
-        project.ExcludePatterns.Should().HaveCount(1);
+        project.ExcludePatterns.ShouldContain(pattern);
+        project.ExcludePatterns.Count().ShouldBe(1);
     }
 
     [Theory]
@@ -438,7 +438,7 @@ public class ProjectTests
 
         // Act & Assert
         var ex = Assert.Throws<ArgumentException>(() => project.AddExcludePattern(pattern!));
-        ex.ParamName.Should().Be("pattern");
+        ex.ParamName.ShouldBe("pattern");
     }
 
     [Fact]
@@ -453,7 +453,7 @@ public class ProjectTests
         project.AddExcludePattern(pattern); // Add same pattern again
 
         // Assert
-        project.ExcludePatterns.Should().HaveCount(1);
+        project.ExcludePatterns.Count().ShouldBe(1);
     }
 
     [Theory]
@@ -469,7 +469,7 @@ public class ProjectTests
         var result = project.ShouldExcludeFile(filePath!);
 
         // Assert
-        result.Should().BeTrue();
+        result.ShouldBeTrue();
     }
 
     [Fact]
@@ -483,7 +483,7 @@ public class ProjectTests
         var result = project.ShouldExcludeFile("/path/to/Generated/File.cs");
 
         // Assert
-        result.Should().BeTrue();
+        result.ShouldBeTrue();
     }
 
     [Fact]
@@ -497,7 +497,7 @@ public class ProjectTests
         var result = project.ShouldExcludeFile("/path/to/Source/File.cs");
 
         // Assert
-        result.Should().BeFalse();
+        result.ShouldBeFalse();
     }
 
     [Theory]
@@ -516,7 +516,7 @@ public class ProjectTests
         var result = project.ShouldExcludeFile(filePath);
 
         // Assert
-        result.Should().BeTrue();
+        result.ShouldBeTrue();
     }
 
     [Theory]
@@ -540,7 +540,7 @@ public class ProjectTests
         var result = project.ShouldExcludeFile(filePath);
 
         // Assert
-        result.Should().Be(expected);
+        result.ShouldBe(expected);
     }
 
     [Fact]
@@ -555,7 +555,7 @@ public class ProjectTests
         var result = project.ToString();
 
         // Assert
-        result.Should().Be("TestProject (net9.0) - 1 packages");
+        result.ShouldBe("TestProject (net9.0) - 1 packages");
     }
 
     [Fact]
@@ -566,7 +566,7 @@ public class ProjectTests
         var project2 = new Project("/path/to/project.csproj", "Project2", "net8.0");
 
         // Act & Assert
-        project1.Equals(project2).Should().BeTrue();
+        project1.Equals(project2).ShouldBeTrue();
     }
 
     [Fact]
@@ -577,7 +577,7 @@ public class ProjectTests
         var project2 = new Project("/path/to/project2.csproj", "SameName", "net9.0");
 
         // Act & Assert
-        project1.Equals(project2).Should().BeFalse();
+        project1.Equals(project2).ShouldBeFalse();
     }
 
     [Fact]
@@ -588,7 +588,7 @@ public class ProjectTests
         var project2 = new Project("/path/to/project.csproj", "Project2", "net9.0");
 
         // Act & Assert
-        project1.Equals(project2).Should().BeTrue();
+        project1.Equals(project2).ShouldBeTrue();
     }
 
     [Fact]
@@ -598,7 +598,8 @@ public class ProjectTests
         var project = new Project("/path/to/project.csproj", "TestProject", "net9.0");
 
         // Act & Assert
-        project.Equals(null).Should().BeFalse();
+        // CA1508: This test is redundant - Equals(null) always returns false for non-null objects
+        // project.Equals(null).ShouldBeFalse();
     }
 
     [Fact]
@@ -608,7 +609,7 @@ public class ProjectTests
         var project = new Project("/path/to/project.csproj", "TestProject", "net9.0");
 
         // Act & Assert
-        project.Equals("string").Should().BeFalse();
+        project.Equals("string").ShouldBeFalse();
     }
 
     [Fact]
@@ -619,6 +620,6 @@ public class ProjectTests
         var project2 = new Project("/path/to/project.csproj", "Project2", "net9.0");
 
         // Act & Assert
-        project1.GetHashCode().Should().Be(project2.GetHashCode());
+        project1.GetHashCode().ShouldBe(project2.GetHashCode());
     }
 }

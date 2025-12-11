@@ -7,7 +7,7 @@ namespace NuGone.Cli.Shared.Utilities;
 /// Implements RFC-0001: CLI Architecture And Command Design.
 /// Provides cross-platform console output with proper error handling.
 /// </summary>
-public static class ConsoleHelpers
+internal static class ConsoleHelpers
 {
     public static void WriteSuccess(string message)
     {
@@ -70,7 +70,8 @@ public static class ConsoleHelpers
     /// </summary>
     private static string EscapeMarkup(string text)
     {
-        return text?.Replace("[", "[[").Replace("]", "]]") ?? string.Empty;
+        return text?.Replace("[", "[[", StringComparison.Ordinal)
+                .Replace("]", "]]", StringComparison.Ordinal) ?? string.Empty;
     }
 
     /// <summary>
@@ -92,8 +93,9 @@ public static class ConsoleHelpers
                     task.Increment(1);
                 });
 
-                await operation(progress);
+                await operation(progress).ConfigureAwait(false);
                 task.Value = 100;
-            });
+            })
+            .ConfigureAwait(false);
     }
 }

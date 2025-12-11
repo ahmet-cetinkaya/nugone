@@ -49,6 +49,10 @@ nugone --help
 
 Only the `analyze` command is currently available. No changes are made; analysis is read-only.
 
+## 📚 Documentation
+
+For comprehensive documentation, see the **[Documentation Index](docs/DOCUMENTATION_INDEX.md)** which includes user guides, migration instructions, performance details, and more.
+
 ## 🤝 Contributing
 
 If you'd like to contribute, please see [CONTRIBUTING.md](docs/CONTRIBUTING.md) for detailed instructions on forking, branching, building, and running the project locally.

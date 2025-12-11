@@ -4,7 +4,7 @@ Thank you for your interest in contributing to NuGone! This document explains ho
 
 ## 📋 Requirements
 
-- .NET 9+ (primary target)
+- .NET 8+
 - Windows, macOS, or Linux
 - .NET SDK ([Download here](https://dotnet.microsoft.com/download))
 - Git
@@ -34,7 +34,15 @@ git checkout -b feat/your-feature-name
 dotnet build -c Release
 ```
 
-### 5. Run Tests (Optional)
+### 5. Run Tests
+
+We provide a script to run tests and verification checks:
+
+```bash
+./scripts/test.sh
+```
+
+Alternatively, you can run tests manually:
 
 ```bash
 dotnet test
@@ -55,13 +63,13 @@ dotnet run --project src/presentation/NuGone.Cli --help
 ## 🔀 Submitting a Pull Request
 
 1. Commit your changes:
-   ```bash
-   git commit -m "feat: describe your change"
-   ```
+    ```bash
+    git commit -m "feat: describe your change"
+    ```
 2. Push your branch:
-   ```bash
-   git push origin feat/your-feature-name
-   ```
+    ```bash
+    git push origin feat/your-feature-name
+    ```
 3. Open a Pull Request from your branch to the `main` branch of the upstream repository.
 
 ## 👀 Code Review

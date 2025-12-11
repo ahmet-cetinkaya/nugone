@@ -1,12 +1,14 @@
-using FluentAssertions;
+using Shouldly;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NuGone.NuGet.Repositories;
 using Xunit;
 
+#pragma warning disable CA1873 // Avoid potentially expensive logging in test verifications
+
 namespace NuGone.NuGet.Tests.Repositories;
 
-public class NuGetRepositoryCpmTests : IDisposable
+public sealed class NuGetRepositoryCpmTests : IDisposable
 {
     private readonly Mock<ILogger<NuGetRepository>> _mockLogger;
     private readonly NuGetRepository _repository;
@@ -15,6 +17,8 @@ public class NuGetRepositoryCpmTests : IDisposable
     public NuGetRepositoryCpmTests()
     {
         _mockLogger = new Mock<ILogger<NuGetRepository>>();
+        // Enable log levels so LoggerMessage source generator actually logs
+        _mockLogger.Setup(x => x.IsEnabled(It.IsAny<LogLevel>())).Returns(true);
         _repository = new NuGetRepository(_mockLogger.Object);
         _tempDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
         Directory.CreateDirectory(_tempDirectory);
@@ -22,12 +26,19 @@ public class NuGetRepositoryCpmTests : IDisposable
 
     public void Dispose()
     {
-        if (Directory.Exists(_tempDirectory))
-        {
-            Directory.Delete(_tempDirectory, true);
-        }
-
+        Dispose(true);
         GC.SuppressFinalize(this);
+    }
+
+    private void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            if (Directory.Exists(_tempDirectory))
+            {
+                Directory.Delete(_tempDirectory, true);
+            }
+        }
     }
 
     [Fact]
@@ -57,10 +68,10 @@ public class NuGetRepositoryCpmTests : IDisposable
         );
 
         // Assert
-        packageReferences.Should().HaveCount(1);
+        packageReferences.Count().ShouldBe(1);
         var package = packageReferences.First();
-        package.PackageId.Should().Be("Newtonsoft.Json");
-        package.Version.Should().Be("13.0.3");
+        package.PackageId.ShouldBe("Newtonsoft.Json");
+        package.Version.ShouldBe("13.0.3");
     }
 
     [Fact]
@@ -90,14 +101,14 @@ public class NuGetRepositoryCpmTests : IDisposable
         );
 
         // Assert
-        packageReferences.Should().HaveCount(1);
+        packageReferences.Count().ShouldBe(1);
         var package = packageReferences.First();
-        package.PackageId.Should().Be("Newtonsoft.Json");
-        package.Version.Should().Be("12.0.1");
+        package.PackageId.ShouldBe("Newtonsoft.Json");
+        package.Version.ShouldBe("12.0.1");
     }
 
     [Fact]
-    public async Task ExtractPackageReferencesAsync_Should_Log_Warning_When_Version_Missing_And_Not_In_Central_Packages()
+    public async Task ExtractPackageReferencesAsync_Should_Skip_Package_When_Version_Missing_And_Not_In_Central_Packages()
     {
         // Arrange
         var projectContent = """
@@ -122,9 +133,10 @@ public class NuGetRepositoryCpmTests : IDisposable
             centralPackageVersions
         );
 
-        // Assert
-        packageReferences.Should().BeEmpty(); // Should skip the package without version
+        // Assert - Package should be skipped when version is missing and not in central packages
+        packageReferences.ShouldBeEmpty();
 
+        // Assert - Warning should be logged for missing package version
         _mockLogger.Verify(
             x =>
                 x.Log(

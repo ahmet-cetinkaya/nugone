@@ -1,3 +1,4 @@
+#pragma warning disable CA1716 // Allow 'Shared' namespace and 'Error' type
 using NuGone.Cli.Shared.Constants;
 
 namespace NuGone.Cli.Shared.Models;
@@ -6,7 +7,7 @@ namespace NuGone.Cli.Shared.Models;
 /// Represents an expected error condition in the application.
 /// Used for predictable failures that should not throw exceptions.
 /// </summary>
-public record Error
+public sealed record Error
 {
     public string Code { get; init; } = string.Empty;
     public string Message { get; init; } = string.Empty;

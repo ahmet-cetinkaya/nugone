@@ -6,7 +6,7 @@ namespace NuGone.Cli.Shared.Utilities;
 /// Global exception handler for unexpected system-level errors.
 /// Handles exceptions that represent truly unexpected situations.
 /// </summary>
-public static class GlobalExceptionHandler
+internal static class GlobalExceptionHandler
 {
     /// <summary>
     /// Handles unexpected exceptions and converts them to appropriate exit codes.
@@ -89,7 +89,7 @@ public static class GlobalExceptionHandler
     {
         try
         {
-            return await commandExecution();
+            return await commandExecution().ConfigureAwait(false);
         }
         catch (Exception ex)
         {

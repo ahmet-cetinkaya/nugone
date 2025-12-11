@@ -1,4 +1,6 @@
 #nullable disable
+#pragma warning disable CA1716 // Allow 'Shared' namespace
+#pragma warning disable CA1040 // Allow empty interface marker
 using NuGone.Cli.Shared.Models;
 using Spectre.Console.Cli;
 
@@ -78,7 +80,7 @@ public abstract class BaseCommand<TSettings> : Command<TSettings>
     protected virtual Task<Result<int>> ExecuteCommandAsync(
         CommandContext context,
         TSettings settings,
-        CancellationToken cancellationToken = default
+        CancellationToken cancellationToken
     )
     {
         throw new NotImplementedException(
@@ -89,7 +91,7 @@ public abstract class BaseCommand<TSettings> : Command<TSettings>
     /// <summary>
     /// Validates the project path and returns the resolved path using Result pattern.
     /// </summary>
-    protected Result<string> ValidateAndResolveProjectPath(string projectPath)
+    protected static Result<string> ValidateAndResolveProjectPath(string projectPath)
     {
         if (string.IsNullOrEmpty(projectPath))
         {

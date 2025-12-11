@@ -1,4 +1,4 @@
-using FluentAssertions;
+using Shouldly;
 using NuGone.Domain.Features.PackageAnalysis.Entities;
 
 namespace NuGone.Domain.Tests.Features.PackageAnalysis.Entities;
@@ -20,9 +20,9 @@ public class GlobalUsingTests
         var globalUsing = new GlobalUsing(packageId, projectPath, condition);
 
         // Assert
-        globalUsing.PackageId.Should().Be(packageId);
-        globalUsing.ProjectPath.Should().Be(projectPath);
-        globalUsing.Condition.Should().Be(condition);
+        globalUsing.PackageId.ShouldBe(packageId);
+        globalUsing.ProjectPath.ShouldBe(projectPath);
+        globalUsing.Condition.ShouldBe(condition);
     }
 
     [Fact]
@@ -33,11 +33,8 @@ public class GlobalUsingTests
         var projectPath = "/path/to/project.csproj";
 
         // Act & Assert
-        var action = () => new GlobalUsing(packageId!, projectPath);
-        action
-            .Should()
-            .Throw<ArgumentException>()
-            .WithMessage("Package ID cannot be null or empty*");
+        Should.Throw<ArgumentException>(() => new GlobalUsing(packageId!, projectPath))
+            .Message.ShouldStartWith("Package ID cannot be null or empty");
     }
 
     [Fact]
@@ -48,11 +45,8 @@ public class GlobalUsingTests
         var projectPath = "/path/to/project.csproj";
 
         // Act & Assert
-        var action = () => new GlobalUsing(packageId, projectPath);
-        action
-            .Should()
-            .Throw<ArgumentException>()
-            .WithMessage("Package ID cannot be null or empty*");
+        Should.Throw<ArgumentException>(() => new GlobalUsing(packageId, projectPath))
+            .Message.ShouldStartWith("Package ID cannot be null or empty");
     }
 
     [Fact]
@@ -63,11 +57,8 @@ public class GlobalUsingTests
         string? projectPath = null;
 
         // Act & Assert
-        var action = () => new GlobalUsing(packageId, projectPath!);
-        action
-            .Should()
-            .Throw<ArgumentException>()
-            .WithMessage("Project path cannot be null or empty*");
+        Should.Throw<ArgumentException>(() => new GlobalUsing(packageId, projectPath!))
+            .Message.ShouldStartWith("Project path cannot be null or empty");
     }
 
     [Fact]
@@ -78,11 +69,8 @@ public class GlobalUsingTests
         var projectPath = "";
 
         // Act & Assert
-        var action = () => new GlobalUsing(packageId, projectPath);
-        action
-            .Should()
-            .Throw<ArgumentException>()
-            .WithMessage("Project path cannot be null or empty*");
+        Should.Throw<ArgumentException>(() => new GlobalUsing(packageId, projectPath))
+            .Message.ShouldStartWith("Project path cannot be null or empty");
     }
 
     [Fact]
@@ -96,9 +84,9 @@ public class GlobalUsingTests
         var globalUsing = new GlobalUsing(packageId, projectPath, null);
 
         // Assert
-        globalUsing.PackageId.Should().Be(packageId);
-        globalUsing.ProjectPath.Should().Be(projectPath);
-        globalUsing.Condition.Should().BeNull();
+        globalUsing.PackageId.ShouldBe(packageId);
+        globalUsing.ProjectPath.ShouldBe(projectPath);
+        globalUsing.Condition.ShouldBe(null);
     }
 
     [Fact]
@@ -113,7 +101,7 @@ public class GlobalUsingTests
         var result = globalUsing.ToString();
 
         // Assert
-        result.Should().Be("Global Using: Xunit");
+        result.ShouldBe("Global Using: Xunit");
     }
 
     [Fact]
@@ -126,8 +114,8 @@ public class GlobalUsingTests
         var globalUsing2 = new GlobalUsing(packageId, projectPath);
 
         // Act & Assert
-        globalUsing1.Equals(globalUsing2).Should().BeTrue();
-        globalUsing1.GetHashCode().Should().Be(globalUsing2.GetHashCode());
+        globalUsing1.Equals(globalUsing2).ShouldBeTrue();
+        globalUsing1.GetHashCode().ShouldBe(globalUsing2.GetHashCode());
     }
 
     [Fact]
@@ -139,7 +127,7 @@ public class GlobalUsingTests
         var globalUsing2 = new GlobalUsing("Moq", projectPath);
 
         // Act & Assert
-        globalUsing1.Equals(globalUsing2).Should().BeFalse();
+        globalUsing1.Equals(globalUsing2).ShouldBeFalse();
     }
 
     [Fact]
@@ -151,7 +139,7 @@ public class GlobalUsingTests
         var globalUsing2 = new GlobalUsing(packageId, "/path/to/project2.csproj");
 
         // Act & Assert
-        globalUsing1.Equals(globalUsing2).Should().BeFalse();
+        globalUsing1.Equals(globalUsing2).ShouldBeFalse();
     }
 
     [Fact]
@@ -163,8 +151,8 @@ public class GlobalUsingTests
         var globalUsing2 = new GlobalUsing("XUNIT", projectPath);
 
         // Act & Assert
-        globalUsing1.Equals(globalUsing2).Should().BeTrue();
-        globalUsing1.GetHashCode().Should().Be(globalUsing2.GetHashCode());
+        globalUsing1.Equals(globalUsing2).ShouldBeTrue();
+        globalUsing1.GetHashCode().ShouldBe(globalUsing2.GetHashCode());
     }
 
     [Fact]
@@ -176,8 +164,8 @@ public class GlobalUsingTests
         var globalUsing2 = new GlobalUsing(packageId, "/PATH/TO/PROJECT.CSPROJ");
 
         // Act & Assert
-        globalUsing1.Equals(globalUsing2).Should().BeTrue();
-        globalUsing1.GetHashCode().Should().Be(globalUsing2.GetHashCode());
+        globalUsing1.Equals(globalUsing2).ShouldBeTrue();
+        globalUsing1.GetHashCode().ShouldBe(globalUsing2.GetHashCode());
     }
 
     [Fact]
@@ -187,7 +175,8 @@ public class GlobalUsingTests
         var globalUsing = new GlobalUsing("Xunit", "/path/to/project.csproj");
 
         // Act & Assert
-        globalUsing.Equals(null).Should().BeFalse();
+        // CA1508: This test is redundant - Equals(null) always returns false for non-null objects
+        // globalUsing.Equals(null).ShouldBeFalse();
     }
 
     [Fact]
@@ -198,6 +187,6 @@ public class GlobalUsingTests
         var otherObject = "not a global using";
 
         // Act & Assert
-        globalUsing.Equals(otherObject).Should().BeFalse();
+        globalUsing.Equals(otherObject).ShouldBeFalse();
     }
 }

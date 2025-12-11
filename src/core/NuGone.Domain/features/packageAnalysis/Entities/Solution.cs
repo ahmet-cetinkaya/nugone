@@ -205,6 +205,6 @@ public class Solution
 
     public override int GetHashCode()
     {
-        return FilePath.ToLowerInvariant().GetHashCode();
+        return FilePath.ToUpperInvariant().GetHashCode(StringComparison.Ordinal);
     }
 }

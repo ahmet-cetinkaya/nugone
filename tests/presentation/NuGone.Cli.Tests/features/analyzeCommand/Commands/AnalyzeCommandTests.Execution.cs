@@ -46,7 +46,7 @@ public partial class AnalyzeCommandTests
         var settings = new AnalyzeCommand.Settings { ProjectPath = "/non/existent/path" };
 
         // Act
-        var result = command.TestValidateAndResolveProjectPath(settings.ProjectPath);
+        var result = TestableAnalyzeCommand.TestValidateAndResolveProjectPath(settings.ProjectPath);
 
         // Assert
         result.IsFailure.ShouldBeTrue();
@@ -63,7 +63,7 @@ public partial class AnalyzeCommandTests
         var settings = new AnalyzeCommand.Settings { ProjectPath = null };
 
         // Act
-        var result = command.TestValidateAndResolveProjectPath(settings.ProjectPath);
+        var result = TestableAnalyzeCommand.TestValidateAndResolveProjectPath(settings.ProjectPath);
 
         // Assert
         result.IsSuccess.ShouldBeTrue();

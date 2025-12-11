@@ -6,7 +6,7 @@ namespace NuGone.Cli.Infrastructure;
 /// Type resolver for Spectre.Console.Cli dependency injection.
 /// Resolves services from the Microsoft.Extensions.DependencyInjection container.
 /// </summary>
-public sealed class TypeResolver(IServiceProvider provider) : ITypeResolver, IDisposable
+internal sealed class TypeResolver(IServiceProvider provider) : ITypeResolver, IDisposable
 {
     private readonly IServiceProvider _provider =
         provider ?? throw new ArgumentNullException(nameof(provider));

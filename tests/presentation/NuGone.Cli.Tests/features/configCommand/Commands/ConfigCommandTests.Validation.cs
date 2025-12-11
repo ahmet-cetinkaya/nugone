@@ -71,7 +71,12 @@ public partial class ConfigCommandTests
         result.IsValid.ShouldBeFalse();
         result.Errors.Count.ShouldBeGreaterThan(0);
         result
-            .Errors.Any(error => error.Contains("Action must be one of: get, set, list, reset"))
+            .Errors.Any(error =>
+                error.Contains(
+                    "Action must be one of: GET, SET, LIST, RESET",
+                    StringComparison.Ordinal
+                )
+            )
             .ShouldBeTrue();
     }
 
@@ -141,7 +146,12 @@ public partial class ConfigCommandTests
         result.IsValid.ShouldBeFalse();
         result.Errors.Count.ShouldBeGreaterThan(0);
         result
-            .Errors.Any(error => error.Contains("Both key and value are required for 'set' action"))
+            .Errors.Any(error =>
+                error.Contains(
+                    "Both key and value are required for 'set' action",
+                    StringComparison.Ordinal
+                )
+            )
             .ShouldBeTrue();
     }
 
@@ -164,7 +174,12 @@ public partial class ConfigCommandTests
         result.IsValid.ShouldBeFalse();
         result.Errors.Count.ShouldBeGreaterThan(0);
         result
-            .Errors.Any(error => error.Contains("Both key and value are required for 'set' action"))
+            .Errors.Any(error =>
+                error.Contains(
+                    "Both key and value are required for 'set' action",
+                    StringComparison.Ordinal
+                )
+            )
             .ShouldBeTrue();
     }
 
@@ -187,7 +202,12 @@ public partial class ConfigCommandTests
         result.IsValid.ShouldBeFalse();
         result.Errors.Count.ShouldBeGreaterThan(0);
         result
-            .Errors.Any(error => error.Contains("Both key and value are required for 'set' action"))
+            .Errors.Any(error =>
+                error.Contains(
+                    "Both key and value are required for 'set' action",
+                    StringComparison.Ordinal
+                )
+            )
             .ShouldBeTrue();
     }
 
@@ -210,7 +230,12 @@ public partial class ConfigCommandTests
         result.IsValid.ShouldBeFalse();
         result.Errors.Count.ShouldBeGreaterThan(0);
         result
-            .Errors.Any(error => error.Contains("Both key and value are required for 'set' action"))
+            .Errors.Any(error =>
+                error.Contains(
+                    "Both key and value are required for 'set' action",
+                    StringComparison.Ordinal
+                )
+            )
             .ShouldBeTrue();
     }
 
@@ -233,7 +258,12 @@ public partial class ConfigCommandTests
         result.IsValid.ShouldBeFalse();
         result.Errors.Count.ShouldBeGreaterThan(0);
         result
-            .Errors.Any(error => error.Contains("Both key and value are required for 'set' action"))
+            .Errors.Any(error =>
+                error.Contains(
+                    "Both key and value are required for 'set' action",
+                    StringComparison.Ordinal
+                )
+            )
             .ShouldBeTrue();
     }
 

@@ -9,7 +9,7 @@ namespace NuGone.NuGet.Repositories;
 /// NuGet implementation of the NuGet repository.
 /// Handles package reference extraction and metadata operations as specified in RFC-0002.
 /// </summary>
-public class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
+public partial class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
 {
     private readonly ILogger<NuGetRepository> _logger =
         logger ?? throw new ArgumentNullException(nameof(logger));
@@ -29,7 +29,7 @@ public class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
         "NUnit",
         "MSTest",
         "Moq",
-        "FluentAssertions",
+        "Shouldly",
         "coverlet",
         "ReportGenerator",
         "Swashbuckle",
@@ -48,14 +48,15 @@ public class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
         CancellationToken cancellationToken = default
     )
     {
-        _logger.LogDebug("Extracting package references from: {ProjectFilePath}", projectFilePath);
+        LogExtractingPackageReferences(projectFilePath);
 
         if (!File.Exists(projectFilePath))
             throw new FileNotFoundException($"Project file not found: {projectFilePath}");
 
         try
         {
-            var content = await File.ReadAllTextAsync(projectFilePath, cancellationToken);
+            var content = await File.ReadAllTextAsync(projectFilePath, cancellationToken)
+                .ConfigureAwait(false);
             var document = XDocument.Parse(content);
 
             var packageReferences = new List<PackageReference>();
@@ -91,11 +92,7 @@ public class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
                     }
                     else
                     {
-                        _logger.LogWarning(
-                            "No version found for package: {PackageId} in project: {ProjectFilePath}",
-                            include,
-                            projectFilePath
-                        );
+                        LogNoVersionFound(include, projectFilePath);
                         continue;
                     }
                 }
@@ -114,21 +111,17 @@ public class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
                 packageReferences.Add(packageRef);
             }
 
-            _logger.LogDebug(
-                "Extracted {Count} package reference(s) from: {ProjectFilePath}, {GlobalUsingCount} with global usings",
+            var globalUsingCount = packageReferences.Count(p => p.HasGlobalUsing);
+            LogExtractedPackageReferences(
                 packageReferences.Count,
                 projectFilePath,
-                packageReferences.Count(p => p.HasGlobalUsing)
+                globalUsingCount
             );
             return packageReferences;
         }
         catch (Exception ex) when (!(ex is OperationCanceledException))
         {
-            _logger.LogError(
-                ex,
-                "Error extracting package references from: {ProjectFilePath}",
-                projectFilePath
-            );
+            LogErrorExtractingPackageReferences(ex, projectFilePath);
             throw;
         }
     }
@@ -144,18 +137,17 @@ public class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
         CancellationToken cancellationToken = default
     )
     {
-        _logger.LogDebug(
-            "Getting namespaces for package: {PackageId} {Version} ({TargetFramework})",
-            packageId,
-            version,
-            targetFramework
-        );
+        ArgumentNullException.ThrowIfNull(packageId);
+        ArgumentNullException.ThrowIfNull(version);
+        ArgumentNullException.ThrowIfNull(targetFramework);
+
+        LogGettingNamespaces(packageId, version, targetFramework);
 
         // For now, return common namespace patterns based on package ID
         // In a full implementation, this would analyze the actual package assemblies
         var namespaces = GetCommonNamespacesForPackage(packageId);
 
-        await Task.CompletedTask; // Placeholder for async operations
+        await Task.CompletedTask.ConfigureAwait(false); // Placeholder for async operations
         return namespaces;
     }
 
@@ -169,7 +161,7 @@ public class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
         CancellationToken cancellationToken = default
     )
     {
-        _logger.LogDebug("Getting metadata for package: {PackageId} {Version}", packageId, version);
+        LogGettingMetadata(packageId, version);
 
         // For now, return basic metadata based on known patterns
         // In a full implementation, this would query NuGet API or local cache
@@ -180,7 +172,7 @@ public class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
             isDevelopmentDependency: isDevelopmentDependency
         );
 
-        await Task.CompletedTask; // Placeholder for async operations
+        await Task.CompletedTask.ConfigureAwait(false); // Placeholder for async operations
         return metadata;
     }
 
@@ -195,16 +187,11 @@ public class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
         CancellationToken cancellationToken = default
     )
     {
-        _logger.LogDebug(
-            "Resolving transitive dependencies for: {PackageId} {Version} ({TargetFramework})",
-            packageId,
-            version,
-            targetFramework
-        );
+        LogResolvingTransitiveDependencies(packageId, version, targetFramework);
 
         // For now, return empty collection
         // In a full implementation, this would analyze package dependencies
-        await Task.CompletedTask; // Placeholder for async operations
+        await Task.CompletedTask.ConfigureAwait(false); // Placeholder for async operations
         return Enumerable.Empty<PackageReference>();
     }
 
@@ -232,14 +219,15 @@ public class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
         CancellationToken cancellationToken = default
     )
     {
-        _logger.LogDebug("Extracting global usings from: {ProjectFilePath}", projectFilePath);
+        LogExtractingGlobalUsings(projectFilePath);
 
         if (!File.Exists(projectFilePath))
             throw new FileNotFoundException($"Project file not found: {projectFilePath}");
 
         try
         {
-            var content = await File.ReadAllTextAsync(projectFilePath, cancellationToken);
+            var content = await File.ReadAllTextAsync(projectFilePath, cancellationToken)
+                .ConfigureAwait(false);
             var document = XDocument.Parse(content);
 
             var globalUsings = new List<GlobalUsing>();
@@ -255,20 +243,12 @@ public class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
                 globalUsings.Add(globalUsing);
             }
 
-            _logger.LogDebug(
-                "Extracted {Count} global using(s) from: {ProjectFilePath}",
-                globalUsings.Count,
-                projectFilePath
-            );
+            LogExtractedGlobalUsings(globalUsings.Count, projectFilePath);
             return globalUsings;
         }
         catch (Exception ex) when (!(ex is OperationCanceledException))
         {
-            _logger.LogError(
-                ex,
-                "Error extracting global usings from: {ProjectFilePath}",
-                projectFilePath
-            );
+            LogErrorExtractingGlobalUsings(ex, projectFilePath);
             throw;
         }
     }
@@ -290,7 +270,7 @@ public class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
         namespaces.Add(packageId);
 
         // Add common variations
-        if (packageId.Contains('.'))
+        if (packageId.Contains('.', StringComparison.Ordinal))
         {
             var parts = packageId.Split('.');
             if (parts.Length >= 2)
@@ -308,31 +288,31 @@ public class NuGetRepository(ILogger<NuGetRepository> logger) : INuGetRepository
         }
 
         // Add some common patterns for well-known packages
-        switch (packageId.ToLowerInvariant())
+        switch (packageId.ToUpperInvariant())
         {
-            case "newtonsoft.json":
+            case "NEWTONSOFT.JSON":
                 namespaces.AddRange(["Newtonsoft.Json", "Newtonsoft.Json.Linq"]);
                 break;
-            case "system.text.json":
+            case "SYSTEM.TEXT.JSON":
                 namespaces.AddRange(["System.Text.Json", "System.Text.Json.Serialization"]);
                 break;
-            case "microsoft.extensions.logging":
+            case "MICROSOFT.EXTENSIONS.LOGGING":
                 namespaces.AddRange([
                     "Microsoft.Extensions.Logging",
                     "Microsoft.Extensions.DependencyInjection",
                 ]);
                 break;
-            case "spectre.console":
+            case "SPECTRE.CONSOLE":
                 namespaces.AddRange(["Spectre.Console", "Spectre.Console.Cli"]);
                 break;
-            case "xunit":
+            case "XUNIT":
                 namespaces.AddRange(["Xunit", "Xunit.Abstractions"]);
                 break;
-            case "moq":
+            case "MOQ":
                 namespaces.Add("Moq");
                 break;
-            case "fluentassertions":
-                namespaces.Add("FluentAssertions");
+            case "SHOULDLY":
+                namespaces.Add("Shouldly");
                 break;
         }
 

@@ -22,6 +22,7 @@ bld/
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
+[Pp]ublish/
 
 # .NET Core
 project.lock.json
@@ -55,10 +56,10 @@ nunit-*.xml
 
 # AI Agents
 .augment/
+.claude/
 .copilot/
 .openai/
-.claude/
-CLAUDE.md
-PROJECT_INDEX.md
-PROJECT_INDEX.json
 .serena/
+CLAUDE.md
+PROJECT_INDEX.json
+PROJECT_INDEX.md

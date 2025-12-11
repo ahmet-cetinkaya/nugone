@@ -2,6 +2,7 @@ using NuGone.Application.Features.PackageAnalysis.Services.Abstractions;
 using NuGone.Cli.Features.ConfigCommand.Commands;
 using NuGone.Cli.Shared.Constants;
 using NuGone.Cli.Shared.Models;
+using NuGone.Cli.Shared.Utilities;
 using Spectre.Console.Cli;
 
 namespace NuGone.Cli.Tests.Commands;
@@ -17,15 +18,18 @@ public partial class ConfigCommandTests
     /// <summary>
     /// Testable version of ConfigCommand that exposes protected methods for testing.
     /// </summary>
-    private class TestableConfigCommand : ConfigCommand
+    private sealed class TestableConfigCommand : ConfigCommand
     {
-        public static ValidationResult TestValidateConfigSettings(Settings settings)
+        public static ValidationResult TestValidateConfigSettings(ConfigCommand.Settings settings)
         {
             return ConfigCommand.ValidateConfigSettings(settings);
         }
 
         // Override to prevent actual execution during tests
-        protected override Result<int> ExecuteCommand(CommandContext context, Settings settings)
+        protected override Result<int> ExecuteCommand(
+            CommandContext context,
+            ConfigCommand.Settings settings
+        )
         {
             return ExitCodes.Success;
         }
@@ -34,7 +38,7 @@ public partial class ConfigCommandTests
     /// <summary>
     /// Helper class for creating CommandContext
     /// </summary>
-    private class FakeRemainingArguments : IRemainingArguments
+    private sealed class FakeRemainingArguments : IRemainingArguments
     {
         public IReadOnlyList<string> Raw => Array.Empty<string>();
         public ILookup<string, string?> Parsed =>

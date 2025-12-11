@@ -29,12 +29,12 @@ fi
 print_info "Checking .NET SDK version..."
 if DOTNET_VERSION=$($DOTNET_CMD --version 2>/dev/null); then
   print_info "Found .NET SDK version: $DOTNET_VERSION"
-  # Check if version is at least 9.0 (required by the project)
+  # Check if version is at least 8.0 (minimum required by the project)
   MAJOR_VERSION=$(echo "$DOTNET_VERSION" | cut -d. -f1)
-  if [ "$MAJOR_VERSION" -lt 9 ]; then
-    print_warning ".NET SDK 9.0 or higher is recommended for this project"
-    print_info "Some build/analysis steps may fail with SDK version $DOTNET_VERSION"
-    print_info "Download .NET 9.0 SDK from: https://dotnet.microsoft.com/download"
+  if [ "$MAJOR_VERSION" -lt 8 ]; then
+    print_error ".NET SDK 8.0 or higher is required for this project"
+    print_info "Download .NET 8.0+ SDK from: https://dotnet.microsoft.com/download"
+    exit 1
   fi
 else
   print_error ".NET SDK is not installed or not in PATH"
@@ -78,6 +78,32 @@ fi
 
 # Track overall success
 OVERALL_SUCCESS=0
+
+print_section "📦 Restoring NuGet packages"
+if [ "$USE_PROJECTS" = true ]; then
+  # Restore each project individually
+  RESTORE_SUCCESS=true
+  while IFS= read -r project; do
+    if ! $DOTNET_CMD restore "$project"; then
+      RESTORE_SUCCESS=false
+    fi
+  done <<<"$PROJECT_FILES"
+
+  if [ "$RESTORE_SUCCESS" = true ]; then
+    print_success "Package restore completed successfully"
+  else
+    print_error "Package restore failed; aborting lint script"
+    exit 1
+  fi
+else
+  # Restore the entire solution
+  if $DOTNET_CMD restore "$SOLUTION_FILE"; then
+    print_success "Package restore completed successfully"
+  else
+    print_error "Package restore failed; aborting lint script"
+    exit 1
+  fi
+fi
 
 print_section "🏗️  Running dotnet build (treat warnings as errors)"
 if [ "$USE_PROJECTS" = true ]; then
@@ -151,9 +177,9 @@ else
   print_info "Install it with: npm install -g markdownlint-cli2"
 fi
 
-print_section "🔍 Running Roslynator analysis"
+print_section "🔧 Running Roslynator auto-fix"
 if [ "$USE_PROJECTS" = true ]; then
-  print_warning "Skipping Roslynator analysis - .slnx format is not supported by Roslynator"
+  print_warning "Skipping Roslynator auto-fix - .slnx format is not supported by Roslynator"
   print_info "Consider generating a .sln file or running Roslynator on individual projects"
 else
   if $DOTNET_CMD tool list | grep -q "roslynator.dotnet.cli"; then
@@ -165,10 +191,41 @@ else
     print_info "Install it with: dotnet tool restore"
   fi
 
+  # Only run Roslynator auto-fix if it was found
+  if [ -n "$ROSLYNATOR_CMD" ]; then
+    print_info "Auto-fixing Roslynator violations..."
+    # Run fixable analyzers with --severity-level warning to fix warnings and errors
+    if $ROSLYNATOR_CMD fix "$SOLUTION_FILE" --severity-level warning --verbosity normal; then
+      print_success "Roslynator auto-fix completed successfully!"
+    else
+      print_warning "Some Roslynator violations could not be auto-fixed"
+      print_info "Manual fixes may be required for remaining issues"
+    fi
+  fi
+fi
+
+print_section "🔍 Running Roslynator analysis"
+if [ "$USE_PROJECTS" = true ]; then
+  print_warning "Skipping Roslynator analysis - .slnx format is not supported by Roslynator"
+  print_info "Consider generating a .sln file or running Roslynator on individual projects"
+else
+  # Reuse ROSLYNATOR_CMD from previous section or find it again
+  if [ -z "$ROSLYNATOR_CMD" ]; then
+    if $DOTNET_CMD tool list | grep -q "roslynator.dotnet.cli"; then
+      ROSLYNATOR_CMD="$DOTNET_CMD roslynator"
+    elif command -v roslynator &>/dev/null; then
+      ROSLYNATOR_CMD="roslynator"
+    else
+      print_warning "Roslynator is not installed"
+      print_info "Install it with: dotnet tool restore"
+    fi
+  fi
+
   # Only run Roslynator if it was found
   if [ -n "$ROSLYNATOR_CMD" ]; then
     print_info "Analyzing code with Roslynator..."
-    if $ROSLYNATOR_CMD analyze "$SOLUTION_FILE"; then
+    # Use --severity-level warning to only report warnings and errors, not info diagnostics
+    if $ROSLYNATOR_CMD analyze "$SOLUTION_FILE" --severity-level warning; then
       print_success "Roslynator analysis completed successfully"
     else
       print_error "Roslynator found issues"

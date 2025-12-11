@@ -1,8 +1,8 @@
-using FluentAssertions;
+using Shouldly;
 using NuGone.Domain.Shared.ValueObjects;
 using Xunit;
 
-namespace NuGone.Domain.Tests.Shared.ValueObjects;
+namespace NuGone.Domain.Tests.SharedValueObjects;
 
 /// <summary>
 /// Tests for the Result value object
@@ -16,8 +16,8 @@ public class ResultTests
         var result = Result.Success();
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
-        result.IsFailure.Should().BeFalse();
+        result.IsSuccess.ShouldBeTrue();
+        result.IsFailure.ShouldBeFalse();
         // Don't test Error property as it throws on success
     }
 
@@ -31,9 +31,9 @@ public class ResultTests
         var result = Result<string>.Success(value);
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
-        result.IsFailure.Should().BeFalse();
-        result.Value.Should().Be(value);
+        result.IsSuccess.ShouldBeTrue();
+        result.IsFailure.ShouldBeFalse();
+        result.Value.ShouldBe(value);
         // Error is null on success, but this is implementation detail
     }
 
@@ -47,9 +47,9 @@ public class ResultTests
         var result = Result.Failure(error);
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(error);
+        result.IsSuccess.ShouldBeFalse();
+        result.IsFailure.ShouldBeTrue();
+        result.Error.ShouldBe(error);
     }
 
     [Fact]
@@ -62,9 +62,9 @@ public class ResultTests
         var result = Result<string>.Failure(error);
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(error);
+        result.IsSuccess.ShouldBeFalse();
+        result.IsFailure.ShouldBeTrue();
+        result.Error.ShouldBe(error);
         // Value on failure returns default, but we don't test it specifically as it's not part of the Result pattern
     }
 
@@ -79,11 +79,11 @@ public class ResultTests
         var result = Result.Failure(errorCode, errorMessage);
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.IsFailure.Should().BeTrue();
-        result.Error.Should().NotBeNull();
-        result.Error.Code.Should().Be(errorCode);
-        result.Error.Message.Should().Be(errorMessage);
+        result.IsSuccess.ShouldBeFalse();
+        result.IsFailure.ShouldBeTrue();
+        result.Error.ShouldNotBeNull();
+        result.Error.Code.ShouldBe(errorCode);
+        result.Error.Message.ShouldBe(errorMessage);
     }
 
     [Fact]
@@ -97,11 +97,11 @@ public class ResultTests
         var result = Result<string>.Failure(errorCode, errorMessage);
 
         // Assert
-        result.IsSuccess.Should().BeFalse();
-        result.IsFailure.Should().BeTrue();
-        result.Error.Should().NotBeNull();
-        result.Error.Code.Should().Be(errorCode);
-        result.Error.Message.Should().Be(errorMessage);
+        result.IsSuccess.ShouldBeFalse();
+        result.IsFailure.ShouldBeTrue();
+        result.Error.ShouldNotBeNull();
+        result.Error.Code.ShouldBe(errorCode);
+        result.Error.Message.ShouldBe(errorMessage);
         // Value on failure returns default, but we don't test it specifically as it's not part of the Result pattern
     }
 
@@ -115,8 +115,8 @@ public class ResultTests
         Result result = error;
 
         // Assert
-        result.IsFailure.Should().BeTrue();
-        result.Error.Should().Be(error);
+        result.IsFailure.ShouldBeTrue();
+        result.Error.ShouldBe(error);
     }
 
     [Fact]
@@ -129,8 +129,8 @@ public class ResultTests
         Result<string> result = value;
 
         // Assert
-        result.IsSuccess.Should().BeTrue();
-        result.Value.Should().Be(value);
+        result.IsSuccess.ShouldBeTrue();
+        result.Value.ShouldBe(value);
     }
 
     [Fact]
@@ -145,7 +145,7 @@ public class ResultTests
         result.OnSuccess(val => capturedValue = val);
 
         // Assert
-        capturedValue.Should().Be(value);
+        capturedValue.ShouldBe(value);
     }
 
     [Fact]
@@ -160,7 +160,7 @@ public class ResultTests
         result.OnSuccess(val => capturedValue = val);
 
         // Assert
-        capturedValue.Should().BeNull();
+        capturedValue.ShouldBe(null);
     }
 
     [Fact]
@@ -171,11 +171,11 @@ public class ResultTests
         var result = Result<string>.Success(value);
 
         // Act
-        var mappedResult = result.Map(val => val.ToUpper());
+        var mappedResult = result.Map(val => val.ToUpperInvariant());
 
         // Assert
-        mappedResult.IsSuccess.Should().BeTrue();
-        mappedResult.Value.Should().Be("TEST VALUE");
+        mappedResult.IsSuccess.ShouldBeTrue();
+        mappedResult.Value.ShouldBe("TEST VALUE");
     }
 
     [Fact]
@@ -186,11 +186,11 @@ public class ResultTests
         var result = Result<string>.Failure(error);
 
         // Act
-        var mappedResult = result.Map(val => val.ToUpper());
+        var mappedResult = result.Map(val => val.ToUpperInvariant());
 
         // Assert
-        mappedResult.IsFailure.Should().BeTrue();
-        mappedResult.Error.Should().Be(error);
+        mappedResult.IsFailure.ShouldBeTrue();
+        mappedResult.Error.ShouldBe(error);
     }
 
     [Fact]
@@ -204,8 +204,8 @@ public class ResultTests
         var boundResult = result.Bind(val => Result<int>.Success(val.Length));
 
         // Assert
-        boundResult.IsSuccess.Should().BeTrue();
-        boundResult.Value.Should().Be(value.Length);
+        boundResult.IsSuccess.ShouldBeTrue();
+        boundResult.Value.ShouldBe(value.Length);
     }
 
     [Fact]
@@ -219,8 +219,8 @@ public class ResultTests
         var boundResult = result.Bind(val => Result<int>.Success(val.Length));
 
         // Assert
-        boundResult.IsFailure.Should().BeTrue();
-        boundResult.Error.Should().Be(error);
+        boundResult.IsFailure.ShouldBeTrue();
+        boundResult.Error.ShouldBe(error);
     }
 
     [Fact]
@@ -235,7 +235,7 @@ public class ResultTests
         var returnedValue = result.GetValueOrDefault(defaultValue);
 
         // Assert
-        returnedValue.Should().Be(value);
+        returnedValue.ShouldBe(value);
     }
 
     [Fact]
@@ -250,7 +250,7 @@ public class ResultTests
         var returnedValue = result.GetValueOrDefault(defaultValue);
 
         // Assert
-        returnedValue.Should().Be(defaultValue);
+        returnedValue.ShouldBe(defaultValue);
     }
 
     [Fact]
@@ -263,7 +263,7 @@ public class ResultTests
         var resultString = result.ToString();
 
         // Assert
-        resultString.Should().Be("Success");
+        resultString.ShouldBe("Success");
     }
 
     [Fact]
@@ -277,7 +277,7 @@ public class ResultTests
         var resultString = result.ToString();
 
         // Assert
-        resultString.Should().Be("Failure: [TestError] Test error message");
+        resultString.ShouldBe("Failure: [TestError] Test error message");
     }
 
     [Fact]
@@ -291,7 +291,7 @@ public class ResultTests
         var resultString = result.ToString();
 
         // Assert
-        resultString.Should().Be($"Success: {value}");
+        resultString.ShouldBe($"Success: {value}");
     }
 
     [Fact]
@@ -305,6 +305,6 @@ public class ResultTests
         var resultString = result.ToString();
 
         // Assert
-        resultString.Should().Be("Failure: [TestError] Test error message");
+        resultString.ShouldBe("Failure: [TestError] Test error message");
     }
 }

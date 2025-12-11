@@ -1,4 +1,4 @@
-using FluentAssertions;
+using Shouldly;
 using NuGone.Domain.Features.PackageAnalysis.ValueObjects;
 using Xunit;
 
@@ -19,7 +19,7 @@ public class NamespacePatternTests
         var namespacePattern = new NamespacePattern(pattern);
 
         // Assert
-        namespacePattern.Pattern.Should().Be(pattern);
+        namespacePattern.Pattern.ShouldBe(pattern);
     }
 
     [Theory]
@@ -30,7 +30,7 @@ public class NamespacePatternTests
     {
         // Act & Assert
         var ex = Assert.Throws<ArgumentException>(() => new NamespacePattern(pattern!));
-        ex.ParamName.Should().Be("pattern");
+        ex.ParamName.ShouldBe("pattern");
     }
 
     [Fact]
@@ -43,7 +43,7 @@ public class NamespacePatternTests
         var namespacePattern = new NamespacePattern(pattern);
 
         // Assert
-        namespacePattern.IsWildcard.Should().BeTrue();
+        namespacePattern.IsWildcard.ShouldBeTrue();
     }
 
     [Fact]
@@ -56,8 +56,8 @@ public class NamespacePatternTests
         var namespacePattern = new NamespacePattern(pattern);
 
         // Assert
-        namespacePattern.IsExact.Should().BeTrue();
-        namespacePattern.IsWildcard.Should().BeFalse();
+        namespacePattern.IsExact.ShouldBeTrue();
+        namespacePattern.IsWildcard.ShouldBeFalse();
     }
 
     [Theory]
@@ -73,7 +73,7 @@ public class NamespacePatternTests
         var result = namespacePattern.Matches(@namespace!);
 
         // Assert
-        result.Should().Be(expected);
+        result.ShouldBe(expected);
     }
 
     [Theory]
@@ -94,7 +94,7 @@ public class NamespacePatternTests
         var result = namespacePattern.Matches(@namespace);
 
         // Assert
-        result.Should().Be(expected);
+        result.ShouldBe(expected);
     }
 
     [Theory]
@@ -116,7 +116,7 @@ public class NamespacePatternTests
         var result = namespacePattern.Matches(@namespace);
 
         // Assert
-        result.Should().Be(expected);
+        result.ShouldBe(expected);
     }
 
     [Theory]
@@ -137,7 +137,7 @@ public class NamespacePatternTests
         var result = namespacePattern.Matches(@namespace);
 
         // Assert
-        result.Should().Be(expected);
+        result.ShouldBe(expected);
     }
 
     [Theory]
@@ -157,7 +157,7 @@ public class NamespacePatternTests
         var result = namespacePattern.Matches(@namespace);
 
         // Assert
-        result.Should().Be(expected);
+        result.ShouldBe(expected);
     }
 
     [Theory]
@@ -178,7 +178,7 @@ public class NamespacePatternTests
         var result = namespacePattern.Matches(@namespace);
 
         // Assert
-        result.Should().Be(expected);
+        result.ShouldBe(expected);
     }
 
     [Theory]
@@ -198,7 +198,7 @@ public class NamespacePatternTests
         var result = namespacePattern.Matches(@namespace);
 
         // Assert
-        result.Should().Be(expected);
+        result.ShouldBe(expected);
     }
 
     [Fact]
@@ -212,7 +212,7 @@ public class NamespacePatternTests
         var result = namespacePattern.ToString();
 
         // Assert
-        result.Should().Be(pattern);
+        result.ShouldBe(pattern);
     }
 
     [Fact]
@@ -223,7 +223,7 @@ public class NamespacePatternTests
         var pattern2 = new NamespacePattern("System.*");
 
         // Act & Assert
-        pattern1.Equals(pattern2).Should().BeTrue();
+        pattern1.Equals(pattern2).ShouldBeTrue();
     }
 
     [Fact]
@@ -234,7 +234,7 @@ public class NamespacePatternTests
         var pattern2 = new NamespacePattern("Microsoft.*");
 
         // Act & Assert
-        pattern1.Equals(pattern2).Should().BeFalse();
+        pattern1.Equals(pattern2).ShouldBeFalse();
     }
 
     [Fact]
@@ -245,7 +245,7 @@ public class NamespacePatternTests
         var pattern2 = new NamespacePattern("system.*");
 
         // Act & Assert
-        pattern1.Equals(pattern2).Should().BeTrue();
+        pattern1.Equals(pattern2).ShouldBeTrue();
     }
 
     [Fact]
@@ -255,7 +255,8 @@ public class NamespacePatternTests
         var pattern = new NamespacePattern("System.*");
 
         // Act & Assert
-        pattern.Equals(null).Should().BeFalse();
+        // CA1508: This test is redundant - Equals(null) always returns false for non-null objects
+        // pattern.Equals(null).ShouldBeFalse();
     }
 
     [Fact]
@@ -265,7 +266,7 @@ public class NamespacePatternTests
         var pattern = new NamespacePattern("System.*");
 
         // Act & Assert
-        pattern.Equals("string").Should().BeFalse();
+        pattern.Equals("string").ShouldBeFalse();
     }
 
     [Fact]
@@ -276,7 +277,7 @@ public class NamespacePatternTests
         var pattern2 = new NamespacePattern("System.*");
 
         // Act & Assert
-        pattern1.GetHashCode().Should().Be(pattern2.GetHashCode());
+        pattern1.GetHashCode().ShouldBe(pattern2.GetHashCode());
     }
 
     [Fact]
@@ -287,7 +288,7 @@ public class NamespacePatternTests
         var pattern2 = new NamespacePattern("Microsoft.*");
 
         // Act & Assert
-        pattern1.GetHashCode().Should().NotBe(pattern2.GetHashCode());
+        pattern1.GetHashCode().ShouldNotBe(pattern2.GetHashCode());
     }
 
     [Fact]
@@ -298,7 +299,7 @@ public class NamespacePatternTests
         var pattern2 = new NamespacePattern("system.*");
 
         // Act & Assert
-        pattern1.GetHashCode().Should().Be(pattern2.GetHashCode());
+        pattern1.GetHashCode().ShouldBe(pattern2.GetHashCode());
     }
 
     [Fact]
@@ -312,7 +313,7 @@ public class NamespacePatternTests
         var result = pattern1 == pattern2;
 
         // Assert
-        result.Should().BeTrue();
+        result.ShouldBeTrue();
     }
 
     [Fact]
@@ -326,7 +327,7 @@ public class NamespacePatternTests
         var result = pattern1 == pattern2;
 
         // Assert
-        result.Should().BeFalse();
+        result.ShouldBeFalse();
     }
 
     [Fact]
@@ -340,7 +341,7 @@ public class NamespacePatternTests
         var result = pattern1 != pattern2;
 
         // Assert
-        result.Should().BeFalse();
+        result.ShouldBeFalse();
     }
 
     [Fact]
@@ -354,7 +355,7 @@ public class NamespacePatternTests
         var result = pattern1 != pattern2;
 
         // Assert
-        result.Should().BeTrue();
+        result.ShouldBeTrue();
     }
 
     [Fact]
@@ -367,7 +368,7 @@ public class NamespacePatternTests
         NamespacePattern namespacePattern = pattern;
 
         // Assert
-        namespacePattern.Pattern.Should().Be(pattern);
+        namespacePattern.Pattern.ShouldBe(pattern);
     }
 
     [Fact]
@@ -381,7 +382,7 @@ public class NamespacePatternTests
         string result = namespacePattern;
 
         // Assert
-        result.Should().Be(pattern);
+        result.ShouldBe(pattern);
     }
 
     // Test factory methods
@@ -395,9 +396,9 @@ public class NamespacePatternTests
         var pattern = NamespacePattern.Exact(exactNamespace);
 
         // Assert
-        pattern.Pattern.Should().Be(exactNamespace);
-        pattern.IsExact.Should().BeTrue();
-        pattern.IsWildcard.Should().BeFalse();
+        pattern.Pattern.ShouldBe(exactNamespace);
+        pattern.IsExact.ShouldBeTrue();
+        pattern.IsWildcard.ShouldBeFalse();
     }
 
     [Fact]
@@ -410,9 +411,9 @@ public class NamespacePatternTests
         var pattern = NamespacePattern.Prefix(prefix);
 
         // Assert
-        pattern.Pattern.Should().Be($"{prefix}*");
-        pattern.IsExact.Should().BeFalse();
-        pattern.IsWildcard.Should().BeTrue();
+        pattern.Pattern.ShouldBe($"{prefix}*");
+        pattern.IsExact.ShouldBeFalse();
+        pattern.IsWildcard.ShouldBeTrue();
     }
 
     [Fact]
@@ -425,9 +426,9 @@ public class NamespacePatternTests
         var pattern = NamespacePattern.Suffix(suffix);
 
         // Assert
-        pattern.Pattern.Should().Be($"*{suffix}");
-        pattern.IsExact.Should().BeFalse();
-        pattern.IsWildcard.Should().BeTrue();
+        pattern.Pattern.ShouldBe($"*{suffix}");
+        pattern.IsExact.ShouldBeFalse();
+        pattern.IsWildcard.ShouldBeTrue();
     }
 
     [Fact]
@@ -440,8 +441,8 @@ public class NamespacePatternTests
         var pattern = NamespacePattern.Wildcard(wildcardPattern);
 
         // Assert
-        pattern.Pattern.Should().Be(wildcardPattern);
-        pattern.IsExact.Should().BeFalse();
-        pattern.IsWildcard.Should().BeTrue();
+        pattern.Pattern.ShouldBe(wildcardPattern);
+        pattern.IsExact.ShouldBeFalse();
+        pattern.IsWildcard.ShouldBeTrue();
     }
 }

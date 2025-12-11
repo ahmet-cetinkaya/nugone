@@ -10,7 +10,7 @@ namespace NuGone.Application.Features.PackageAnalysis.Commands.AnalyzePackageUsa
 /// Command handler for analyzing package usage in a solution or project.
 /// Implements the core algorithm specified in RFC-0002.
 /// </summary>
-public class AnalyzePackageUsageHandler(
+public partial class AnalyzePackageUsageHandler(
     ISolutionRepository solutionRepository,
     IProjectRepository projectRepository,
     INuGetRepository nugetRepository,
@@ -29,6 +29,53 @@ public class AnalyzePackageUsageHandler(
     private readonly ILogger<AnalyzePackageUsageHandler> _logger =
         logger ?? throw new ArgumentNullException(nameof(logger));
 
+    private static readonly Action<ILogger, Exception?> _analysisCancelledWarning =
+        LoggerMessage.Define(
+            LogLevel.Warning,
+            new EventId(1, nameof(AnalyzePackageUsageHandler)),
+            "Package usage analysis was cancelled"
+        );
+
+    private static readonly Action<ILogger, Exception?> _unexpectedError = LoggerMessage.Define(
+        LogLevel.Error,
+        new EventId(2, nameof(AnalyzePackageUsageHandler)),
+        "An unexpected error occurred during package usage analysis"
+    );
+
+    private static readonly Action<ILogger, Exception?> _errorLoadingSolution =
+        LoggerMessage.Define(
+            LogLevel.Error,
+            new EventId(3, nameof(AnalyzePackageUsageHandler)),
+            "Error loading solution"
+        );
+
+    private static readonly Action<ILogger, Exception?> _errorLoadingProject = LoggerMessage.Define(
+        LogLevel.Error,
+        new EventId(4, nameof(AnalyzePackageUsageHandler)),
+        "Error loading project"
+    );
+
+    private static readonly Action<ILogger, Exception?> _errorLoadingDirectory =
+        LoggerMessage.Define(
+            LogLevel.Error,
+            new EventId(5, nameof(AnalyzePackageUsageHandler)),
+            "Error loading directory"
+        );
+
+    private static readonly Action<ILogger, Exception?> _errorLoadingPackageReferences =
+        LoggerMessage.Define(
+            LogLevel.Error,
+            new EventId(6, nameof(AnalyzePackageUsageHandler)),
+            "Error loading package references"
+        );
+
+    private static readonly Action<ILogger, Exception?> _errorPerformingAnalysis =
+        LoggerMessage.Define(
+            LogLevel.Error,
+            new EventId(7, nameof(AnalyzePackageUsageHandler)),
+            "Error performing package analysis"
+        );
+
     /// <summary>
     /// Handles the package usage analysis command.
     /// RFC-0002: Main entry point for unused package detection.
@@ -41,14 +88,13 @@ public class AnalyzePackageUsageHandler(
         CancellationToken cancellationToken = default
     )
     {
+        ArgumentNullException.ThrowIfNull(command);
+
         var stopwatch = Stopwatch.StartNew();
 
         try
         {
-            _logger.LogInformation(
-                "Starting package usage analysis for path: {Path}",
-                command.Path
-            );
+            LogStartingAnalysis(_logger, command.Path);
 
             // Step 1: Validate input
             var validationResult = ValidateCommand(command);
@@ -56,19 +102,18 @@ public class AnalyzePackageUsageHandler(
                 return Result<AnalyzePackageUsageResult>.Failure(validationResult.Error);
 
             // Step 2: Determine if we're analyzing a solution or individual project
-            var analysisTarget = await DetermineAnalysisTargetAsync(
-                command.Path,
-                cancellationToken
-            );
+            var analysisTarget = await DetermineAnalysisTargetAsync(command.Path, cancellationToken)
+                .ConfigureAwait(false);
             if (analysisTarget.IsFailure)
                 return Result<AnalyzePackageUsageResult>.Failure(analysisTarget.Error);
 
             // Step 3: Load the solution or project
             var loadResult = await LoadAnalysisTargetAsync(
-                analysisTarget.Value,
-                command.Path,
-                cancellationToken
-            );
+                    analysisTarget.Value,
+                    command.Path,
+                    cancellationToken
+                )
+                .ConfigureAwait(false);
             if (loadResult.IsFailure)
                 return Result<AnalyzePackageUsageResult>.Failure(loadResult.Error);
 
@@ -77,20 +122,19 @@ public class AnalyzePackageUsageHandler(
             ApplyExcludePatterns(solution, command.ExcludePatterns);
 
             // Step 5: Load package references for all projects
-            var packageLoadResult = await LoadPackageReferencesAsync(solution, cancellationToken);
+            var packageLoadResult = await LoadPackageReferencesAsync(solution, cancellationToken)
+                .ConfigureAwait(false);
             if (packageLoadResult.IsFailure)
                 return Result<AnalyzePackageUsageResult>.Failure(packageLoadResult.Error);
 
             // Step 6: Perform the analysis
-            var analysisResult = await PerformAnalysisAsync(solution, command, cancellationToken);
+            var analysisResult = await PerformAnalysisAsync(solution, command, cancellationToken)
+                .ConfigureAwait(false);
             if (analysisResult.IsFailure)
                 return Result<AnalyzePackageUsageResult>.Failure(analysisResult.Error);
 
             stopwatch.Stop();
-            _logger.LogInformation(
-                "Package usage analysis completed in {ElapsedTime}",
-                stopwatch.Elapsed
-            );
+            LogAnalysisCompleted(_logger, stopwatch.Elapsed);
 
             var result = new AnalyzePackageUsageResult(
                 command.Path,
@@ -102,15 +146,17 @@ public class AnalyzePackageUsageHandler(
         }
         catch (OperationCanceledException)
         {
-            _logger.LogWarning("Package usage analysis was cancelled");
+            _analysisCancelledWarning(_logger, null);
             return Result<AnalyzePackageUsageResult>.Failure(
                 "OPERATION_CANCELLED",
                 "Analysis was cancelled"
             );
         }
+#pragma warning disable CA1031 // Top-level handler must catch all exceptions to provide proper error handling
         catch (Exception ex)
+#pragma warning restore CA1031
         {
-            _logger.LogError(ex, "An unexpected error occurred during package usage analysis");
+            _unexpectedError(_logger, ex);
             return Result<AnalyzePackageUsageResult>.Failure(
                 "UNEXPECTED_ERROR",
                 $"An unexpected error occurred: {ex.Message}"
@@ -134,7 +180,7 @@ public class AnalyzePackageUsageHandler(
         CancellationToken cancellationToken
     )
     {
-        if (!await _projectRepository.ExistsAsync(path))
+        if (!await _projectRepository.ExistsAsync(path).ConfigureAwait(false))
             return Result<AnalysisTargetType>.Failure(
                 "PATH_NOT_FOUND",
                 $"Path does not exist: {path}"
@@ -160,19 +206,17 @@ public class AnalyzePackageUsageHandler(
         }
 
         // Check if it's a directory - look for solution files first, then projects
-        var solutionFiles = await _solutionRepository.DiscoverSolutionFilesAsync(
-            path,
-            cancellationToken
-        );
+        var solutionFiles = await _solutionRepository
+            .DiscoverSolutionFilesAsync(path, cancellationToken)
+            .ConfigureAwait(false);
         if (solutionFiles.Any())
         {
             return Result<AnalysisTargetType>.Success(AnalysisTargetType.Directory);
         }
 
-        var projectFiles = await _projectRepository.DiscoverProjectFilesAsync(
-            path,
-            cancellationToken
-        );
+        var projectFiles = await _projectRepository
+            .DiscoverProjectFilesAsync(path, cancellationToken)
+            .ConfigureAwait(false);
         if (projectFiles.Any())
         {
             return Result<AnalysisTargetType>.Success(AnalysisTargetType.Directory);
@@ -193,13 +237,15 @@ public class AnalyzePackageUsageHandler(
         switch (targetType)
         {
             case AnalysisTargetType.Solution:
-                return await LoadSolutionAsync(path, cancellationToken);
+                return await LoadSolutionAsync(path, cancellationToken).ConfigureAwait(false);
 
             case AnalysisTargetType.Project:
-                return await LoadSingleProjectAsSolutionAsync(path, cancellationToken);
+                return await LoadSingleProjectAsSolutionAsync(path, cancellationToken)
+                    .ConfigureAwait(false);
 
             case AnalysisTargetType.Directory:
-                return await LoadDirectoryAsSolutionAsync(path, cancellationToken);
+                return await LoadDirectoryAsSolutionAsync(path, cancellationToken)
+                    .ConfigureAwait(false);
 
             default:
                 return Result<Solution>.Failure(
@@ -216,19 +262,17 @@ public class AnalyzePackageUsageHandler(
     {
         try
         {
-            var solution = await _solutionRepository.LoadSolutionAsync(
-                solutionPath,
-                cancellationToken
-            );
+            var solution = await _solutionRepository
+                .LoadSolutionAsync(solutionPath, cancellationToken)
+                .ConfigureAwait(false);
 
             // Load each project in the solution
             var loadedProjects = new List<Project>();
             foreach (var project in solution.Projects)
             {
-                var loadedProject = await _projectRepository.LoadProjectAsync(
-                    project.FilePath,
-                    cancellationToken
-                );
+                var loadedProject = await _projectRepository
+                    .LoadProjectAsync(project.FilePath, cancellationToken)
+                    .ConfigureAwait(false);
                 loadedProjects.Add(loadedProject);
             }
 
@@ -241,9 +285,11 @@ public class AnalyzePackageUsageHandler(
 
             return Result<Solution>.Success(solution);
         }
+#pragma warning disable CA1031 // Solution loading can fail for various reasons (file I/O, parsing, etc.)
         catch (Exception ex)
+#pragma warning restore CA1031
         {
-            _logger.LogError(ex, "Error loading solution: {SolutionPath}", solutionPath);
+            _errorLoadingSolution(_logger, ex);
             return Result<Solution>.Failure(
                 "SOLUTION_LOAD_ERROR",
                 $"Failed to load solution: {ex.Message}"
@@ -258,7 +304,9 @@ public class AnalyzePackageUsageHandler(
     {
         try
         {
-            var project = await _projectRepository.LoadProjectAsync(projectPath, cancellationToken);
+            var project = await _projectRepository
+                .LoadProjectAsync(projectPath, cancellationToken)
+                .ConfigureAwait(false);
             var solutionName = Path.GetFileNameWithoutExtension(projectPath) + "_Solution";
             var solutionPath = Path.ChangeExtension(projectPath, ".sln");
 
@@ -267,9 +315,11 @@ public class AnalyzePackageUsageHandler(
 
             return Result<Solution>.Success(solution);
         }
+#pragma warning disable CA1031 // Project loading can fail for various reasons (file I/O, parsing, etc.)
         catch (Exception ex)
+#pragma warning restore CA1031
         {
-            _logger.LogError(ex, "Error loading project as solution: {ProjectPath}", projectPath);
+            _errorLoadingProject(_logger, ex);
             return Result<Solution>.Failure(
                 "PROJECT_LOAD_ERROR",
                 $"Failed to load project: {ex.Message}"
@@ -285,20 +335,19 @@ public class AnalyzePackageUsageHandler(
         try
         {
             // First try to find a solution file
-            var solutionFiles = await _solutionRepository.DiscoverSolutionFilesAsync(
-                directoryPath,
-                cancellationToken
-            );
+            var solutionFiles = await _solutionRepository
+                .DiscoverSolutionFilesAsync(directoryPath, cancellationToken)
+                .ConfigureAwait(false);
             if (solutionFiles.Any())
             {
-                return await LoadSolutionAsync(solutionFiles.First(), cancellationToken);
+                return await LoadSolutionAsync(solutionFiles.First(), cancellationToken)
+                    .ConfigureAwait(false);
             }
 
             // If no solution file, create a virtual solution from all projects
-            var projectFiles = await _projectRepository.DiscoverProjectFilesAsync(
-                directoryPath,
-                cancellationToken
-            );
+            var projectFiles = await _projectRepository
+                .DiscoverProjectFilesAsync(directoryPath, cancellationToken)
+                .ConfigureAwait(false);
             if (!projectFiles.Any())
             {
                 return Result<Solution>.Failure(
@@ -313,22 +362,19 @@ public class AnalyzePackageUsageHandler(
 
             foreach (var projectFile in projectFiles)
             {
-                var project = await _projectRepository.LoadProjectAsync(
-                    projectFile,
-                    cancellationToken
-                );
+                var project = await _projectRepository
+                    .LoadProjectAsync(projectFile, cancellationToken)
+                    .ConfigureAwait(false);
                 solution.AddProject(project);
             }
 
             return Result<Solution>.Success(solution);
         }
+#pragma warning disable CA1031 // Directory loading can fail for various reasons (file I/O, parsing, etc.)
         catch (Exception ex)
+#pragma warning restore CA1031
         {
-            _logger.LogError(
-                ex,
-                "Error loading directory as solution: {DirectoryPath}",
-                directoryPath
-            );
+            _errorLoadingDirectory(_logger, ex);
             return Result<Solution>.Failure(
                 "DIRECTORY_LOAD_ERROR",
                 $"Failed to load directory: {ex.Message}"
@@ -360,19 +406,23 @@ public class AnalyzePackageUsageHandler(
                 && !string.IsNullOrEmpty(solution.DirectoryPackagesPropsPath)
             )
             {
-                centralPackageVersions = await _solutionRepository.LoadCentralPackageVersionsAsync(
-                    solution.DirectoryPackagesPropsPath,
-                    cancellationToken
-                );
+                centralPackageVersions = await _solutionRepository
+                    .LoadCentralPackageVersionsAsync(
+                        solution.DirectoryPackagesPropsPath,
+                        cancellationToken
+                    )
+                    .ConfigureAwait(false);
             }
 
             foreach (var project in solution.Projects)
             {
-                var packageReferences = await _nugetRepository.ExtractPackageReferencesAsync(
-                    project.FilePath,
-                    centralPackageVersions,
-                    cancellationToken
-                );
+                var packageReferences = await _nugetRepository
+                    .ExtractPackageReferencesAsync(
+                        project.FilePath,
+                        centralPackageVersions,
+                        cancellationToken
+                    )
+                    .ConfigureAwait(false);
 
                 foreach (var packageRef in packageReferences)
                 {
@@ -382,9 +432,11 @@ public class AnalyzePackageUsageHandler(
 
             return Result.Success();
         }
+#pragma warning disable CA1031 // Package reference loading can fail for various reasons (file I/O, parsing, etc.)
         catch (Exception ex)
+#pragma warning restore CA1031
         {
-            _logger.LogError(ex, "Error loading package references");
+            _errorLoadingPackageReferences(_logger, ex);
             return Result.Failure(
                 "PACKAGE_LOAD_ERROR",
                 $"Failed to load package references: {ex.Message}"
@@ -401,7 +453,9 @@ public class AnalyzePackageUsageHandler(
         try
         {
             // Validate inputs
-            var validationResult = await _packageUsageAnalyzer.ValidateInputsAsync(solution);
+            var validationResult = await _packageUsageAnalyzer
+                .ValidateInputsAsync(solution)
+                .ConfigureAwait(false);
             if (!validationResult.IsValid)
             {
                 var errors = string.Join(", ", validationResult.Errors);
@@ -412,7 +466,9 @@ public class AnalyzePackageUsageHandler(
             }
 
             // Perform the analysis
-            await _packageUsageAnalyzer.AnalyzePackageUsageAsync(solution, cancellationToken);
+            await _packageUsageAnalyzer
+                .AnalyzePackageUsageAsync(solution, cancellationToken)
+                .ConfigureAwait(false);
 
             // Convert results to DTOs
             var projectResults = new List<ProjectAnalysisResult>();
@@ -436,9 +492,11 @@ public class AnalyzePackageUsageHandler(
 
             return Result<IEnumerable<ProjectAnalysisResult>>.Success(projectResults);
         }
+#pragma warning disable CA1031 // Analysis can fail for various reasons and must be handled gracefully
         catch (Exception ex)
+#pragma warning restore CA1031
         {
-            _logger.LogError(ex, "Error performing package analysis");
+            _errorPerformingAnalysis(_logger, ex);
             return Result<IEnumerable<ProjectAnalysisResult>>.Failure(
                 "ANALYSIS_ERROR",
                 $"Analysis failed: {ex.Message}"

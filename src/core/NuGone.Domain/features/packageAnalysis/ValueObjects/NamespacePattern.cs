@@ -12,7 +12,7 @@ public class NamespacePattern : IEquatable<NamespacePattern>
             throw new ArgumentException("Pattern cannot be null or empty", nameof(pattern));
 
         Pattern = pattern.Trim();
-        IsWildcard = Pattern.Contains('*');
+        IsWildcard = Pattern.Contains('*', StringComparison.Ordinal);
         IsExact = !IsWildcard;
     }
 
@@ -59,7 +59,7 @@ public class NamespacePattern : IEquatable<NamespacePattern>
             return @namespace.EndsWith(suffix, StringComparison.OrdinalIgnoreCase);
         }
 
-        if (Pattern.Contains('*'))
+        if (Pattern.Contains('*', StringComparison.Ordinal))
         {
             // More complex wildcard matching - convert to regex-like behavior
             var parts = Pattern.Split('*', StringSplitOptions.RemoveEmptyEntries);
@@ -131,7 +131,7 @@ public class NamespacePattern : IEquatable<NamespacePattern>
 
     public override int GetHashCode()
     {
-        return Pattern.ToLowerInvariant().GetHashCode();
+        return Pattern.ToUpperInvariant().GetHashCode(StringComparison.Ordinal);
     }
 
     public override string ToString()
@@ -149,7 +149,16 @@ public class NamespacePattern : IEquatable<NamespacePattern>
         return !(left == right);
     }
 
-    public static implicit operator string(NamespacePattern pattern) => pattern.Pattern;
+    public static implicit operator string(NamespacePattern pattern)
+    {
+        ArgumentNullException.ThrowIfNull(pattern);
+        return pattern.Pattern;
+    }
 
     public static implicit operator NamespacePattern(string pattern) => new(pattern);
+
+    public NamespacePattern ToNamespacePattern()
+    {
+        throw new NotImplementedException();
+    }
 }

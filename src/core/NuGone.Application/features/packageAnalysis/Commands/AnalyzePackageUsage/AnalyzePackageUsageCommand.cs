@@ -21,12 +21,12 @@ public class AnalyzePackageUsageCommand(string path)
     /// Whether to include transitive dependencies in the analysis.
     /// RFC-0002: Transitive dependency analysis option.
     /// </summary>
-    public bool IncludeTransitiveDependencies { get; set; } = false;
+    public bool IncludeTransitiveDependencies { get; set; }
 
     /// <summary>
     /// Whether to enable verbose output with detailed information.
     /// </summary>
-    public bool Verbose { get; set; } = false;
+    public bool Verbose { get; set; }
 
     /// <summary>
     /// Optional target framework to filter analysis.
@@ -61,6 +61,8 @@ public class AnalyzePackageUsageCommand(string path)
     /// <param name="patterns">The patterns to exclude</param>
     public void AddExcludePatterns(IEnumerable<string> patterns)
     {
+        ArgumentNullException.ThrowIfNull(patterns);
+
         foreach (var pattern in patterns)
             AddExcludePattern(pattern);
     }

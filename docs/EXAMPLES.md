@@ -60,28 +60,28 @@ nugone analyze --project . --format json | jq '.unusedPackages | length'
 
 ```json
 {
-  "sdk": {
-    "version": "9.0.100"
-  },
-  "nugone": {
-    "excludeNamespaces": [
-      "Microsoft.AspNetCore.Mvc",
-      "Microsoft.Extensions.Logging",
-      "Microsoft.EntityFrameworkCore",
-      "Swashbuckle.AspNetCore"
-    ],
-    "excludePackages": [
-      "Microsoft.AspNetCore.App",
-      "Microsoft.NET.Test.Sdk",
-      "coverlet.collector"
-    ],
-    "excludeFiles": [
-      "**/*.Designer.cs",
-      "**/obj/**",
-      "**/bin/**",
-      "**/wwwroot/**"
-    ]
-  }
+    "sdk": {
+        "version": "9.0.100"
+    },
+    "nugone": {
+        "excludeNamespaces": [
+            "Microsoft.AspNetCore.Mvc",
+            "Microsoft.Extensions.Logging",
+            "Microsoft.EntityFrameworkCore",
+            "Swashbuckle.AspNetCore"
+        ],
+        "excludePackages": [
+            "Microsoft.AspNetCore.App",
+            "Microsoft.NET.Test.Sdk",
+            "coverlet.collector"
+        ],
+        "excludeFiles": [
+            "**/*.Designer.cs",
+            "**/obj/**",
+            "**/bin/**",
+            "**/wwwroot/**"
+        ]
+    }
 }
 ```
 
@@ -91,23 +91,23 @@ nugone analyze --project . --format json | jq '.unusedPackages | length'
 
 ```json
 {
-  "sdk": {
-    "version": "9.0.100"
-  },
-  "nugone": {
-    "excludeNamespaces": [
-      "System.Windows",
-      "System.Windows.Controls",
-      "Microsoft.Xaml"
-    ],
-    "excludePackages": ["Microsoft.Toolkit.Mvvm", "MaterialDesignThemes"],
-    "excludeFiles": [
-      "**/*.g.cs",
-      "**/*.g.i.cs",
-      "**/*.Designer.cs",
-      "**/Properties/*.cs"
-    ]
-  }
+    "sdk": {
+        "version": "9.0.100"
+    },
+    "nugone": {
+        "excludeNamespaces": [
+            "System.Windows",
+            "System.Windows.Controls",
+            "Microsoft.Xaml"
+        ],
+        "excludePackages": ["Microsoft.Toolkit.Mvvm", "MaterialDesignThemes"],
+        "excludeFiles": [
+            "**/*.g.cs",
+            "**/*.g.i.cs",
+            "**/*.Designer.cs",
+            "**/Properties/*.cs"
+        ]
+    }
 }
 ```
 
@@ -117,21 +117,21 @@ nugone analyze --project . --format json | jq '.unusedPackages | length'
 
 ```json
 {
-  "sdk": {
-    "version": "9.0.100"
-  },
-  "nugone": {
-    "excludeNamespaces": [
-      "System.Runtime.CompilerServices",
-      "System.Diagnostics.CodeAnalysis"
-    ],
-    "excludePackages": [
-      "MinVer",
-      "Nerdbank.GitVersioning",
-      "Microsoft.SourceLink.GitHub"
-    ],
-    "excludeFiles": ["**/obj/**", "**/bin/**"]
-  }
+    "sdk": {
+        "version": "9.0.100"
+    },
+    "nugone": {
+        "excludeNamespaces": [
+            "System.Runtime.CompilerServices",
+            "System.Diagnostics.CodeAnalysis"
+        ],
+        "excludePackages": [
+            "MinVer",
+            "Nerdbank.GitVersioning",
+            "Microsoft.SourceLink.GitHub"
+        ],
+        "excludeFiles": ["**/obj/**", "**/bin/**"]
+    }
 }
 ```
 
@@ -204,93 +204,93 @@ Consider removing these packages to keep your project clean.`;
 
 ```yaml
 trigger:
-  - main
+    - main
 
 variables:
-  solution: "**/*.sln"
-  buildPlatform: "Any CPU"
-  buildConfiguration: "Release"
+    solution: "**/*.sln"
+    buildPlatform: "Any CPU"
+    buildConfiguration: "Release"
 
 stages:
-  - stage: Build
-    displayName: "Build and Analyze"
-    jobs:
-      - job: Build
-        displayName: "Build Job"
-        pool:
-          vmImage: "windows-latest"
+    - stage: Build
+      displayName: "Build and Analyze"
+      jobs:
+          - job: Build
+            displayName: "Build Job"
+            pool:
+                vmImage: "windows-latest"
 
-        steps:
-          - task: UseDotNet@2
-            displayName: "Use .NET 9.0"
-            inputs:
-              packageType: "sdk"
-              version: "9.x"
+            steps:
+                - task: UseDotNet@2
+                  displayName: "Use .NET 9.0"
+                  inputs:
+                      packageType: "sdk"
+                      version: "9.x"
 
-          - task: DotNetCoreCLI@2
-            displayName: "Install NuGone"
-            inputs:
-              command: "custom"
-              custom: "tool"
-              arguments: "install --global nugone"
+                - task: DotNetCoreCLI@2
+                  displayName: "Install NuGone"
+                  inputs:
+                      command: "custom"
+                      custom: "tool"
+                      arguments: "install --global nugone"
 
-          - task: DotNetCoreCLI@2
-            displayName: "Restore"
-            inputs:
-              command: "restore"
-              projects: "$(solution)"
+                - task: DotNetCoreCLI@2
+                  displayName: "Restore"
+                  inputs:
+                      command: "restore"
+                      projects: "$(solution)"
 
-          - task: DotNetCoreCLI@2
-            displayName: "Build"
-            inputs:
-              command: "build"
-              projects: "$(solution)"
-              arguments: "--configuration $(buildConfiguration) --no-restore"
+                - task: DotNetCoreCLI@2
+                  displayName: "Build"
+                  inputs:
+                      command: "build"
+                      projects: "$(solution)"
+                      arguments: "--configuration $(buildConfiguration) --no-restore"
 
-          - script: |
-              nugone analyze --project $(solution) --format json --output $(Build.ArtifactStagingDirectory)/unused-packages.json
-            displayName: "Analyze unused packages"
-            failOnStderr: true
+                - script: |
+                      nugone analyze --project $(solution) --format json --output $(Build.ArtifactStagingDirectory)/unused-packages.json
+                  displayName: "Analyze unused packages"
+                  failOnStderr: true
 
-          - task: PublishBuildArtifacts@1
-            displayName: "Publish analysis results"
-            inputs:
-              pathtoPublish: "$(Build.ArtifactStagingDirectory)/unused-packages.json"
-              artifactName: "package-analysis"
+                - task: PublishBuildArtifacts@1
+                  displayName: "Publish analysis results"
+                  inputs:
+                      pathtoPublish: "$(Build.ArtifactStagingDirectory)/unused-packages.json"
+                      artifactName: "package-analysis"
 ```
 
 ### GitLab CI - Merge Request Pipeline
 
 ```yaml
 stages:
-  - analyze
-  - build
+    - analyze
+    - build
 
 variables:
-  SOLUTION: "*.sln"
+    SOLUTION: "*.sln"
 
 analyze_packages:
-  stage: analyze
-  image: mcr.microsoft.com/dotnet/sdk:9.0
-  script:
-    - dotnet tool install --global nugone
-    - nugone analyze --project $SOLUTION --format json --output unused-packages.json
-  artifacts:
-    reports:
-      junit: unused-packages.json
-    paths:
-      - unused-packages.json
-  only:
-    - merge_requests
+    stage: analyze
+    image: mcr.microsoft.com/dotnet/sdk:9.0
+    script:
+        - dotnet tool install --global nugone
+        - nugone analyze --project $SOLUTION --format json --output unused-packages.json
+    artifacts:
+        reports:
+            junit: unused-packages.json
+        paths:
+            - unused-packages.json
+    only:
+        - merge_requests
 
 build:
-  stage: build
-  image: mcr.microsoft.com/dotnet/sdk:9.0
-  script:
-    - dotnet restore $SOLUTION
-    - dotnet build $SOLUTION --no-restore
-  dependencies:
-    - analyze_packages
+    stage: build
+    image: mcr.microsoft.com/dotnet/sdk:9.0
+    script:
+        - dotnet restore $SOLUTION
+        - dotnet build $SOLUTION --no-restore
+    dependencies:
+        - analyze_packages
 ```
 
 ## 🔧 Advanced Scenarios
@@ -467,24 +467,24 @@ MyWebApi/
 
 ```json
 {
-  "sdk": {
-    "version": "9.0.100"
-  },
-  "nugone": {
-    "excludeNamespaces": [
-      "Microsoft.AspNetCore.Mvc",
-      "Microsoft.Extensions.Logging",
-      "Microsoft.EntityFrameworkCore",
-      "Swashbuckle.AspNetCore",
-      "xUnit"
-    ],
-    "excludePackages": [
-      "Microsoft.AspNetCore.App",
-      "Microsoft.NET.Test.Sdk",
-      "coverlet.collector",
-      "Microsoft.AspNetCore.Mvc.Testing"
-    ]
-  }
+    "sdk": {
+        "version": "9.0.100"
+    },
+    "nugone": {
+        "excludeNamespaces": [
+            "Microsoft.AspNetCore.Mvc",
+            "Microsoft.Extensions.Logging",
+            "Microsoft.EntityFrameworkCore",
+            "Swashbuckle.AspNetCore",
+            "xUnit"
+        ],
+        "excludePackages": [
+            "Microsoft.AspNetCore.App",
+            "Microsoft.NET.Test.Sdk",
+            "coverlet.collector",
+            "Microsoft.AspNetCore.Mvc.Testing"
+        ]
+    }
 }
 ```
 
@@ -510,31 +510,31 @@ Analysis completed in 1.2 seconds
 
 ```json
 {
-  "project": "MyProject.csproj",
-  "scannedPackages": 25,
-  "unusedPackages": [
-    {
-      "name": "Newtonsoft.Json",
-      "version": "13.0.3",
-      "referencesFound": 0,
-      "frameworks": ["net8.0"]
-    },
-    {
-      "name": "AutoMapper",
-      "version": "12.0.1",
-      "referencesFound": 0,
-      "frameworks": ["net8.0"]
-    },
-    {
-      "name": "Serilog.Sinks.File",
-      "version": "5.0.0",
-      "referencesFound": 0,
-      "frameworks": ["net8.0"]
-    }
-  ],
-  "usedPackages": 22,
-  "analysisTime": "00:00:01.234",
-  "timestamp": "2025-12-06T10:30:00Z"
+    "project": "MyProject.csproj",
+    "scannedPackages": 25,
+    "unusedPackages": [
+        {
+            "name": "Newtonsoft.Json",
+            "version": "13.0.3",
+            "referencesFound": 0,
+            "frameworks": ["net8.0"]
+        },
+        {
+            "name": "AutoMapper",
+            "version": "12.0.1",
+            "referencesFound": 0,
+            "frameworks": ["net8.0"]
+        },
+        {
+            "name": "Serilog.Sinks.File",
+            "version": "5.0.0",
+            "referencesFound": 0,
+            "frameworks": ["net8.0"]
+        }
+    ],
+    "usedPackages": 22,
+    "analysisTime": "00:00:01.234",
+    "timestamp": "2025-12-06T10:30:00Z"
 }
 ```
 
@@ -542,26 +542,26 @@ Analysis completed in 1.2 seconds
 
 ```json
 {
-  "solution": "MySolution.sln",
-  "projects": [
-    {
-      "name": "MyProject.csproj",
-      "scannedPackages": 25,
-      "unusedPackages": 3,
-      "usedPackages": 22
-    },
-    {
-      "name": "MyProject.Tests.csproj",
-      "scannedPackages": 15,
-      "unusedPackages": 1,
-      "usedPackages": 14
-    }
-  ],
-  "totalScannedPackages": 40,
-  "totalUnusedPackages": 4,
-  "totalUsedPackages": 36,
-  "analysisTime": "00:00:03.456",
-  "timestamp": "2025-12-06T10:30:00Z"
+    "solution": "MySolution.sln",
+    "projects": [
+        {
+            "name": "MyProject.csproj",
+            "scannedPackages": 25,
+            "unusedPackages": 3,
+            "usedPackages": 22
+        },
+        {
+            "name": "MyProject.Tests.csproj",
+            "scannedPackages": 15,
+            "unusedPackages": 1,
+            "usedPackages": 14
+        }
+    ],
+    "totalScannedPackages": 40,
+    "totalUnusedPackages": 4,
+    "totalUsedPackages": 36,
+    "analysisTime": "00:00:03.456",
+    "timestamp": "2025-12-06T10:30:00Z"
 }
 ```
 

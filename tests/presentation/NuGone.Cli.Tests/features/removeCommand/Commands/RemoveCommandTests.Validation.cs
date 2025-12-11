@@ -73,7 +73,9 @@ public partial class RemoveCommandTests
         result.IsValid.ShouldBeFalse();
         result.Errors.Count.ShouldBeGreaterThan(0);
         result
-            .Errors.Any(error => error.Contains("Format must be either 'text' or 'json'"))
+            .Errors.Any(error =>
+                error.Contains("Format must be either 'text' or 'json'", StringComparison.Ordinal)
+            )
             .ShouldBeTrue();
     }
 
@@ -118,7 +120,11 @@ public partial class RemoveCommandTests
         // Assert
         result.IsValid.ShouldBeFalse();
         result.Errors.Count.ShouldBeGreaterThan(0);
-        result.Errors.Any(error => error.Contains("Output directory not found")).ShouldBeTrue();
+        result
+            .Errors.Any(error =>
+                error.Contains("Output directory not found", StringComparison.Ordinal)
+            )
+            .ShouldBeTrue();
     }
 
     [Fact]
@@ -193,7 +199,9 @@ public partial class RemoveCommandTests
         result.IsValid.ShouldBeFalse();
         result.Errors.Count.ShouldBeGreaterThan(0);
         result
-            .Errors.Any(error => error.Contains("Cannot skip confirmation in dry-run mode"))
+            .Errors.Any(error =>
+                error.Contains("Cannot skip confirmation in dry-run mode", StringComparison.Ordinal)
+            )
             .ShouldBeTrue();
     }
 

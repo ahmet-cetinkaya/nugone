@@ -38,24 +38,6 @@ else
   print_info "Install it with: dotnet tool install -g csharpier"
 fi
 
-# Auto-fix static analyzer issues
-print_section "🔍 Auto-fixing static analyzer violations"
-if [ -f "NuGone.sln" ]; then
-  SOLUTION_FILE="./NuGone.sln"
-  print_info "Running dotnet format analyzers on solution..."
-  if $DOTNET_CMD format analyzers "$SOLUTION_FILE" --verbosity diagnostic 2>/dev/null; then
-    print_success "Static analyzer violations fixed successfully!"
-  else
-    print_warning "Some analyzer violations could not be auto-fixed"
-    print_info "Run './scripts/lint.sh' to see remaining issues"
-  fi
-elif [ -f "NuGone.slnx" ]; then
-  print_warning "Skipping analyzer auto-fix - .slnx format is not fully supported"
-  print_info "Consider generating a .sln file for full analyzer support"
-else
-  print_warning "No solution file found, skipping analyzer auto-fix"
-fi
-
 # Format other files with Prettier
 print_section "📄 Formatting markdown and other files with Prettier"
 if command -v prettier &>/dev/null; then
@@ -72,7 +54,7 @@ fi
 # Format shell scripts with shfmt
 print_section "🐚 Formatting shell scripts with shfmt"
 if command -v shfmt &>/dev/null; then
-  shfmt -w -i 2 -ci **/*.sh 2>/dev/null || true
+  shfmt -w -i 2 -ci ./**/*.sh 2>/dev/null || true
   print_success "Shell scripts formatted successfully!"
 else
   print_warning "shfmt is not installed or not in PATH"

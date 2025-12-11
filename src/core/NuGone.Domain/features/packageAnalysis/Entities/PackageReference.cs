@@ -134,9 +134,9 @@ public class PackageReference
     public override int GetHashCode()
     {
         return HashCode.Combine(
-            PackageId.ToLowerInvariant(),
-            Version.ToLowerInvariant(),
-            ProjectPath.ToLowerInvariant()
+            PackageId.ToUpperInvariant(),
+            Version.ToUpperInvariant(),
+            ProjectPath.ToUpperInvariant()
         );
     }
 }

@@ -8,9 +8,9 @@ To automatically detect and optionally remove unused NuGet package references in
 
 - Developers frequently add new NuGet packages during development.
 - Over time, some packages become unused but remain referenced in project files:
-  - Increasing project size
-  - Slowing build times
-  - Introducing potential security risks
+    - Increasing project size
+    - Slowing build times
+    - Introducing potential security risks
 - Neither `dotnet` CLI nor Visual Studio fully automates unused package removal.
 
 ### Goal
@@ -50,45 +50,45 @@ To automatically detect and optionally remove unused NuGet package references in
 - Distinguish between direct and transitive dependencies.
 - Handle conditional references (e.g., `<Condition>` attributes).
 - For each package:
-  - Scan codebase for:
-    - `using` statements referring to the package’s namespaces.
-    - Class or method names from the package used in code.
-    - (Planned) Reflection-based usage detection.
-  - Support multi-targeted projects.
-  - Exclude files/folders by pattern (e.g., `**/Generated/**`).
+    - Scan codebase for:
+        - `using` statements referring to the package’s namespaces.
+        - Class or method names from the package used in code.
+        - (Planned) Reflection-based usage detection.
+    - Support multi-targeted projects.
+    - Exclude files/folders by pattern (e.g., `**/Generated/**`).
 
 ### 3.2 Reporting
 
 - Output a report listing:
-  - Used packages
-  - Unused packages
-  - Summary (total unused, total scanned, percentage unused)
+    - Used packages
+    - Unused packages
+    - Summary (total unused, total scanned, percentage unused)
 - Output formats:
-  - Plain text
-  - JSON
+    - Plain text
+    - JSON
 - Option to save report to file (`--output <file>`)
 
 **Example JSON Output:**
 
 ```json
 {
-  "unusedPackages": [
-    {
-      "name": "Newtonsoft.Json",
-      "version": "13.0.3",
-      "referencesFound": 0
-    }
-  ],
-  "scannedPackages": 10,
-  "project": "MyProject.csproj"
+    "unusedPackages": [
+        {
+            "name": "Newtonsoft.Json",
+            "version": "13.0.3",
+            "referencesFound": 0
+        }
+    ],
+    "scannedPackages": 10,
+    "project": "MyProject.csproj"
 }
 ```
 
 ### 3.3 Removal Functionality
 
 - CLI command to remove packages:
-  - Remove a single unused package: `dotnet nuget-unused remove --package <PackageName>`
-  - Remove all unused packages: `dotnet nuget-unused remove --all-unused`
+    - Remove a single unused package: `dotnet nuget-unused remove --package <PackageName>`
+    - Remove all unused packages: `dotnet nuget-unused remove --all-unused`
 - Prompt for confirmation before removal (unless `--yes` is specified).
 - Create a backup of the project file before removal (`--backup`).
 - Attempt to rebuild the project after removal (unless `--no-build`).
@@ -102,21 +102,21 @@ To automatically detect and optionally remove unused NuGet package references in
 ### 3.5 Performance & Configuration
 
 - For large solutions:
-  - Parallelized code scanning.
-  - Exclude certain files (e.g., .Designer.cs, .g.cs) for speed.
+    - Parallelized code scanning.
+    - Exclude certain files (e.g., .Designer.cs, .g.cs) for speed.
 - Configuration support:
-  - Read configuration options from `global.json` at the solution root (preferred method).
-  - Tüm NuGone konfigürasyonları `nugone` ana objesi altında toplanır.
-  - Exclude namespaces, files, or folders via `nugone` objesi (`global.json` içinde).
-  - Fallback to legacy config file (JSON) only if `global.json` is not present.
-  - Specify config file location and precedence (global.json > legacy config > defaults).
+    - Read configuration options from `global.json` at the solution root (preferred method).
+    - All NuGone configurations are collected under the `nugone` main object.
+    - Exclude namespaces, files, or folders via `nugone` object (within `global.json`).
+    - Fallback to legacy config file (JSON) only if `global.json` is not present.
+    - Specify config file location and precedence (global.json > legacy config > defaults).
 
 ```json
 {
-  "nugone": {
-    "excludeNamespaces": ["System.Text.Json"],
-    "excludeFiles": ["**/*.Designer.cs", "**/Generated/**"]
-  }
+    "nugone": {
+        "excludeNamespaces": ["System.Text.Json"],
+        "excludeFiles": ["**/*.Designer.cs", "**/Generated/**"]
+    }
 }
 ```
 
@@ -187,7 +187,7 @@ nugone config [options]
 ## 7. Performance Targets
 
 - For solutions with 5,000+ files:
-  - Complete analysis under 2 minutes on modern hardware.
+    - Complete analysis under 2 minutes on modern hardware.
 - Target memory overhead: < 50 MB additional memory usage during analysis.
 - Parallelized scanning for improved performance.
 
