@@ -1,4 +1,4 @@
-using FluentAssertions;
+using Shouldly;
 using NuGone.Domain.Features.PackageAnalysis.Entities;
 
 namespace NuGone.Domain.Tests.Features.PackageAnalysis.Entities;
@@ -26,12 +26,12 @@ public class PackageReferenceGlobalUsingsTests
         );
 
         // Assert
-        packageRef.PackageId.Should().Be(packageId);
-        packageRef.Version.Should().Be(version);
-        packageRef.ProjectPath.Should().Be(projectPath);
-        packageRef.HasGlobalUsing.Should().BeTrue();
-        packageRef.IsDirect.Should().BeTrue(); // Default value
-        packageRef.Condition.Should().BeNull(); // Default value
+        packageRef.PackageId.ShouldBe(packageId);
+        packageRef.Version.ShouldBe(version);
+        packageRef.ProjectPath.ShouldBe(projectPath);
+        packageRef.HasGlobalUsing.ShouldBeTrue();
+        packageRef.IsDirect.ShouldBeTrue(); // Default value
+        packageRef.Condition.ShouldBe(null); // Default value
     }
 
     [Fact]
@@ -46,7 +46,7 @@ public class PackageReferenceGlobalUsingsTests
         var packageRef = new PackageReference(packageId, version, projectPath);
 
         // Assert
-        packageRef.HasGlobalUsing.Should().BeFalse();
+        packageRef.HasGlobalUsing.ShouldBeFalse();
     }
 
     [Fact]
@@ -71,12 +71,12 @@ public class PackageReferenceGlobalUsingsTests
         );
 
         // Assert
-        packageRef.PackageId.Should().Be(packageId);
-        packageRef.Version.Should().Be(version);
-        packageRef.ProjectPath.Should().Be(projectPath);
-        packageRef.IsDirect.Should().Be(isDirect);
-        packageRef.Condition.Should().Be(condition);
-        packageRef.HasGlobalUsing.Should().Be(hasGlobalUsing);
+        packageRef.PackageId.ShouldBe(packageId);
+        packageRef.Version.ShouldBe(version);
+        packageRef.ProjectPath.ShouldBe(projectPath);
+        packageRef.IsDirect.ShouldBe(isDirect);
+        packageRef.Condition.ShouldBe(condition);
+        packageRef.HasGlobalUsing.ShouldBe(hasGlobalUsing);
     }
 
     [Fact]
@@ -96,7 +96,7 @@ public class PackageReferenceGlobalUsingsTests
         // Assert
         // The ToString method doesn't include global using information by design
         // It focuses on the core package reference information
-        result.Should().Be("Xunit 2.4.2 (Direct) - Unused");
+        result.ShouldBe("Xunit 2.4.2 (Direct) - Unused");
     }
 
     [Fact]
@@ -122,8 +122,8 @@ public class PackageReferenceGlobalUsingsTests
 
         // Act & Assert
         // Equality should be based on PackageId, Version, and ProjectPath only
-        packageRef1.Equals(packageRef2).Should().BeTrue();
-        packageRef1.GetHashCode().Should().Be(packageRef2.GetHashCode());
+        packageRef1.Equals(packageRef2).ShouldBeTrue();
+        packageRef1.GetHashCode().ShouldBe(packageRef2.GetHashCode());
     }
 
     [Theory]
@@ -140,6 +140,6 @@ public class PackageReferenceGlobalUsingsTests
         );
 
         // Act & Assert
-        packageRef.HasGlobalUsing.Should().Be(hasGlobalUsing);
+        packageRef.HasGlobalUsing.ShouldBe(hasGlobalUsing);
     }
 }

@@ -1,4 +1,4 @@
-using FluentAssertions;
+using Shouldly;
 using NuGone.Domain.Features.PackageAnalysis.Entities;
 using Xunit;
 
@@ -20,13 +20,13 @@ public class SolutionTests
         var solution = new Solution(filePath, name);
 
         // Assert
-        solution.FilePath.Should().Be(filePath);
-        solution.Name.Should().Be(name);
-        solution.IsVirtual.Should().BeFalse();
-        solution.Projects.Should().NotBeNull();
-        solution.Projects.Should().BeEmpty();
-        solution.CentralPackageManagementEnabled.Should().BeFalse();
-        solution.DirectoryPackagesPropsPath.Should().BeNull();
+        solution.FilePath.ShouldBe(filePath);
+        solution.Name.ShouldBe(name);
+        solution.IsVirtual.ShouldBeFalse();
+        solution.Projects.ShouldNotBeNull();
+        solution.Projects.ShouldBeEmpty();
+        solution.CentralPackageManagementEnabled.ShouldBeFalse();
+        solution.DirectoryPackagesPropsPath.ShouldBe(null);
     }
 
     [Theory]
@@ -40,7 +40,7 @@ public class SolutionTests
 
         // Act & Assert
         var ex = Assert.Throws<ArgumentException>(() => new Solution(filePath!, name));
-        ex.ParamName.Should().Be("filePath");
+        ex.ParamName.ShouldBe("filePath");
     }
 
     [Theory]
@@ -54,7 +54,7 @@ public class SolutionTests
 
         // Act & Assert
         var ex = Assert.Throws<ArgumentException>(() => new Solution(filePath, name!));
-        ex.ParamName.Should().Be("name");
+        ex.ParamName.ShouldBe("name");
     }
 
     [Fact]
@@ -68,7 +68,7 @@ public class SolutionTests
         var solution = new Solution(filePath, name, isVirtual: true);
 
         // Assert
-        solution.IsVirtual.Should().BeTrue();
+        solution.IsVirtual.ShouldBeTrue();
     }
 
     [Fact]
@@ -82,7 +82,7 @@ public class SolutionTests
         var directoryPath = solution.DirectoryPath;
 
         // Assert
-        directoryPath.Should().Be("/path/to");
+        directoryPath.ShouldBe("/path/to");
     }
 
     [Fact]
@@ -96,8 +96,8 @@ public class SolutionTests
         solution.AddProject(project);
 
         // Assert
-        solution.Projects.Should().Contain(project);
-        solution.Projects.Should().HaveCount(1);
+        solution.Projects.ShouldContain(project);
+        solution.Projects.Count.ShouldBe(1);
     }
 
     [Fact]
@@ -122,7 +122,7 @@ public class SolutionTests
         solution.AddProject(project); // Add same project again
 
         // Assert
-        solution.Projects.Should().HaveCount(1);
+        solution.Projects.Count.ShouldBe(1);
     }
 
     [Fact]
@@ -137,8 +137,8 @@ public class SolutionTests
         var result = solution.RemoveProject(project);
 
         // Assert
-        result.Should().BeTrue();
-        solution.Projects.Should().BeEmpty();
+        result.ShouldBeTrue();
+        solution.Projects.ShouldBeEmpty();
     }
 
     [Fact]
@@ -152,7 +152,7 @@ public class SolutionTests
         var result = solution.RemoveProject(project);
 
         // Assert
-        result.Should().BeFalse();
+        result.ShouldBeFalse();
     }
 
     [Fact]
@@ -176,8 +176,8 @@ public class SolutionTests
         solution.EnableCentralPackageManagement(directoryPackagesPropsPath!);
 
         // Assert
-        solution.CentralPackageManagementEnabled.Should().BeTrue();
-        solution.DirectoryPackagesPropsPath.Should().Be(directoryPackagesPropsPath);
+        solution.CentralPackageManagementEnabled.ShouldBeTrue();
+        solution.DirectoryPackagesPropsPath.ShouldBe(directoryPackagesPropsPath);
     }
 
     [Theory]
@@ -195,7 +195,7 @@ public class SolutionTests
         var ex = Assert.Throws<ArgumentException>(() =>
             solution.EnableCentralPackageManagement(path!)
         );
-        ex.ParamName.Should().Be("directoryPackagesPropsPath");
+        ex.ParamName.ShouldBe("directoryPackagesPropsPath");
     }
 
     [Fact]
@@ -209,8 +209,8 @@ public class SolutionTests
         solution.DisableCentralPackageManagement();
 
         // Assert
-        solution.CentralPackageManagementEnabled.Should().BeFalse();
-        solution.DirectoryPackagesPropsPath.Should().BeNull();
+        solution.CentralPackageManagementEnabled.ShouldBeFalse();
+        solution.DirectoryPackagesPropsPath.ShouldBe(null);
     }
 
     [Fact]
@@ -236,10 +236,10 @@ public class SolutionTests
         var allPackages = solution.GetAllPackageReferences();
 
         // Assert
-        allPackages.Should().HaveCount(3);
-        allPackages.Should().Contain(package1);
-        allPackages.Should().Contain(package2);
-        allPackages.Should().Contain(package3);
+        allPackages.ToList().Count.ShouldBe(3);
+        allPackages.ShouldContain(package1);
+        allPackages.ShouldContain(package2);
+        allPackages.ShouldContain(package3);
     }
 
     [Fact]
@@ -262,9 +262,9 @@ public class SolutionTests
         var unusedPackages = solution.GetAllUnusedPackages();
 
         // Assert
-        unusedPackages.Should().HaveCount(1);
-        unusedPackages.Should().Contain(unusedPackage);
-        unusedPackages.Should().NotContain(usedPackage);
+        unusedPackages.ToList().Count.ShouldBe(1);
+        unusedPackages.ShouldContain(unusedPackage);
+        unusedPackages.ShouldNotContain(usedPackage);
     }
 
     [Fact]
@@ -287,9 +287,9 @@ public class SolutionTests
         var usedPackages = solution.GetAllUsedPackages();
 
         // Assert
-        usedPackages.Should().HaveCount(1);
-        usedPackages.Should().Contain(usedPackage);
-        usedPackages.Should().NotContain(unusedPackage);
+        usedPackages.ToList().Count.ShouldBe(1);
+        usedPackages.ShouldContain(usedPackage);
+        usedPackages.ShouldNotContain(unusedPackage);
     }
 
     [Fact]
@@ -315,11 +315,11 @@ public class SolutionTests
         var groupedPackages = solution.GetPackageReferencesGroupedById();
 
         // Assert
-        groupedPackages.Should().HaveCount(2);
-        groupedPackages.Should().ContainKey("SamePackage");
-        groupedPackages.Should().ContainKey("DifferentPackage");
-        groupedPackages["SamePackage"].Should().HaveCount(2);
-        groupedPackages["DifferentPackage"].Should().HaveCount(1);
+        groupedPackages.Count().ShouldBe(2);
+        groupedPackages.ShouldContainKey("SamePackage");
+        groupedPackages.ShouldContainKey("DifferentPackage");
+        groupedPackages["SamePackage"].Count().ShouldBe(2);
+        groupedPackages["DifferentPackage"].Count().ShouldBe(1);
     }
 
     [Fact]
@@ -342,9 +342,9 @@ public class SolutionTests
         var (total, used, unused) = solution.GetPackageStatistics();
 
         // Assert
-        total.Should().Be(2);
-        used.Should().Be(1);
-        unused.Should().Be(1);
+        total.ShouldBe(2);
+        used.ShouldBe(1);
+        unused.ShouldBe(1);
     }
 
     [Fact]
@@ -359,7 +359,7 @@ public class SolutionTests
         var found = solution.FindProjectByPath("/path/to/project.csproj");
 
         // Assert
-        found.Should().Be(project);
+        found.ShouldBe(project);
     }
 
     [Fact]
@@ -374,7 +374,7 @@ public class SolutionTests
         var found = solution.FindProjectByPath("/path/to/nonexistent.csproj");
 
         // Assert
-        found.Should().BeNull();
+        found.ShouldBe(null);
     }
 
     [Theory]
@@ -390,7 +390,7 @@ public class SolutionTests
         var result = solution.FindProjectByPath(path!);
 
         // Assert
-        result.Should().BeNull();
+        result.ShouldBe(null);
     }
 
     [Fact]
@@ -405,7 +405,7 @@ public class SolutionTests
         var found = solution.FindProjectByPath("/path/to/project.csproj");
 
         // Assert
-        found.Should().Be(project);
+        found.ShouldBe(project);
     }
 
     [Fact]
@@ -420,7 +420,7 @@ public class SolutionTests
         var found = solution.FindProjectByName("TestProject");
 
         // Assert
-        found.Should().Be(project);
+        found.ShouldBe(project);
     }
 
     [Fact]
@@ -435,7 +435,7 @@ public class SolutionTests
         var found = solution.FindProjectByName("NonExistent");
 
         // Assert
-        found.Should().BeNull();
+        found.ShouldBe(null);
     }
 
     [Theory]
@@ -451,7 +451,7 @@ public class SolutionTests
         var result = solution.FindProjectByName(name!);
 
         // Assert
-        result.Should().BeNull();
+        result.ShouldBe(null);
     }
 
     [Fact]
@@ -466,7 +466,7 @@ public class SolutionTests
         var found = solution.FindProjectByName("testproject");
 
         // Assert
-        found.Should().Be(project);
+        found.ShouldBe(project);
     }
 
     [Fact]
@@ -487,7 +487,7 @@ public class SolutionTests
         var result = solution.ToString();
 
         // Assert
-        result.Should().Be("TestSolution - 2 projects, 1 packages");
+        result.ShouldBe("TestSolution - 2 projects, 1 packages");
     }
 
     [Fact]
@@ -498,7 +498,7 @@ public class SolutionTests
         var solution2 = new Solution("/path/to/solution.slnx", "Solution2");
 
         // Act & Assert
-        solution1.Equals(solution2).Should().BeTrue();
+        solution1.Equals(solution2).ShouldBeTrue();
     }
 
     [Fact]
@@ -509,7 +509,7 @@ public class SolutionTests
         var solution2 = new Solution("/path/to/solution2.slnx", "SameName");
 
         // Act & Assert
-        solution1.Equals(solution2).Should().BeFalse();
+        solution1.Equals(solution2).ShouldBeFalse();
     }
 
     [Fact]
@@ -520,7 +520,7 @@ public class SolutionTests
         var solution2 = new Solution("/path/to/solution.slnx", "Solution2");
 
         // Act & Assert
-        solution1.Equals(solution2).Should().BeTrue();
+        solution1.Equals(solution2).ShouldBeTrue();
     }
 
     [Fact]
@@ -531,7 +531,7 @@ public class SolutionTests
 
         // Act & Assert
         // CA1508: This test is redundant - Equals(null) always returns false for non-null objects
-        // solution.Equals(null).Should().BeFalse();
+        // solution.Equals(null).ShouldBeFalse();
     }
 
     [Fact]
@@ -541,7 +541,7 @@ public class SolutionTests
         var solution = new Solution("/path/to/solution.slnx", "TestSolution");
 
         // Act & Assert
-        solution.Equals("string").Should().BeFalse();
+        solution.Equals("string").ShouldBeFalse();
     }
 
     [Fact]
@@ -552,6 +552,6 @@ public class SolutionTests
         var solution2 = new Solution("/path/to/solution.slnx", "Solution2");
 
         // Act & Assert
-        solution1.GetHashCode().Should().Be(solution2.GetHashCode());
+        solution1.GetHashCode().ShouldBe(solution2.GetHashCode());
     }
 }

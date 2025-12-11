@@ -1,4 +1,4 @@
-using FluentAssertions;
+using Shouldly;
 using NuGone.Domain.Features.PackageAnalysis.Entities;
 using Xunit;
 
@@ -21,17 +21,17 @@ public class PackageReferenceTests
         var packageReference = new PackageReference(packageId, version, projectPath);
 
         // Assert
-        packageReference.PackageId.Should().Be(packageId);
-        packageReference.Version.Should().Be(version);
-        packageReference.ProjectPath.Should().Be(projectPath);
-        packageReference.IsDirect.Should().BeTrue();
-        packageReference.Condition.Should().BeNull();
-        packageReference.HasGlobalUsing.Should().BeFalse();
-        packageReference.IsUsed.Should().BeFalse();
-        packageReference.UsageLocations.Should().NotBeNull();
-        packageReference.UsageLocations.Should().BeEmpty();
-        packageReference.DetectedNamespaces.Should().NotBeNull();
-        packageReference.DetectedNamespaces.Should().BeEmpty();
+        packageReference.PackageId.ShouldBe(packageId);
+        packageReference.Version.ShouldBe(version);
+        packageReference.ProjectPath.ShouldBe(projectPath);
+        packageReference.IsDirect.ShouldBeTrue();
+        packageReference.Condition.ShouldBe(null);
+        packageReference.HasGlobalUsing.ShouldBeFalse();
+        packageReference.IsUsed.ShouldBeFalse();
+        packageReference.UsageLocations.ShouldNotBeNull();
+        packageReference.UsageLocations.ShouldBeEmpty();
+        packageReference.DetectedNamespaces.ShouldNotBeNull();
+        packageReference.DetectedNamespaces.ShouldBeEmpty();
     }
 
     [Theory]
@@ -48,7 +48,7 @@ public class PackageReferenceTests
         var ex = Assert.Throws<ArgumentException>(() =>
             new PackageReference(packageId!, version, projectPath)
         );
-        ex.ParamName.Should().Be("packageId");
+        ex.ParamName.ShouldBe("packageId");
     }
 
     [Theory]
@@ -65,7 +65,7 @@ public class PackageReferenceTests
         var ex = Assert.Throws<ArgumentException>(() =>
             new PackageReference(packageId, version!, projectPath)
         );
-        ex.ParamName.Should().Be("version");
+        ex.ParamName.ShouldBe("version");
     }
 
     [Theory]
@@ -82,7 +82,7 @@ public class PackageReferenceTests
         var ex = Assert.Throws<ArgumentException>(() =>
             new PackageReference(packageId, version, projectPath!)
         );
-        ex.ParamName.Should().Be("projectPath");
+        ex.ParamName.ShouldBe("projectPath");
     }
 
     [Fact]
@@ -107,13 +107,13 @@ public class PackageReferenceTests
         );
 
         // Assert
-        packageReference.PackageId.Should().Be(packageId);
-        packageReference.Version.Should().Be(version);
-        packageReference.ProjectPath.Should().Be(projectPath);
-        packageReference.IsDirect.Should().Be(isDirect);
-        packageReference.Condition.Should().Be(condition);
-        packageReference.HasGlobalUsing.Should().Be(hasGlobalUsing);
-        packageReference.IsUsed.Should().BeFalse();
+        packageReference.PackageId.ShouldBe(packageId);
+        packageReference.Version.ShouldBe(version);
+        packageReference.ProjectPath.ShouldBe(projectPath);
+        packageReference.IsDirect.ShouldBe(isDirect);
+        packageReference.Condition.ShouldBe(condition);
+        packageReference.HasGlobalUsing.ShouldBe(hasGlobalUsing);
+        packageReference.IsUsed.ShouldBeFalse();
     }
 
     [Theory]
@@ -130,7 +130,7 @@ public class PackageReferenceTests
         var packageReference = new PackageReference(packageId, version, projectPath, isDirect);
 
         // Assert
-        packageReference.IsDirect.Should().Be(isDirect);
+        packageReference.IsDirect.ShouldBe(isDirect);
     }
 
     [Fact]
@@ -152,7 +152,7 @@ public class PackageReferenceTests
         );
 
         // Assert
-        packageReference.Condition.Should().Be(condition);
+        packageReference.Condition.ShouldBe(condition);
     }
 
     [Theory]
@@ -178,7 +178,7 @@ public class PackageReferenceTests
         );
 
         // Assert
-        packageReference.HasGlobalUsing.Should().Be(hasGlobalUsing);
+        packageReference.HasGlobalUsing.ShouldBe(hasGlobalUsing);
     }
 
     [Fact]
@@ -196,9 +196,9 @@ public class PackageReferenceTests
         packageReference.MarkAsUsed(filePath);
 
         // Assert
-        packageReference.IsUsed.Should().BeTrue();
-        packageReference.UsageLocations.Should().Contain(filePath);
-        packageReference.UsageLocations.Should().HaveCount(1);
+        packageReference.IsUsed.ShouldBeTrue();
+        packageReference.UsageLocations.ShouldContain(filePath);
+        packageReference.UsageLocations.Count.ShouldBe(1);
     }
 
     [Fact]
@@ -217,10 +217,10 @@ public class PackageReferenceTests
         packageReference.MarkAsUsed(filePath, @namespace);
 
         // Assert
-        packageReference.IsUsed.Should().BeTrue();
-        packageReference.UsageLocations.Should().Contain(filePath);
-        packageReference.DetectedNamespaces.Should().Contain(@namespace);
-        packageReference.DetectedNamespaces.Should().HaveCount(1);
+        packageReference.IsUsed.ShouldBeTrue();
+        packageReference.UsageLocations.ShouldContain(filePath);
+        packageReference.DetectedNamespaces.ShouldContain(@namespace);
+        packageReference.DetectedNamespaces.Count.ShouldBe(1);
     }
 
     [Theory]
@@ -238,7 +238,7 @@ public class PackageReferenceTests
 
         // Act & Assert
         var ex = Assert.Throws<ArgumentException>(() => packageReference.MarkAsUsed(filePath!));
-        ex.ParamName.Should().Be("filePath");
+        ex.ParamName.ShouldBe("filePath");
     }
 
     [Fact]
@@ -257,7 +257,7 @@ public class PackageReferenceTests
         packageReference.MarkAsUsed(filePath); // Mark same file again
 
         // Assert
-        packageReference.UsageLocations.Should().HaveCount(1);
+        packageReference.UsageLocations.Count.ShouldBe(1);
     }
 
     [Fact]
@@ -278,7 +278,7 @@ public class PackageReferenceTests
         packageReference.MarkAsUsed(filePath2, @namespace); // Same namespace again
 
         // Assert
-        packageReference.DetectedNamespaces.Should().HaveCount(1);
+        packageReference.DetectedNamespaces.Count.ShouldBe(1);
     }
 
     [Fact]
@@ -296,9 +296,9 @@ public class PackageReferenceTests
         packageReference.MarkAsUsed(filePath, null);
 
         // Assert
-        packageReference.IsUsed.Should().BeTrue();
-        packageReference.UsageLocations.Should().Contain(filePath);
-        packageReference.DetectedNamespaces.Should().BeEmpty();
+        packageReference.IsUsed.ShouldBeTrue();
+        packageReference.UsageLocations.ShouldContain(filePath);
+        packageReference.DetectedNamespaces.ShouldBeEmpty();
     }
 
     [Fact]
@@ -316,9 +316,9 @@ public class PackageReferenceTests
         packageReference.MarkAsUsed(filePath, "");
 
         // Assert
-        packageReference.IsUsed.Should().BeTrue();
-        packageReference.UsageLocations.Should().Contain(filePath);
-        packageReference.DetectedNamespaces.Should().BeEmpty();
+        packageReference.IsUsed.ShouldBeTrue();
+        packageReference.UsageLocations.ShouldContain(filePath);
+        packageReference.DetectedNamespaces.ShouldBeEmpty();
     }
 
     [Fact]
@@ -336,9 +336,9 @@ public class PackageReferenceTests
         packageReference.ResetUsageStatus();
 
         // Assert
-        packageReference.IsUsed.Should().BeFalse();
-        packageReference.UsageLocations.Should().BeEmpty();
-        packageReference.DetectedNamespaces.Should().BeEmpty();
+        packageReference.IsUsed.ShouldBeFalse();
+        packageReference.UsageLocations.ShouldBeEmpty();
+        packageReference.DetectedNamespaces.ShouldBeEmpty();
     }
 
     [Theory]
@@ -396,7 +396,7 @@ public class PackageReferenceTests
         var result = packageReference.ToString();
 
         // Assert
-        result.Should().Be(expected);
+        result.ShouldBe(expected);
     }
 
     [Fact]
@@ -407,7 +407,7 @@ public class PackageReferenceTests
         var package2 = new PackageReference("TestPackage", "1.0.0", "/path/to/project.csproj");
 
         // Act & Assert
-        package1.Equals(package2).Should().BeTrue();
+        package1.Equals(package2).ShouldBeTrue();
     }
 
     [Fact]
@@ -418,7 +418,7 @@ public class PackageReferenceTests
         var package2 = new PackageReference("Package2", "1.0.0", "/path/to/project.csproj");
 
         // Act & Assert
-        package1.Equals(package2).Should().BeFalse();
+        package1.Equals(package2).ShouldBeFalse();
     }
 
     [Fact]
@@ -429,7 +429,7 @@ public class PackageReferenceTests
         var package2 = new PackageReference("TestPackage", "2.0.0", "/path/to/project.csproj");
 
         // Act & Assert
-        package1.Equals(package2).Should().BeFalse();
+        package1.Equals(package2).ShouldBeFalse();
     }
 
     [Fact]
@@ -440,7 +440,7 @@ public class PackageReferenceTests
         var package2 = new PackageReference("TestPackage", "1.0.0", "/path/to/project2.csproj");
 
         // Act & Assert
-        package1.Equals(package2).Should().BeFalse();
+        package1.Equals(package2).ShouldBeFalse();
     }
 
     [Fact]
@@ -451,7 +451,7 @@ public class PackageReferenceTests
         var package2 = new PackageReference("testpackage", "1.0.0", "/path/to/project.csproj");
 
         // Act & Assert
-        package1.Equals(package2).Should().BeTrue();
+        package1.Equals(package2).ShouldBeTrue();
     }
 
     [Fact]
@@ -462,7 +462,7 @@ public class PackageReferenceTests
         var package2 = new PackageReference("TestPackage", "1.0.0", "/path/to/project.csproj"); // Same case but testing case insensitivity
 
         // Act & Assert
-        package1.Equals(package2).Should().BeTrue();
+        package1.Equals(package2).ShouldBeTrue();
     }
 
     [Fact]
@@ -473,7 +473,7 @@ public class PackageReferenceTests
         var package2 = new PackageReference("TestPackage", "1.0.0", "/path/to/project.csproj");
 
         // Act & Assert
-        package1.Equals(package2).Should().BeTrue();
+        package1.Equals(package2).ShouldBeTrue();
     }
 
     [Fact]
@@ -484,7 +484,7 @@ public class PackageReferenceTests
 
         // Act & Assert
         // CA1508: This test is redundant - Equals(null) always returns false for non-null objects
-        // package.Equals(null).Should().BeFalse();
+        // package.Equals(null).ShouldBeFalse();
     }
 
     [Fact]
@@ -494,7 +494,7 @@ public class PackageReferenceTests
         var package = new PackageReference("TestPackage", "1.0.0", "/path/to/project.csproj");
 
         // Act & Assert
-        package.Equals("string").Should().BeFalse();
+        package.Equals("string").ShouldBeFalse();
     }
 
     [Fact]
@@ -505,7 +505,7 @@ public class PackageReferenceTests
         var package2 = new PackageReference("testpackage", "1.0.0", "/path/to/project.csproj");
 
         // Act & Assert
-        package1.GetHashCode().Should().Be(package2.GetHashCode());
+        package1.GetHashCode().ShouldBe(package2.GetHashCode());
     }
 
     [Fact]
@@ -516,6 +516,6 @@ public class PackageReferenceTests
         var package2 = new PackageReference("Package2", "1.0.0", "/path/to/project.csproj");
 
         // Act & Assert
-        package1.GetHashCode().Should().NotBe(package2.GetHashCode());
+        package1.GetHashCode().ShouldNotBe(package2.GetHashCode());
     }
 }

@@ -251,7 +251,7 @@ public partial class PackageUsageAnalyzerTests
         // RFC-0004 Safety: Different versions should be handled independently
         var packageGroups = solution.GetPackageReferencesGroupedById();
         packageGroups.ShouldContainKey("Shared.Package");
-        packageGroups["Shared.Package"].Count.ShouldBe(2);
+        packageGroups["Shared.Package"].Count().ShouldBe(2);
     }
 
     [Fact]

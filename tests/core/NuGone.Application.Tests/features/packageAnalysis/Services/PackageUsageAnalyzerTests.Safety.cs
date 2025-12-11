@@ -120,7 +120,7 @@ public partial class PackageUsageAnalyzerTests
 
         // Assert
         result.IsValid.ShouldBeFalse();
-        result.Errors.Count.ShouldBe(5); // Solution + 2 projects + 2 directories
+        result.Errors.Count().ShouldBe(5); // Solution + 2 projects + 2 directories
         result.Errors.ShouldContain($"Solution file does not exist: {solution.FilePath}");
         result.Errors.ShouldContain($"Project file does not exist: {project1.FilePath}");
         result.Errors.ShouldContain($"Project directory does not exist: {project1.DirectoryPath}");

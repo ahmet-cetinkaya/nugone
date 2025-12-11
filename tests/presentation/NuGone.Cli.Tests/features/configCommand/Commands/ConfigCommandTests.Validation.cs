@@ -73,7 +73,7 @@ public partial class ConfigCommandTests
         result
             .Errors.Any(error =>
                 error.Contains(
-                    "Action must be one of: get, set, list, reset",
+                    "Action must be one of: GET, SET, LIST, RESET",
                     StringComparison.Ordinal
                 )
             )

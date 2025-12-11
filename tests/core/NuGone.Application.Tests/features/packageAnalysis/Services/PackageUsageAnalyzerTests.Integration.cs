@@ -430,7 +430,7 @@ public partial class PackageUsageAnalyzerTests
 
         // RFC-0004 Safety: Provide clear removal guidance
         var safeToRemove = unusedPackages.Where(p => p.IsDirect).ToList();
-        safeToRemove.Count.ShouldBe(3); // Serilog, Polly, Swashbuckle
+        safeToRemove.Count().ShouldBe(3); // Serilog, Polly, Swashbuckle
 
         // Verify statistics
         var stats = solution.GetPackageStatistics();

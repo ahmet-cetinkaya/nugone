@@ -1,4 +1,4 @@
-using FluentAssertions;
+using Shouldly;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NuGone.NuGet.Repositories;
@@ -68,10 +68,10 @@ public sealed class NuGetRepositoryCpmTests : IDisposable
         );
 
         // Assert
-        packageReferences.Should().HaveCount(1);
+        packageReferences.Count().ShouldBe(1);
         var package = packageReferences.First();
-        package.PackageId.Should().Be("Newtonsoft.Json");
-        package.Version.Should().Be("13.0.3");
+        package.PackageId.ShouldBe("Newtonsoft.Json");
+        package.Version.ShouldBe("13.0.3");
     }
 
     [Fact]
@@ -101,10 +101,10 @@ public sealed class NuGetRepositoryCpmTests : IDisposable
         );
 
         // Assert
-        packageReferences.Should().HaveCount(1);
+        packageReferences.Count().ShouldBe(1);
         var package = packageReferences.First();
-        package.PackageId.Should().Be("Newtonsoft.Json");
-        package.Version.Should().Be("12.0.1");
+        package.PackageId.ShouldBe("Newtonsoft.Json");
+        package.Version.ShouldBe("12.0.1");
     }
 
     [Fact]
@@ -134,7 +134,7 @@ public sealed class NuGetRepositoryCpmTests : IDisposable
         );
 
         // Assert - Package should be skipped when version is missing and not in central packages
-        packageReferences.Should().BeEmpty();
+        packageReferences.ShouldBeEmpty();
 
         // Assert - Warning should be logged for missing package version
         _mockLogger.Verify(

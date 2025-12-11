@@ -2,7 +2,7 @@ global using System;
 global using System.Collections.Generic;
 global using System.IO;
 global using System.Linq;
-global using FluentAssertions;
+global using Shouldly;
 global using NuGone.Domain.Features.PackageAnalysis.Entities;
 global using NuGone.Domain.Features.PackageAnalysis.ValueObjects;
 global using NuGone.Domain.Shared.ValueObjects;

@@ -1,4 +1,4 @@
-using FluentAssertions;
+using Shouldly;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NuGone.Domain.Features.PackageAnalysis.Entities;
@@ -70,10 +70,13 @@ public sealed class NuGetRepositoryGlobalUsingsTests : IDisposable
         var globalUsings = await _repository.ExtractGlobalUsingsAsync(projectFilePath);
 
         // Assert
-        globalUsings.Should().HaveCount(2);
-        globalUsings.Should().Contain(gu => gu.PackageId == "Xunit");
-        globalUsings.Should().Contain(gu => gu.PackageId == "Moq");
-        globalUsings.Should().AllSatisfy(gu => gu.ProjectPath.Should().Be(projectFilePath));
+        globalUsings.Count().ShouldBe(2);
+        globalUsings.ShouldContain(gu => gu.PackageId == "Xunit");
+        globalUsings.ShouldContain(gu => gu.PackageId == "Moq");
+        foreach (var gu in globalUsings)
+        {
+            gu.ProjectPath.ShouldBe(projectFilePath);
+        }
     }
 
     [Fact]
@@ -105,13 +108,13 @@ public sealed class NuGetRepositoryGlobalUsingsTests : IDisposable
         var globalUsings = await _repository.ExtractGlobalUsingsAsync(projectFilePath);
 
         // Assert
-        globalUsings.Should().HaveCount(2);
+        globalUsings.Count().ShouldBe(2);
 
         var xunitUsing = globalUsings.First(gu => gu.PackageId == "Xunit");
-        xunitUsing.Condition.Should().BeNull();
+        xunitUsing.Condition.ShouldBe(null);
 
         var moqUsing = globalUsings.First(gu => gu.PackageId == "Moq");
-        moqUsing.Condition.Should().Be("'$(Configuration)' == 'Debug'");
+        moqUsing.Condition.ShouldBe("'$(Configuration)' == 'Debug'");
     }
 
     [Fact]
@@ -138,7 +141,7 @@ public sealed class NuGetRepositoryGlobalUsingsTests : IDisposable
         var globalUsings = await _repository.ExtractGlobalUsingsAsync(projectFilePath);
 
         // Assert
-        globalUsings.Should().BeEmpty();
+        globalUsings.ShouldBeEmpty();
     }
 
     [Fact]
@@ -171,16 +174,16 @@ public sealed class NuGetRepositoryGlobalUsingsTests : IDisposable
         var packageReferences = await _repository.ExtractPackageReferencesAsync(projectFilePath);
 
         // Assert
-        packageReferences.Should().HaveCount(3);
+        packageReferences.Count().ShouldBe(3);
 
         var xunitPackage = packageReferences.First(pr => pr.PackageId == "Xunit");
-        xunitPackage.HasGlobalUsing.Should().BeTrue();
+        xunitPackage.HasGlobalUsing.ShouldBeTrue();
 
         var moqPackage = packageReferences.First(pr => pr.PackageId == "Moq");
-        moqPackage.HasGlobalUsing.Should().BeTrue();
+        moqPackage.HasGlobalUsing.ShouldBeTrue();
 
         var shouldlyPackage = packageReferences.First(pr => pr.PackageId == "Shouldly");
-        shouldlyPackage.HasGlobalUsing.Should().BeFalse();
+        shouldlyPackage.HasGlobalUsing.ShouldBeFalse();
     }
 
     [Fact]
@@ -190,11 +193,10 @@ public sealed class NuGetRepositoryGlobalUsingsTests : IDisposable
         var nonExistentPath = Path.Combine(_tempDirectory, "NonExistent.csproj");
 
         // Act & Assert
-        await _repository
-            .Invoking(r => r.ExtractGlobalUsingsAsync(nonExistentPath))
-            .Should()
-            .ThrowAsync<FileNotFoundException>()
-            .WithMessage($"Project file not found: {nonExistentPath}");
+        var exception = await Should.ThrowAsync<FileNotFoundException>(
+            () => _repository.ExtractGlobalUsingsAsync(nonExistentPath)
+        );
+        exception.Message.ShouldBe($"Project file not found: {nonExistentPath}");
     }
 
     [Fact]
@@ -206,10 +208,9 @@ public sealed class NuGetRepositoryGlobalUsingsTests : IDisposable
         await File.WriteAllTextAsync(projectFilePath, invalidXmlContent);
 
         // Act & Assert
-        await _repository
-            .Invoking(r => r.ExtractGlobalUsingsAsync(projectFilePath))
-            .Should()
-            .ThrowAsync<Exception>();
+        await Should.ThrowAsync<Exception>(
+            () => _repository.ExtractGlobalUsingsAsync(projectFilePath)
+        );
     }
 
     [Fact]
@@ -238,8 +239,8 @@ public sealed class NuGetRepositoryGlobalUsingsTests : IDisposable
         var globalUsings = await _repository.ExtractGlobalUsingsAsync(projectFilePath);
 
         // Assert
-        globalUsings.Should().HaveCount(2);
-        globalUsings.Should().Contain(gu => gu.PackageId == "Xunit");
-        globalUsings.Should().Contain(gu => gu.PackageId == "Moq");
+        globalUsings.Count().ShouldBe(2);
+        globalUsings.ShouldContain(gu => gu.PackageId == "Xunit");
+        globalUsings.ShouldContain(gu => gu.PackageId == "Moq");
     }
 }
