@@ -1,9 +1,31 @@
 #!/bin/bash
 
 # Test script for NuGone project
-# This script runs test compilation checks
+# This script runs comprehensive multi-framework validation across all supported .NET versions (8.0, 9.0, 10.0)
 
 set -e
+
+# Default behavior: always multi-framework test
+VERBOSE=false
+
+# Parse command line arguments
+for arg in "$@"; do
+  case $arg in
+    --verbose|-v)
+      VERBOSE=true
+      shift
+      ;;
+    --help|-h)
+      echo "Usage: $0 [OPTIONS]"
+      echo "Options:"
+      echo "  --verbose, -v           Enable verbose output"
+      echo "  --help, -h             Show this help message"
+      echo ""
+      echo "This script tests NuGone across all supported .NET frameworks (8.0, 9.0, 10.0)"
+      exit 0
+      ;;
+  esac
+done
 
 # Source common output functions
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -57,38 +79,134 @@ esac
 
 print_info "Detected .NET SDK version: $DOTNET_VERSION (targeting $TARGET_FRAMEWORK)"
 
-# Track overall success
-OVERALL_SUCCESS=0
+# Multi-framework validation functions
+test_framework() {
+    local framework=$1
+    local configuration=$2
 
-print_section "📦 Restoring packages (single framework to avoid multi-target issues)"
-# Use /p:TargetFramework to avoid restoring unsupported frameworks
-if dotnet restore "$SOLUTION_FILE" /p:TargetFramework="$TARGET_FRAMEWORK" --verbosity minimal; then
-  print_success "Restore completed successfully"
-else
-  print_error "Restore failed"
-  OVERALL_SUCCESS=1
-fi
+    print_section "🔍 Testing $framework ($configuration)"
 
-print_section "🏗️  Running dotnet build (ensure tests can build)"
-if dotnet build "$SOLUTION_FILE" --configuration Release --framework "$TARGET_FRAMEWORK" --no-restore --verbosity normal; then
-  print_success "Build completed successfully"
-else
-  print_error "Build failed"
-  OVERALL_SUCCESS=1
-fi
+    # Build the solution for the specific framework
+    if dotnet build "$SOLUTION_FILE" \
+        --configuration "$configuration" \
+        --framework "$framework" \
+        --no-restore \
+        --verbosity minimal; then
+        if [ "$VERBOSE" = true ]; then
+            print_success "Build successful for $framework ($configuration)"
+        fi
+    else
+        print_error "Build failed for $framework ($configuration)"
+        return 1
+    fi
 
-print_section "🧪 Running dotnet test (compilation and execution check)"
-if dotnet test "$SOLUTION_FILE" --no-build --configuration Release --framework "$TARGET_FRAMEWORK" --verbosity normal --logger "console;verbosity=minimal"; then
-  print_success "Test projects compile and run successfully"
-else
-  print_error "Test projects have compilation or execution issues"
-  OVERALL_SUCCESS=1
-fi
+    # Run tests for the specific framework
+    if dotnet test "$SOLUTION_FILE" \
+        --configuration "$configuration" \
+        --framework "$framework" \
+        --no-build \
+        --verbosity minimal \
+        --logger "console;verbosity=minimal" \
+        --results-directory "./TestResults/${framework}-${configuration}"; then
+        print_success "Tests passed for $framework ($configuration)"
+    else
+        print_error "Tests failed for $framework ($configuration)"
+        return 1
+    fi
+}
 
+test_cli_functionality() {
+    local framework=$1
+
+    print_section "🚀 Validating CLI functionality for $framework"
+
+    # Build and publish the CLI for the specific framework
+    if dotnet publish src/presentation/NuGone.Cli \
+        --configuration Release \
+        --framework "$framework" \
+        --output "./publish/${framework}" \
+        --verbosity minimal; then
+        print_success "CLI published successfully for $framework"
+    else
+        print_error "Failed to publish CLI for $framework"
+        return 1
+    fi
+
+    # Test basic CLI functionality
+    if ./publish/"$framework"/nugone --help > /dev/null 2>&1; then
+        print_success "CLI help command works for $framework"
+    else
+        print_error "CLI help command failed for $framework"
+        return 1
+    fi
+}
+
+run_multi_framework_validation() {
+    local frameworks=("net8.0" "net9.0" "net10.0")
+    local configurations=("Debug" "Release")
+    local failed_tests=()
+    local total_tests=0
+
+    print_header "🌐 NuGone Multi-Framework Validation"
+    echo ""
+
+    # Restore packages once
+    print_section "📦 Restoring packages for all frameworks"
+    if dotnet restore "$SOLUTION_FILE" --verbosity minimal; then
+        print_success "Restore completed successfully"
+    else
+        print_error "Restore failed"
+        exit 1
+    fi
+    echo ""
+
+    # Test each framework and configuration
+    for framework in "${frameworks[@]}"; do
+        print_header "Framework: $framework"
+        echo ""
+
+        for config in "${configurations[@]}"; do
+            total_tests=$((total_tests + 1))
+            if ! test_framework "$framework" "$config"; then
+                failed_tests+=("$framework ($config)")
+            fi
+            echo ""
+        done
+
+        # Additional validation for Release builds
+        test_cli_functionality "$framework"
+        echo ""
+    done
+
+    # Summary
+    print_header "📊 Test Results Summary"
+    echo ""
+
+    if [ ${#failed_tests[@]} -gt 0 ]; then
+        print_error "❌ Failed Tests (${#failed_tests[@]}):"
+        for test in "${failed_tests[@]}"; do
+            print_error "  - $test"
+        done
+        echo ""
+        print_error "Validation failed with ${#failed_tests[@]} failures."
+        exit 1
+    else
+        print_success "🎉 All tests passed! Multi-framework support is working correctly."
+        echo ""
+        print_success "Total tests executed: $total_tests"
+        print_success "Frameworks tested: ${#frameworks[@]}"
+        print_success "Configurations tested: ${#configurations[@]}"
+        echo ""
+        print_info "Test results are available in ./TestResults/"
+        print_info "Published CLI binaries are available in ./publish/"
+    fi
+}
+
+# Main execution logic
+print_header "🌐 NuGone Multi-Framework Testing"
+print_info "Detected .NET SDK version: $DOTNET_VERSION"
+print_info "Testing all supported .NET frameworks: 8.0, 9.0, and 10.0"
 echo ""
-if [ $OVERALL_SUCCESS -eq 0 ]; then
-  print_success "🎉 All test checks passed!"
-else
-  print_error "❌ Some test checks failed."
-  exit 1
-fi
+
+# Always run multi-framework validation
+run_multi_framework_validation
