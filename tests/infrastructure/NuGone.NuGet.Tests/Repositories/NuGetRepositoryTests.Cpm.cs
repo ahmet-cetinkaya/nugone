@@ -1,7 +1,7 @@
-using Shouldly;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NuGone.NuGet.Repositories;
+using Shouldly;
 using Xunit;
 
 #pragma warning disable CA1873 // Avoid potentially expensive logging in test verifications

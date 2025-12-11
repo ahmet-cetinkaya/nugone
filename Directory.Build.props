@@ -13,8 +13,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="8.0.0" PrivateAssets="all" Condition="'$(ManagePackageVersionsCentrally)' != 'true'" />
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" PrivateAssets="all" Condition="'$(ManagePackageVersionsCentrally)' == 'true'" />
+    <PackageReference
+      Include="Microsoft.CodeAnalysis.NetAnalyzers"
+      Version="8.0.0"
+      PrivateAssets="all"
+      Condition="'$(ManagePackageVersionsCentrally)' != 'true'"
+    />
+    <PackageReference
+      Include="Microsoft.CodeAnalysis.NetAnalyzers"
+      PrivateAssets="all"
+      Condition="'$(ManagePackageVersionsCentrally)' == 'true'"
+    />
   </ItemGroup>
 
   <!-- Conditional package versions based on target framework -->

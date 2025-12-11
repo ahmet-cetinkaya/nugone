@@ -1,5 +1,5 @@
-using Shouldly;
 using NuGone.Domain.Features.PackageAnalysis.ValueObjects;
+using Shouldly;
 using Xunit;
 
 namespace NuGone.Domain.Tests.Features.PackageAnalysis.ValueObjects;

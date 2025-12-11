@@ -1,5 +1,5 @@
-using Shouldly;
 using NuGone.Domain.Shared.ValueObjects;
+using Shouldly;
 using Xunit;
 
 namespace NuGone.Domain.Tests.SharedValueObjects;

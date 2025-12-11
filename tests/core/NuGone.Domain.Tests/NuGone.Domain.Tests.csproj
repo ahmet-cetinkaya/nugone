@@ -10,7 +10,7 @@
     <PackageReference Include="xunit.runner.visualstudio" />
     <PackageReference Include="coverlet.collector" />
     <PackageReference Include="Shouldly" />
-      </ItemGroup>
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\core\NuGone.Domain\NuGone.Domain.csproj" />
   </ItemGroup>

@@ -1,5 +1,5 @@
-using Shouldly;
 using NuGone.Domain.Features.PackageAnalysis.Entities;
+using Shouldly;
 
 namespace NuGone.Domain.Tests.Features.PackageAnalysis.Entities;
 

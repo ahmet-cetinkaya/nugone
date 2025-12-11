@@ -1,8 +1,8 @@
-using Shouldly;
 using Microsoft.Extensions.Logging;
 using Moq;
 using NuGone.Domain.Features.PackageAnalysis.Entities;
 using NuGone.NuGet.Repositories;
+using Shouldly;
 using Xunit;
 
 namespace NuGone.NuGet.Tests.Repositories;
@@ -193,8 +193,8 @@ public sealed class NuGetRepositoryGlobalUsingsTests : IDisposable
         var nonExistentPath = Path.Combine(_tempDirectory, "NonExistent.csproj");
 
         // Act & Assert
-        var exception = await Should.ThrowAsync<FileNotFoundException>(
-            () => _repository.ExtractGlobalUsingsAsync(nonExistentPath)
+        var exception = await Should.ThrowAsync<FileNotFoundException>(() =>
+            _repository.ExtractGlobalUsingsAsync(nonExistentPath)
         );
         exception.Message.ShouldBe($"Project file not found: {nonExistentPath}");
     }
@@ -208,8 +208,8 @@ public sealed class NuGetRepositoryGlobalUsingsTests : IDisposable
         await File.WriteAllTextAsync(projectFilePath, invalidXmlContent);
 
         // Act & Assert
-        await Should.ThrowAsync<Exception>(
-            () => _repository.ExtractGlobalUsingsAsync(projectFilePath)
+        await Should.ThrowAsync<Exception>(() =>
+            _repository.ExtractGlobalUsingsAsync(projectFilePath)
         );
     }
 

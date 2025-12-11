@@ -41,8 +41,9 @@ public class TestLogger<T> : ILogger<T>
     public void AssertLogged(LogLevel level, string expectedMessage)
     {
         var entry = _logEntries.FirstOrDefault(e =>
-            e.Level == level &&
-            e.Message.Contains(expectedMessage, StringComparison.OrdinalIgnoreCase));
+            e.Level == level
+            && e.Message.Contains(expectedMessage, StringComparison.OrdinalIgnoreCase)
+        );
 
         if (entry == null)
         {
@@ -51,7 +52,8 @@ public class TestLogger<T> : ILogger<T>
                 .Select(e => $"  - {e.Message}");
 
             throw new AssertionException(
-                $"Expected log message at {level} level containing '{expectedMessage}' but found:\n{string.Join("\n", actualMessages)}");
+                $"Expected log message at {level} level containing '{expectedMessage}' but found:\n{string.Join("\n", actualMessages)}"
+            );
         }
     }
 
@@ -61,13 +63,15 @@ public class TestLogger<T> : ILogger<T>
     public void AssertNotLogged(LogLevel level, string unexpectedMessage)
     {
         var entry = _logEntries.FirstOrDefault(e =>
-            e.Level == level &&
-            e.Message.Contains(unexpectedMessage, StringComparison.OrdinalIgnoreCase));
+            e.Level == level
+            && e.Message.Contains(unexpectedMessage, StringComparison.OrdinalIgnoreCase)
+        );
 
         if (entry != null)
         {
             throw new AssertionException(
-                $"Unexpected log message at {level} level containing '{unexpectedMessage}': {entry.Message}");
+                $"Unexpected log message at {level} level containing '{unexpectedMessage}': {entry.Message}"
+            );
         }
     }
 
@@ -80,7 +84,8 @@ public class TestLogger<T> : ILogger<T>
         if (actualCount != expectedCount)
         {
             throw new AssertionException(
-                $"Expected {expectedCount} log entries at {level} level, but found {actualCount}");
+                $"Expected {expectedCount} log entries at {level} level, but found {actualCount}"
+            );
         }
     }
 
@@ -90,8 +95,8 @@ public class TestLogger<T> : ILogger<T>
     public void Clear() => _logEntries.Clear();
 
     // ILogger implementation
-    public IDisposable BeginScope<TState>(TState state) where TState : notnull =>
-        new NoOpDisposable();
+    public IDisposable BeginScope<TState>(TState state)
+        where TState : notnull => new NoOpDisposable();
 
     public bool IsEnabled(LogLevel level) => level >= _minimumLevel;
 
@@ -100,7 +105,8 @@ public class TestLogger<T> : ILogger<T>
         EventId eventId,
         TState state,
         Exception? exception,
-        Func<TState, Exception?, string> formatter)
+        Func<TState, Exception?, string> formatter
+    )
     {
         if (!IsEnabled(level))
             return;
@@ -115,26 +121,34 @@ public class TestLogger<T> : ILogger<T>
     public static Mock<ILogger<T>> CreateMockLogger(LogLevel minimumLevel = LogLevel.Information)
     {
         var mockLogger = new Mock<ILogger<T>>();
-        mockLogger.Setup(x => x.IsEnabled(It.IsAny<LogLevel>())).Returns(level => level >= minimumLevel);
+        mockLogger
+            .Setup(x => x.IsEnabled(It.IsAny<LogLevel>()))
+            .Returns(level => level >= minimumLevel);
 
         // Capture log calls for verification
         mockLogger
             .As<ILogger>()
-            .Setup(x => x.Log(
-                It.IsAny<LogLevel>(),
-                It.IsAny<EventId>(),
-                It.IsAny<It.IsAnyType>(),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()))
+            .Setup(x =>
+                x.Log(
+                    It.IsAny<LogLevel>(),
+                    It.IsAny<EventId>(),
+                    It.IsAny<It.IsAnyType>(),
+                    It.IsAny<Exception>(),
+                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()
+                )
+            )
             .Callback<LogLevel, EventId, object, Exception, Func<object, Exception?, string>>(
                 (level, eventId, state, exception, formatter) =>
                 {
                     if (level >= minimumLevel)
                     {
                         // This helps with debugging in tests
-                        System.Diagnostics.Debug.WriteLine($"[{level}] {formatter(state, exception)}");
+                        System.Diagnostics.Debug.WriteLine(
+                            $"[{level}] {formatter(state, exception)}"
+                        );
                     }
-                });
+                }
+            );
 
         return mockLogger;
     }
@@ -161,7 +175,8 @@ public record LogEntry(
 /// </summary>
 public class AssertionException : Exception
 {
-    public AssertionException(string message) : base(message) { }
+    public AssertionException(string message)
+        : base(message) { }
 }
 
 /// <summary>
@@ -181,9 +196,13 @@ public static class LoggerMockExtensions
     /// <summary>
     /// Enables specific log levels for the mock logger.
     /// </summary>
-    public static Mock<ILogger<T>> EnableLevels<T>(this Mock<ILogger<T>> mockLogger, params LogLevel[] levels)
+    public static Mock<ILogger<T>> EnableLevels<T>(
+        this Mock<ILogger<T>> mockLogger,
+        params LogLevel[] levels
+    )
     {
-        mockLogger.Setup(x => x.IsEnabled(It.IsAny<LogLevel>()))
+        mockLogger
+            .Setup(x => x.IsEnabled(It.IsAny<LogLevel>()))
             .Returns<LogLevel>(level => levels.Contains(level));
         return mockLogger;
     }
@@ -191,16 +210,28 @@ public static class LoggerMockExtensions
     /// <summary>
     /// Verifies that a log call was made with the specified level and message content.
     /// </summary>
-    public static Mock<ILogger<T>> VerifyLog<T>(this Mock<ILogger<T>> mockLogger, LogLevel level, string expectedMessage)
+    public static Mock<ILogger<T>> VerifyLog<T>(
+        this Mock<ILogger<T>> mockLogger,
+        LogLevel level,
+        string expectedMessage
+    )
     {
         mockLogger.Verify(
-            x => x.Log(
-                level,
-                It.IsAny<EventId>(),
-                It.Is<It.IsAnyType>((state, _) => state.ToString()!.Contains(expectedMessage, StringComparison.OrdinalIgnoreCase)),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
-            $"Expected log at {level} level containing '{expectedMessage}' was not found");
+            x =>
+                x.Log(
+                    level,
+                    It.IsAny<EventId>(),
+                    It.Is<It.IsAnyType>(
+                        (state, _) =>
+                            state
+                                .ToString()!
+                                .Contains(expectedMessage, StringComparison.OrdinalIgnoreCase)
+                    ),
+                    It.IsAny<Exception>(),
+                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()
+                ),
+            $"Expected log at {level} level containing '{expectedMessage}' was not found"
+        );
 
         return mockLogger;
     }
@@ -211,14 +242,17 @@ public static class LoggerMockExtensions
     public static Mock<ILogger<T>> VerifyNoLog<T>(this Mock<ILogger<T>> mockLogger, LogLevel level)
     {
         mockLogger.Verify(
-            x => x.Log(
-                level,
-                It.IsAny<EventId>(),
-                It.IsAny<It.IsAnyType>(),
-                It.IsAny<Exception>(),
-                It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
+            x =>
+                x.Log(
+                    level,
+                    It.IsAny<EventId>(),
+                    It.IsAny<It.IsAnyType>(),
+                    It.IsAny<Exception>(),
+                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()
+                ),
             Times.Never,
-            $"Unexpected log entries found at {level} level");
+            $"Unexpected log entries found at {level} level"
+        );
 
         return mockLogger;
     }

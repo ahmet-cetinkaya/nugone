@@ -1,5 +1,5 @@
-using Shouldly;
 using NuGone.Domain.Features.PackageAnalysis.Entities;
+using Shouldly;
 
 namespace NuGone.Domain.Tests.Features.PackageAnalysis.Entities;
 
@@ -33,7 +33,8 @@ public class GlobalUsingTests
         var projectPath = "/path/to/project.csproj";
 
         // Act & Assert
-        Should.Throw<ArgumentException>(() => new GlobalUsing(packageId!, projectPath))
+        Should
+            .Throw<ArgumentException>(() => new GlobalUsing(packageId!, projectPath))
             .Message.ShouldStartWith("Package ID cannot be null or empty");
     }
 
@@ -45,7 +46,8 @@ public class GlobalUsingTests
         var projectPath = "/path/to/project.csproj";
 
         // Act & Assert
-        Should.Throw<ArgumentException>(() => new GlobalUsing(packageId, projectPath))
+        Should
+            .Throw<ArgumentException>(() => new GlobalUsing(packageId, projectPath))
             .Message.ShouldStartWith("Package ID cannot be null or empty");
     }
 
@@ -57,7 +59,8 @@ public class GlobalUsingTests
         string? projectPath = null;
 
         // Act & Assert
-        Should.Throw<ArgumentException>(() => new GlobalUsing(packageId, projectPath!))
+        Should
+            .Throw<ArgumentException>(() => new GlobalUsing(packageId, projectPath!))
             .Message.ShouldStartWith("Project path cannot be null or empty");
     }
 
@@ -69,7 +72,8 @@ public class GlobalUsingTests
         var projectPath = "";
 
         // Act & Assert
-        Should.Throw<ArgumentException>(() => new GlobalUsing(packageId, projectPath))
+        Should
+            .Throw<ArgumentException>(() => new GlobalUsing(packageId, projectPath))
             .Message.ShouldStartWith("Project path cannot be null or empty");
     }
 
