@@ -146,6 +146,7 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
                     if (isProjectCpmEnabled && !string.IsNullOrWhiteSpace(projectCpmPath))
                     {
                         projectCpmRoots.Add(projectCpmPath);
+                        LogProjectCpmDetected(project.DirectoryPath, projectCpmPath);
                     }
                 }
 
@@ -157,9 +158,15 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
                 }
                 else if (projectCpmRoots.Count > 1)
                 {
-                    // Multiple distinct CPM roots discovered - choose deterministically by:
+                    // Multiple distinct CPM roots discovered
+                    // Choose deterministically by:
                     //  1. Path length (shortest is considered "closest" to the solution root)
-                    //  2. Lexicographical order as a stable tiebreaker
+                    //     This typically represents the most common/root-level CPM configuration
+                    //  2. Lexicographical order as a stable tiebreaker for reproducibility
+                    //
+                    // Note: This heuristic works well for most scenarios where projects have
+                    // inherited CPM from parent directories, but may not match complex
+                    // custom MSBuild import hierarchies.
                     var orderedRoots = projectCpmRoots
                         .OrderBy(path => path.Length)
                         .ThenBy(path => path, StringComparer.OrdinalIgnoreCase)
@@ -167,6 +174,9 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
 
                     isEnabled = true;
                     directoryPackagesPropsPath = orderedRoots.First();
+
+                    // Log to inform users about the CPM root selection
+                    LogMultipleCpmRootsDetected(projectCpmRoots.Count, directoryPackagesPropsPath);
                 }
             }
 

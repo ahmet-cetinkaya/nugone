@@ -85,4 +85,16 @@ public partial class SolutionRepository
         Message = "Invalid XML format in .slnx file: {SolutionFilePath}"
     )]
     private partial void LogInvalidSlnxFormat(Exception ex, string solutionFilePath);
+
+    [LoggerMessage(
+        Level = LogLevel.Warning,
+        Message = "Multiple distinct Central Package Management roots detected: {CpmRootCount} roots found. Using: {SelectedRoot} (shortest path from solution root)"
+    )]
+    private partial void LogMultipleCpmRootsDetected(int cpmRootCount, string selectedRoot);
+
+    [LoggerMessage(
+        Level = LogLevel.Debug,
+        Message = "Central Package Management detected in project directory: {ProjectDirectory} with props file: {PropsPath}"
+    )]
+    private partial void LogProjectCpmDetected(string projectDirectory, string propsPath);
 }

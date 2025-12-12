@@ -27,8 +27,6 @@
   </ItemGroup>
   <!-- Packages -->
   <ItemGroup>
-    <!-- Downgraded from 4.14.0 to 3.3.4 to resolve compatibility issues with .NET 8/9 SDKs.
-         Version 4.x requires newer MSBuild APIs that aren't fully compatible with the target frameworks. -->
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="4.14.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
