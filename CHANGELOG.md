@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2025-12-06
+
+### Added
+
+- Central package management (CPM) support with Directory.Packages.props detection
+- .NET 10 compatibility support through RollForward Major setting
+
+### Changed
+
+- Updated project documentation and banner images
+
+### Fixed
+
+- Fixed version display consistency between CLI and package metadata
+- Corrected central package management detection edge cases
+- Improved error handling in package version resolution
+
 ## [2.0.0] - 2025-10-31
 
 ### Added
@@ -46,37 +63,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### BREAKING CHANGE
 
 - Move TypeRegistrar and TypeResolver to NuGone.Cli.Infrastructure namespace
-
-## [2.0.1] - 2025-12-06
-
-### Added
-
-- Central package management (CPM) support with Directory.Packages.props detection
-- .NET 10 compatibility support through RollForward Major setting
-
-### Changed
-
-- Updated project documentation and banner images
-
-### Fixed
-
-- Fixed version display consistency between CLI and package metadata
-- Corrected central package management detection edge cases
-- Improved error handling in package version resolution
-
-## [Unreleased]
-
-### Added
-
-- (No new features added yet)
-
-### Changed
-
-- (No changes yet)
-
-### Removed
-
-- (Nothing removed yet)
 
 ## [1.1.0] - 2025-07-16
 
