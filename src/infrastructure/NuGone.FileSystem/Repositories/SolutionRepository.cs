@@ -199,6 +199,9 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
     /// Checks if central package management is enabled by searching up from a given directory.
     /// RFC-0002: Central package management detection.
     /// </summary>
+    /// <param name="startDirectoryPath">Directory to start searching from (can be solution or project directory)</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Result tuple indicating if enabled and path to props file</returns>
     public async Task<(
         bool IsEnabled,
         string? DirectoryPackagesPropsPath
@@ -233,7 +236,25 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
                     currentDirectory.LastIndexOf('\\'),
                     currentDirectory.LastIndexOf('/')
                 );
-                parentDir = lastSeparator > 0 ? currentDirectory.Substring(0, lastSeparator) : null;
+
+                // Special handling for Windows drive-rooted paths (e.g., "C:\foo")
+                if (lastSeparator > 0)
+                {
+                    // Check if this is a Windows drive path (e.g., "C:\foo")
+                    if (lastSeparator == 2 && currentDirectory.Length > 2 && currentDirectory[1] == ':')
+                    {
+                        // For "C:\foo", parent should be "C:\"
+                        parentDir = currentDirectory.Substring(0, lastSeparator + 1); // Include the backslash
+                    }
+                    else
+                    {
+                        parentDir = currentDirectory.Substring(0, lastSeparator);
+                    }
+                }
+                else
+                {
+                    parentDir = null;
+                }
             }
 
             // To prevent infinite loops if GetDirectoryName returns same path or empty
