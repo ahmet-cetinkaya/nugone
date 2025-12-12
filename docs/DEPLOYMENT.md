@@ -138,10 +138,10 @@ Version is managed in the project file:
 
 ```xml
 <PropertyGroup>
-  <Version>3.0.0</Version>
-  <AssemblyVersion>3.0.0.0</AssemblyVersion>
-  <FileVersion>3.0.0.0</FileVersion>
-  <PackageVersion>3.0.0</PackageVersion>
+  <Version>2.1.0</Version>
+  <AssemblyVersion>2.1.0.0</AssemblyVersion>
+  <FileVersion>2.1.0.0</FileVersion>
+  <PackageVersion>2.1.0</PackageVersion>
 </PropertyGroup>
 ```
 
@@ -248,10 +248,10 @@ Before publishing, ensure:
 
 ```bash
 # Verify package contents
-dotnet nuget verify ./nupkg/NuGone.3.0.0.nupkg
+dotnet nuget verify ./nupkg/NuGone.2.1.0.nupkg
 
 # Test package locally
-dotnet tool install --local --add-source ./nupkg nugone --version 3.0.0
+dotnet tool install --local --add-source ./nupkg nugone --version 2.1.0
 nugone --version
 ```
 

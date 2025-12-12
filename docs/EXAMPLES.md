@@ -161,10 +161,10 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ~/.nuget/tools
-        key: ${{ runner.os }}-nugone-1.0.0
+        key: ${{ runner.os }}-nugone-2.1.0
 
     - name: Install NuGone
-      run: dotnet tool install --global nugone --version 1.0.0
+      run: dotnet tool install --global nugone --version 2.1.0
 
     - name: Analyze packages
       run: |

@@ -34,6 +34,22 @@ All versions support:
 
 - **Improvement**: Now supports .NET 8.0 (downgrade from 9.0 requirement)
 - Added multi-target support for .NET 8, 9, and 10
+- Enhanced central package management support with recursive imports
+- Added comprehensive cross-platform path compatibility improvements
+- Upgraded project dependencies including Microsoft.Extensions packages to v10.0.1
+- Removed MediatR dependency for simplified architecture
+
+### v2.1.0 Latest Features
+
+- **New**: Multi-target .NET support (8.0, 9.0, 10.0) with Directory.Build.props
+- **New**: Comprehensive central package management (CPM) support with recursive imports
+- **New**: Version bump automation script with conventional commit parsing
+- **New**: LoggerMessage source generator for high-performance structured logging
+- **New**: Known build packages whitelist to prevent false positives
+- **Enhanced**: Cross-platform path compatibility for Windows and Unix systems
+- **Enhanced**: Test coverage with comprehensive domain entity tests
+- **Improved**: Code quality with ConfigureAwait(false) throughout async codebase
+- **Updated**: Project dependencies to latest stable versions
 
 ## Upgrade Guide
 
@@ -49,13 +65,18 @@ No configuration changes needed. Just ensure you have .NET 8.0+ SDK installed.
 
 ## Feature Compatibility
 
-| Feature                    | v1.0 | v1.1 | v2.0.x | v2.1.x+        |
+| Feature                    | v1.0 | v1.1 | v2.0.x | v2.1.0+        |
 | -------------------------- | ---- | ---- | ------ | -------------- |
 | Package Analysis           | ✅   | ✅   | ✅     | ✅             |
 | JSON Output                | ✅   | ✅   | ✅     | ✅             |
 | Global Using Detection     | ❌   | ✅   | ✅     | ✅             |
 | Package Removal            | ✅   | ✅   | ❌     | Planned v2.2.0 |
-| Central Package Management | ❌   | ❌   | ❌     | ✅ (v2.0.1)    |
+| Central Package Management | ❌   | ❌   | ❌     | ✅ (v2.1.0)    |
 | .NET 8+ Support            | ❌   | ❌   | ❌     | ✅             |
 | CancellationToken Support  | ❌   | ❌   | ✅     | ✅             |
 | Multi-target Support       | ❌   | ❌   | ❌     | ✅             |
+| Recursive CPM Imports      | ❌   | ❌   | ❌     | ✅ (v2.1.0)    |
+| Build Packages Whitelist   | ❌   | ❌   | ❌     | ✅ (v2.1.0)    |
+| Cross-platform Paths       | ❌   | ❌   | ❌     | ✅ (v2.1.0)    |
+| High-performance Logging   | ❌   | ❌   | ❌     | ✅ (v2.1.0)    |
+| Version Automation Scripts | ❌   | ❌   | ❌     | ✅ (v2.1.0)    |

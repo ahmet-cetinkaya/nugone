@@ -76,5 +76,5 @@ This document provides a comprehensive index of all NuGone project documentation
 
 ---
 
-_Last updated: 2025-12-06_
+_Last updated: 2025-12-12_
 _For questions or contributions, see [CONTRIBUTING.md](./CONTRIBUTING.md)_

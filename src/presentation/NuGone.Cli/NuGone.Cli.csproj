@@ -11,13 +11,13 @@
     <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/ahmet-cetinkaya/nugone</PackageProjectUrl>
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageReleaseNotes>Added multi-version .NET support (8, 9, 10).</PackageReleaseNotes>
+    <PackageReleaseNotes>Multi-target .NET support (8, 9, 10), comprehensive CPM with recursive imports, version automation scripts, cross-platform improvements, enhanced logging infrastructure, and dependency upgrades.</PackageReleaseNotes>
     <PackageTags>nuget;packages;cleanup;dotnet;cli</PackageTags>
     <PackAsTool>true</PackAsTool>
     <RepositoryUrl>https://github.com/ahmet-cetinkaya/nugone</RepositoryUrl>
     <RollForward>Major</RollForward>
     <ToolCommandName>nugone</ToolCommandName>
-    <Version>3.0.0</Version>
+    <Version>2.1.0</Version>
   </PropertyGroup>
   <!-- Package Files -->
   <ItemGroup>
