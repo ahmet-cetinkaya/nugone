@@ -142,7 +142,36 @@ test_cli_functionality() {
 }
 
 run_multi_framework_validation() {
-  local frameworks=("net8.0" "net9.0" "net10.0")
+  local frameworks=()
+  if [ -f "Directory.Build.props" ]; then
+    # Extract content between <TargetFrameworks> tags - more robust approach
+    # Handles whitespace and attributes in the XML tag
+    local tf_string
+    # First try with xmlstarlet if available (most robust)
+    if command -v xmlstarlet >/dev/null 2>&1; then
+      tf_string=$(xmlstarlet sel -t -v "//TargetFrameworks" Directory.Build.props 2>/dev/null || echo "")
+    # Fallback to grep with improved regex
+    else
+      tf_string=$(grep -o '<TargetFrameworks[^>]*>[^<]*' Directory.Build.props | sed 's/<TargetFrameworks[^>]*>//; s/^[[:space:]]*//; s/[[:space:]]*$//' || echo "")
+    fi
+
+    # Split by semicolon into array if we found frameworks
+    if [ -n "$tf_string" ]; then
+      # Remove whitespace around each framework
+      IFS=';' read -ra frameworks <<<"$tf_string"
+      # Trim whitespace from each framework
+      for i in "${!frameworks[@]}"; do
+        frameworks[$i]=$(echo "${frameworks[$i]}" | xargs)
+      done
+    fi
+  fi
+
+  # Fallback if detection failed or file missing
+  if [ ${#frameworks[@]} -eq 0 ]; then
+    print_warning "Could not detect frameworks from Directory.Build.props, defaulting to net8.0"
+    frameworks=("net8.0")
+  fi
+  print_info "Testing detected .NET frameworks: ${frameworks[*]}"
   local configurations=("Debug" "Release")
   local failed_tests=()
   local total_tests=0
@@ -205,7 +234,7 @@ run_multi_framework_validation() {
 # Main execution logic
 print_header "🌐 NuGone Multi-Framework Testing"
 print_info "Detected .NET SDK version: $DOTNET_VERSION"
-print_info "Testing all supported .NET frameworks: 8.0, 9.0, and 10.0"
+
 echo ""
 
 # Always run multi-framework validation

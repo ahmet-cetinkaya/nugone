@@ -45,6 +45,18 @@ public interface ISolutionRepository
     );
 
     /// <summary>
+    /// Checks if central package management is enabled by searching up from a given directory.
+    /// RFC-0002: Central package management detection.
+    /// </summary>
+    /// <param name="startDirectoryPath">Directory to start searching from</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Result tuple indicating if enabled and path to props file</returns>
+    Task<(bool IsEnabled, string? DirectoryPackagesPropsPath)> CheckCentralPackageManagementAsync(
+        string startDirectoryPath,
+        CancellationToken cancellationToken = default
+    );
+
+    /// <summary>
     /// Resolves the full path to a project file relative to the solution directory.
     /// </summary>
     /// <param name="solutionDirectoryPath">Path to the solution directory</param>

@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        dotnet-version: ["8.0.x", "9.0.x"]
+        dotnet-version: ["8.0.x", "9.0.x", "10.0.x"]
       fail-fast: false
     steps:
       - name: Checkout code

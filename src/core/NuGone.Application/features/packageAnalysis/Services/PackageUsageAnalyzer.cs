@@ -27,6 +27,17 @@ public partial class PackageUsageAnalyzer(
     private static partial Regex UnqualifiedIdentifierRegex();
 
     /// <summary>
+    /// Known build-time or test packages that might not have code references but are essential.
+    /// These are automatically marked as used.
+    /// </summary>
+    private static readonly HashSet<string> _knownBuildPackages =
+    [
+        "Microsoft.NET.Test.Sdk",
+        "coverlet.collector",
+        "xunit.runner.visualstudio",
+    ];
+
+    /// <summary>
     /// Analyzes package usage across all projects in a solution.
     /// RFC-0002: Core algorithm for detecting unused packages.
     /// </summary>
@@ -83,6 +94,18 @@ public partial class PackageUsageAnalyzer(
 
             // Reset usage status before analysis
             packageRef.ResetUsageStatus();
+
+            // Check if it's a known build package
+            if (_knownBuildPackages.Contains(packageRef.PackageId))
+            {
+                packageRef.MarkAsUsed("Project File (Known Build Package)", "N/A");
+                LogPackageAnalysisResult(
+                    packageRef.PackageId,
+                    packageRef.IsUsed,
+                    packageRef.UsageLocations.Count
+                );
+                continue;
+            }
 
             // Get namespaces for all target frameworks (RFC-0002: multi-target support)
             var allNamespaces = new HashSet<string>(StringComparer.OrdinalIgnoreCase);

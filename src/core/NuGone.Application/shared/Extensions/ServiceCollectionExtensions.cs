@@ -23,9 +23,6 @@ public static class ServiceCollectionExtensions
         // Register services
         _ = services.AddScoped<IPackageUsageAnalyzer, PackageUsageAnalyzer>();
 
-        // Add MediatR if needed for CQRS pattern
-        // services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(ServiceCollectionExtensions).Assembly));
-
         return services;
     }
 }
