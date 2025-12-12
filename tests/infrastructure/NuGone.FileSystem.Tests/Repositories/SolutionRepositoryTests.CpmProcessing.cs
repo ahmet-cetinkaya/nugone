@@ -187,7 +187,8 @@ public sealed class SolutionRepositoryTests_CpmProcessing : SolutionRepositoryTe
         FileSystem.Directory.CreateDirectory(projectPath);
 
         // Create props file with ../ import
-        var propsContent = @"
+        var propsContent =
+            @"
 <Project>
   <Import Project=""../../Directory.Packages.props"" />
   <ItemGroup>
@@ -240,7 +241,8 @@ public sealed class SolutionRepositoryTests_CpmProcessing : SolutionRepositoryTe
         FileSystem.Directory.CreateDirectory(projectPath);
 
         // Create circular import: A imports B, B imports A
-        var propsAContent = @"
+        var propsAContent =
+            @"
 <Project>
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
@@ -251,7 +253,8 @@ public sealed class SolutionRepositoryTests_CpmProcessing : SolutionRepositoryTe
   </ItemGroup>
 </Project>";
 
-        var propsBContent = @"
+        var propsBContent =
+            @"
 <Project>
   <Import Project=""src/project/Directory.Packages.props"" />
   <ItemGroup>
@@ -299,14 +302,20 @@ public sealed class SolutionRepositoryTests_CpmProcessing : SolutionRepositoryTe
         var solutionDirectory = "/solution with spaces";
         var solutionPath = Path.Combine(solutionDirectory, "My Solution.sln");
         FileSystem.AddDirectory(solutionDirectory);
-        CreateSlnFile(solutionPath, "Project(\"{9A19103F-16F7-4668-BE54-9A1E7A4F7556}\") = \"MyProject\", \"src\\My Project\\My Project.csproj\", \"{12345678-1234-1234-1234-123456789012}\"\r\nEndProject");
+        CreateSlnFile(
+            solutionPath,
+            "Project(\"{9A19103F-16F7-4668-BE54-9A1E7A4F7556}\") = \"MyProject\", \"src\\My Project\\My Project.csproj\", \"{12345678-1234-1234-1234-123456789012}\"\r\nEndProject"
+        );
 
         var projectDirectory = Path.Combine(solutionDirectory, "src", "My Project");
         FileSystem.AddDirectory(projectDirectory);
 
         // Create a project file
         var projectFilePath = Path.Combine(projectDirectory, "My Project.csproj");
-        FileSystem.AddFile(projectFilePath, new MockFileData("<Project Sdk=\"Microsoft.NET.Sdk\"></Project>"));
+        FileSystem.AddFile(
+            projectFilePath,
+            new MockFileData("<Project Sdk=\"Microsoft.NET.Sdk\"></Project>")
+        );
 
         var propsPath = Path.Combine(solutionDirectory, "Directory.Packages.props");
         CreateDirectoryPackagesProps(propsPath, enableCentralManagement: true);

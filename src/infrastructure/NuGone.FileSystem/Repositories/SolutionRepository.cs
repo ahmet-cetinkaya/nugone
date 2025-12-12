@@ -241,7 +241,11 @@ public partial class SolutionRepository(IFileSystem fileSystem, ILogger<Solution
                 if (lastSeparator > 0)
                 {
                     // Check if this is a Windows drive path (e.g., "C:\foo")
-                    if (lastSeparator == 2 && currentDirectory.Length > 2 && currentDirectory[1] == ':')
+                    if (
+                        lastSeparator == 2
+                        && currentDirectory.Length > 2
+                        && currentDirectory[1] == ':'
+                    )
                     {
                         // For "C:\foo", parent should be "C:\"
                         parentDir = currentDirectory.Substring(0, lastSeparator + 1); // Include the backslash
