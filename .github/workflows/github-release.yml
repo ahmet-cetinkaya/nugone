@@ -36,16 +36,40 @@ jobs:
       - name: Pack NuGet package
         run: dotnet pack src/presentation/NuGone.Cli/NuGone.Cli.csproj --no-build --configuration Release --output ./nupkg
 
-      - name: Publish CLI
+      - name: Publish CLI for multiple frameworks
         run: |
+          # Publish for each framework
           dotnet publish src/presentation/NuGone.Cli/NuGone.Cli.csproj \
             --configuration Release \
-            --output ./publish \
+            --framework net8.0 \
+            --output ./publish/net8.0 \
             --no-build
 
-      - name: Archive published CLI as tar.gz
+          dotnet publish src/presentation/NuGone.Cli/NuGone.Cli.csproj \
+            --configuration Release \
+            --framework net9.0 \
+            --output ./publish/net9.0 \
+            --no-build
+
+          dotnet publish src/presentation/NuGone.Cli/NuGone.Cli.csproj \
+            --configuration Release \
+            --framework net10.0 \
+            --output ./publish/net10.0 \
+            --no-build
+
+      - name: Archive published CLI for multiple frameworks
         run: |
-          tar -czf ./nugone-cli.tar.gz -C ./publish .
+          # Create separate archives for each framework
+          tar -czf ./nugone-cli-net8.0.tar.gz -C ./publish/net8.0 .
+          tar -czf ./nugone-cli-net9.0.tar.gz -C ./publish/net9.0 .
+          tar -czf ./nugone-cli-net10.0.tar.gz -C ./publish/net10.0 .
+
+          # Create a combined archive with all frameworks
+          mkdir -p ./nugone-cli-all
+          cp -r ./publish/net8.0/* ./nugone-cli-all/
+          cp -r ./publish/net9.0/* ./nugone-cli-all/
+          cp -r ./publish/net10.0/* ./nugone-cli-all/
+          tar -czf ./nugone-cli-all.tar.gz -C ./nugone-cli-all .
 
       - name: Get tag name
         id: get_tag
@@ -71,10 +95,16 @@ jobs:
             echo "No NuGet packages found in ./nupkg directory"
             exit 1
           fi
-          if [ ! -f "./nugone-cli.tar.gz" ]; then
-            echo "CLI archive nugone-cli.tar.gz not found"
-            exit 1
-          fi
+
+          # Check for all CLI archives
+          archives=("nugone-cli-net8.0.tar.gz" "nugone-cli-net9.0.tar.gz" "nugone-cli-net10.0.tar.gz" "nugone-cli-all.tar.gz")
+          for archive in "${archives[@]}"; do
+            if [ ! -f "./$archive" ]; then
+              echo "CLI archive $archive not found"
+              exit 1
+            fi
+          done
+
           echo "Build artifacts validated successfully"
 
       - name: Create Release
@@ -88,6 +118,9 @@ jobs:
             For detailed changes, see the [CHANGELOG.md for this release](https://github.com/ahmet-cetinkaya/nugone/blob/${{ steps.get_tag.outputs.tag }}/CHANGELOG.md).
           files: |
             ./nupkg/*.nupkg
-            ./nugone-cli.tar.gz
+            ./nugone-cli-net8.0.tar.gz
+            ./nugone-cli-net9.0.tar.gz
+            ./nugone-cli-net10.0.tar.gz
+            ./nugone-cli-all.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
