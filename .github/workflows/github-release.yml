@@ -124,3 +124,43 @@ jobs:
             ./nugone-cli-all.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-nuget:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Get tag name
+        id: get_tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tag=${{ github.event.inputs.tag_name }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=$(echo ${{ github.event.workflow_run.ref }} | sed 's|refs/tags/||')" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download release assets
+        run: |
+          mkdir -p ./nupkg
+          gh release download ${{ steps.get_tag.outputs.tag }} --repo ${{ github.repository }} --pattern '*.nupkg' --dir ./nupkg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to NuGet
+        run: |
+          nupkg_file=$(ls ./nupkg/*.nupkg | head -n1)
+          if [ -z "$nupkg_file" ]; then
+            echo "No nupkg file found. Failing workflow."
+            exit 1
+          fi
+          echo "Publishing $nupkg_file to NuGet..."
+          dotnet nuget push "$nupkg_file" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
