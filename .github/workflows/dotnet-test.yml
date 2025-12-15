@@ -9,6 +9,7 @@ on:
       - "**/*.cs"
       - "**/*.csproj"
       - "**/*.sln"
+      - "**/*.slnx"
       - "**/*.slnc"
       - "**/*.props"
       - "**/*.targets"
@@ -27,6 +28,7 @@ on:
       - "**/*.cs"
       - "**/*.csproj"
       - "**/*.sln"
+      - "**/*.slnx"
       - "**/*.slnc"
       - "**/*.props"
       - "**/*.targets"
@@ -58,13 +60,13 @@ jobs:
           dotnet-version: ${{ matrix.dotnet-version }}
 
       - name: Restore dependencies
-        run: dotnet restore NuGone.sln
+        run: dotnet restore NuGone.slnx
 
       - name: Build
-        run: dotnet build NuGone.sln --no-restore --configuration Release
+        run: dotnet build NuGone.slnx --no-restore --configuration Release
 
       - name: Test
-        run: dotnet test NuGone.sln --no-build --configuration Release --logger "trx;LogFileName=test-results-${{ matrix.dotnet-version }}.trx"
+        run: dotnet test NuGone.slnx --no-build --configuration Release --logger "trx;LogFileName=test-results-${{ matrix.dotnet-version }}.trx"
         env:
           DOTNET_CLI_TELEMETRY_OPTOUT: 1
 

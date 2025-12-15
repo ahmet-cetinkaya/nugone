@@ -28,10 +28,10 @@ jobs:
           dotnet-version: "9.0.x"
 
       - name: Restore dependencies
-        run: dotnet restore NuGone.sln
+        run: dotnet restore NuGone.slnx
 
       - name: Build
-        run: dotnet build NuGone.sln --no-restore --configuration Release
+        run: dotnet build NuGone.slnx --no-restore --configuration Release
 
       - name: Pack NuGet package
         run: dotnet pack src/presentation/NuGone.Cli/NuGone.Cli.csproj --no-build --configuration Release --output ./nupkg
