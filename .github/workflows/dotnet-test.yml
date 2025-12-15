@@ -42,6 +42,11 @@ on:
       - "**/*.yml"
       - "**/*.yaml"
 
+# Prevent duplicate runs for the same commit/tag
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
