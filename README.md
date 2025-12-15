@@ -32,8 +32,8 @@ nugone analyze --project <SOLUTION_OR_PROJECT_PATH>
 
 **Options:**
 
--   `--output json` Show results in JSON format
--   `--verbose` Show detailed analysis output
+- `--output json` Show results in JSON format
+- `--verbose` Show detailed analysis output
 
 **Example:**
 
