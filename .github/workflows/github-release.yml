@@ -77,7 +77,8 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "tag=${{ github.event.inputs.tag_name }}" >> $GITHUB_OUTPUT
           else
-            echo "tag=$(echo ${{ github.event.workflow_run.ref }} | sed 's|refs/tags/||')" >> $GITHUB_OUTPUT
+            # For workflow_run triggered by tag pushes, use head_branch which contains the tag name
+            echo "tag=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Validate tag format
@@ -143,7 +144,8 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "tag=${{ github.event.inputs.tag_name }}" >> $GITHUB_OUTPUT
           else
-            echo "tag=$(echo ${{ github.event.workflow_run.ref }} | sed 's|refs/tags/||')" >> $GITHUB_OUTPUT
+            # For workflow_run triggered by tag pushes, use head_branch which contains the tag name
+            echo "tag=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
           fi
 
       - name: Download release assets
